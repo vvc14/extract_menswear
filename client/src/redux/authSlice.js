@@ -2,16 +2,25 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const loadAuth = () => {
     try {
-        const data = localStorage.getItem("extractAuth");
-        if (!data) return { token: null, admin: null, user: null };
-        const parsed = JSON.parse(data);
-        // Don't persist admin sessions — admin must re-login each visit
-        // Only keep regular user sessions
-        if (parsed.admin && !parsed.user) {
-            return { token: null, admin: null, user: null };
+        // Admin sessions are stored in sessionStorage (cleared when browser closes)
+        const adminData = sessionStorage.getItem("extractAdminAuth");
+        if (adminData) {
+            const parsed = JSON.parse(adminData);
+            if (parsed.token && parsed.admin) {
+                return { token: parsed.token, admin: parsed.admin, user: null };
+            }
         }
-        // If it's a regular user session, strip any admin data
-        return { token: parsed.token, admin: null, user: parsed.user || null };
+
+        // User sessions are stored in localStorage (persistent)
+        const userData = localStorage.getItem("extractAuth");
+        if (userData) {
+            const parsed = JSON.parse(userData);
+            if (parsed.token && parsed.user) {
+                return { token: parsed.token, admin: null, user: parsed.user };
+            }
+        }
+
+        return { token: null, admin: null, user: null };
     } catch {
         return { token: null, admin: null, user: null };
     }
@@ -25,13 +34,29 @@ const authSlice = createSlice({
             state.token = action.payload.token;
             state.admin = action.payload.admin || null;
             state.user = action.payload.user || null;
-            localStorage.setItem("extractAuth", JSON.stringify(state));
+
+            if (action.payload.admin) {
+                // Admin sessions go to sessionStorage (ephemeral per tab/window)
+                sessionStorage.setItem("extractAdminAuth", JSON.stringify({
+                    token: action.payload.token,
+                    admin: action.payload.admin,
+                }));
+                localStorage.removeItem("extractAuth");
+            } else {
+                // User sessions go to localStorage (persistent)
+                localStorage.setItem("extractAuth", JSON.stringify({
+                    token: action.payload.token,
+                    user: action.payload.user,
+                }));
+                sessionStorage.removeItem("extractAdminAuth");
+            }
         },
         logout: (state) => {
             state.token = null;
             state.admin = null;
             state.user = null;
             localStorage.removeItem("extractAuth");
+            sessionStorage.removeItem("extractAdminAuth");
         },
     },
 });

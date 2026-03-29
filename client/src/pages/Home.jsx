@@ -47,7 +47,7 @@ export default function Home() {
                 </div>
 
                 {/* Right side — decorative glass element */}
-                <div className="hidden lg:block absolute right-12 xl:right-24 top-1/2 -translate-y-1/2">
+                <div className="hidden lg:block absolute right-20 xl:right-36 top-1/2 -translate-y-1/2">
                     <div className="w-[280px] xl:w-[320px] bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8">
                         <p className="text-white/40 text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">This Season</p>
                         <p className="text-white text-[28px] xl:text-[32px] font-extrabold leading-tight mb-2">Premium Fabrics</p>
@@ -61,7 +61,7 @@ export default function Home() {
                 </div>
 
                 {/* Hero content — generous left padding */}
-                <div className="relative w-full max-w-7xl mx-auto px-8 sm:px-12 lg:px-20 xl:px-24 py-20 sm:py-24 md:py-28">
+                <div className="relative w-full max-w-7xl mx-auto px-10 sm:px-14 lg:px-28 xl:px-36 py-20 sm:py-24 md:py-28">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}

@@ -50,6 +50,14 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
 body {
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   color: var(--color-slate-900);
@@ -57,7 +65,58 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  font-size: 16px;
+  font-size: clamp(14px, 1vw + 12px, 18px);
+}
+
+/* ============================
+   Fluid Responsive Padding (+1px base)
+   - Only on interactive & text elements (NOT containers)
+   - Uses clamp() for auto-adjustable sizing
+   - :where() = zero specificity, never overrides Tailwind
+   ============================ */
+
+:where(h1, h2, h3, h4, h5, h6) {
+  padding: clamp(1px, 0.15vw, 2px) 0;
+}
+
+:where(p) {
+  padding: clamp(1px, 0.15vw, 2px) 0;
+}
+
+:where(li) {
+  padding: clamp(1px, 0.15vw, 2px) 0;
+}
+
+:where(button) {
+  padding: clamp(7px, 1.3vw, 15px) clamp(13px, 2.6vw, 29px);
+}
+
+:where(input, textarea, select) {
+  padding: clamp(7px, 1.3vw, 15px) clamp(9px, 1.6vw, 17px);
+}
+
+:where(th, td) {
+  padding: clamp(7px, 1.3vw, 15px) clamp(9px, 1.6vw, 17px);
+}
+
+:where(blockquote) {
+  padding: clamp(9px, 1.6vw, 19px) clamp(13px, 2.6vw, 29px);
+}
+
+:where(details) {
+  padding: clamp(9px, 1.6vw, 19px);
+}
+
+:where(summary) {
+  padding: clamp(5px, 1.1vw, 13px);
+}
+
+:where(fieldset) {
+  padding: clamp(9px, 2.1vw, 25px);
+}
+
+:where(legend) {
+  padding: clamp(3px, 0.6vw, 7px) clamp(5px, 1.1vw, 13px);
 }
 
 ::selection {
