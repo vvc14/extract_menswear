@@ -125,12 +125,12 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Name */}
-                        <h1 className="text-[28px] sm:text-[34px] lg:text-[42px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
+                        <h1 className="text-[28px] sm:text-[34px] lg:text-[42px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-6">
                             {product.name}
                         </h1>
 
                         {/* Ratings */}
-                        <div className="flex items-center gap-3 mb-8">
+                        <div className="flex items-center gap-3 mb-10">
                             <div className="flex items-center gap-1 bg-emerald text-white text-[15px] font-bold px-3 py-1.5 rounded-xl">
                                 4.0 <HiStar className="w-3.5 h-3.5" />
                             </div>
@@ -138,7 +138,7 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Price */}
-                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 mb-8">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 mb-10">
                             <div className="flex items-baseline gap-3 mb-2">
                                 <span className="text-[36px] sm:text-[44px] font-extrabold text-slate-900 dark:text-white">₹{product.price.toLocaleString("en-IN")}</span>
                                 {originalPrice > 0 && (
@@ -153,16 +153,16 @@ export default function ProductDetail() {
 
                         {/* Stock */}
                         {product.stock > 0 ? (
-                            <p className="text-[16px] font-bold text-emerald mb-8 flex items-center gap-2">
+                            <p className="text-[16px] font-bold text-emerald mb-10 flex items-center gap-2">
                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block animate-pulse"></span>
                                 In Stock — {product.stock} available
                             </p>
                         ) : (
-                            <p className="text-[16px] font-bold text-rose mb-8">Out of Stock</p>
+                            <p className="text-[16px] font-bold text-rose mb-10">Out of Stock</p>
                         )}
 
                         {/* Quantity */}
-                        <div className="flex items-center gap-5 mb-8">
+                        <div className="flex items-center gap-5 mb-10">
                             <label className="text-[16px] font-bold text-slate-700 dark:text-slate-300">Quantity:</label>
                             <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
                                 <button
@@ -182,7 +182,7 @@ export default function ProductDetail() {
                         </div>
 
                         {/* CTA buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                        <div className="flex flex-col sm:flex-row gap-4 mb-12">
                             <button
                                 onClick={handleAdd}
                                 disabled={product.stock === 0}
@@ -207,11 +207,10 @@ export default function ProductDetail() {
                                     }
                                     dispatch(toggleWishlist(product));
                                 }}
-                                className={`flex items-center justify-center gap-2.5 text-[17px] font-bold py-[22px] px-10 rounded-2xl border-2 transition-colors ${
-                                    isWishlisted
+                                className={`flex items-center justify-center gap-2.5 text-[17px] font-bold py-[22px] px-10 rounded-2xl border-2 transition-colors ${isWishlisted
                                         ? "border-rose-400 text-rose-500 bg-rose-50 dark:bg-rose-500/10 dark:border-rose-500"
                                         : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-500 dark:hover:border-rose-400 dark:hover:text-rose-500"
-                                }`}
+                                    }`}
                                 aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                             >
                                 {isWishlisted ? <HiHeart className="w-5 h-5" /> : <HiOutlineHeart className="w-5 h-5" />}
