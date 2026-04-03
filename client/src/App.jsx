@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import { Provider, useSelector } from "react-redux";
@@ -17,23 +18,27 @@ import Contact from "./pages/Contact";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import AdminLogin from "./pages/AdminLogin";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
+import AdminOrders from "./pages/AdminOrders";
 import AdminUsers from "./pages/AdminUsers";
 import Wishlist from "./pages/Wishlist";
 import SizeGuide from "./pages/SizeGuide";
+import Orders from "./pages/Orders";
+import { preloadRazorpay } from "./services/razorpay";
 
 function ProtectedRoute({ children }) {
   const token = useSelector((s) => s.auth.token);
   const admin = useSelector((s) => s.auth.admin);
   const user = useSelector((s) => s.auth.user);
-  return token && (admin || user?.role === "admin") ? children : <Navigate to="/admin/login" replace />;
+  return token && (admin || user?.role === "admin") ? children : <Navigate to="/login" replace />;
 }
 
 function AppRoutes() {
   useCartSync();
   useWishlistSync();
+  useEffect(() => { preloadRazorpay(); }, []);
   return (
     <>
     <ScrollToTop />
@@ -51,9 +56,10 @@ function AppRoutes() {
         <Route path="register" element={<Register />} />
         <Route path="wishlist" element={<Wishlist />} />
         <Route path="size-guide" element={<SizeGuide />} />
+        <Route path="orders" element={<Orders />} />
       </Route>
 
-      <Route path="admin/login" element={<AdminLogin />} />
+
 
       <Route
         path="admin"
@@ -65,6 +71,7 @@ function AppRoutes() {
       >
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
+        <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
       </Route>
     </Routes>

@@ -1,9 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HiChevronDown } from "react-icons/hi";
-
-const SHIRT_FABRICS = ["Linen", "Oxford", "Twill", "Satin"];
-const SHIRT_STYLES = ["Plain", "Checks", "Print"];
-const TROUSER_TYPES = ["Formal", "Casual"];
+import API from "../services/api";
 
 function FilterSection({ title, defaultOpen = false, children }) {
     const [open, setOpen] = useState(defaultOpen);
@@ -35,6 +32,16 @@ export default function FilterSidebar({ category, onFilterChange }) {
     const [selectedFabrics, setSelectedFabrics] = useState([]);
     const [selectedStyles, setSelectedStyles] = useState([]);
     const [priceRange, setPriceRange] = useState([0, 10000]);
+    const [catOptions, setCatOptions] = useState({ fabrics: [], styles: [] });
+
+    useEffect(() => {
+        API.get("/products/category-options").then(({ data }) => {
+            if (data[category]) setCatOptions(data[category]);
+        }).catch(() => {});
+    }, [category]);
+
+    const filterOptions = catOptions.fabrics;
+    const styleOptions = catOptions.styles;
 
     const toggleItem = (list, setList, item) => {
         const updated = list.includes(item) ? list.filter((i) => i !== item) : [...list, item];
@@ -68,8 +75,6 @@ export default function FilterSidebar({ category, onFilterChange }) {
         onFilterChange({ fabric: [], style: [], minPrice: 0, maxPrice: 10000 });
     };
 
-    const filterOptions = category === "shirt" ? SHIRT_FABRICS : [];
-    const styleOptions = category === "shirt" ? SHIRT_STYLES : TROUSER_TYPES;
     const styleLabel = category === "shirt" ? "Style" : "Type";
     const hasActiveFilters = selectedFabrics.length > 0 || selectedStyles.length > 0 || priceRange[1] < 10000;
     const activeCount = selectedFabrics.length + selectedStyles.length + (priceRange[1] < 10000 ? 1 : 0);

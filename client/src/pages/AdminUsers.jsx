@@ -38,19 +38,19 @@ export default function AdminUsers() {
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-[32px] sm:text-[36px] font-extrabold tracking-tight text-slate-900 mb-2">Users</h1>
-                <p className="text-[16px] text-slate-500">{users.length} registered user{users.length !== 1 ? "s" : ""} · {adminCount} admin{adminCount !== 1 ? "s" : ""}</p>
+            <div style={{ marginBottom: "32px" }}>
+                <h1 style={{ fontSize: "36px", fontWeight: 800, letterSpacing: "-0.025em", color: "#0f172a", marginBottom: "8px" }}>Users</h1>
+                <p style={{ fontSize: "16px", color: "#64748b" }}>{users.length} registered user{users.length !== 1 ? "s" : ""} · {adminCount} admin{adminCount !== 1 ? "s" : ""}</p>
             </div>
 
             {/* Search & Filter */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <div style={{ display: "flex", flexDirection: "row", gap: "16px", marginBottom: "32px" }}>
                 <div className="relative flex-1">
                     <HiOutlineSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input type="text" placeholder="Search by name or email..." value={search} onChange={(e) => setSearch(e.target.value)}
                         className="w-full bg-white border border-slate-200 pl-11 pr-4 py-3 text-[16px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400" />
                 </div>
-                <div className="flex gap-1.5 bg-white border border-slate-200 rounded-xl p-1.5">
+                <div style={{ display: "flex", gap: "6px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "6px" }}>
                     {[
                         { key: "all", label: "All" },
                         { key: "admin", label: `Admins (${adminCount})` },

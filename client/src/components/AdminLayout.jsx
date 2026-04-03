@@ -5,7 +5,7 @@ import { logout } from "../redux/authSlice";
 import {
     HiOutlineViewGrid, HiOutlineCollection, HiOutlineUsers,
     HiOutlineLogout, HiOutlineExternalLink, HiOutlineMenu, HiOutlineX,
-    HiOutlineChevronRight
+    HiOutlineChevronRight, HiOutlineClipboardList
 } from "react-icons/hi";
 
 const SIDEBAR_W = 230;
@@ -13,6 +13,7 @@ const SIDEBAR_W = 230;
 const NAV = [
     { to: "/admin/dashboard", label: "Dashboard", icon: HiOutlineViewGrid },
     { to: "/admin/products", label: "Products", icon: HiOutlineCollection },
+    { to: "/admin/orders", label: "Orders", icon: HiOutlineClipboardList },
     { to: "/admin/users", label: "Users", icon: HiOutlineUsers },
 ];
 
@@ -26,7 +27,7 @@ export default function AdminLayout() {
     const authAdmin = admin || (user?.role === "admin" ? user : null);
     const displayName = authAdmin?.username || authAdmin?.name || "Admin";
 
-    const handleLogout = () => { dispatch(logout()); navigate("/admin/login"); };
+    const handleLogout = () => { dispatch(logout()); navigate("/login"); };
     const pageTitle = NAV.find((n) => pathname.startsWith(n.to))?.label || "Admin";
 
     return (

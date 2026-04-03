@@ -8,7 +8,7 @@ import { useTheme } from "../context/ThemeContext";
 import {
     HiOutlineShoppingCart, HiOutlineMenu, HiOutlineX,
     HiOutlineUser, HiOutlineChevronDown, HiOutlineLogout, HiOutlineShieldCheck,
-    HiOutlineSun, HiOutlineMoon, HiOutlineHeart
+    HiOutlineSun, HiOutlineMoon, HiOutlineHeart, HiOutlineClipboardList
 } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -84,7 +84,7 @@ export default function Navbar() {
                                 ))}
                             </div>
                         </div>
-                        <div className="hidden sm:flex items-center gap-5 text-[12px] text-slate-500 shrink-0 ml-10 pl-4 border-l border-slate-700">
+                        <div className="hidden sm:flex items-center text-[12px] text-slate-500 shrink-0" style={{ marginLeft: "40px", paddingLeft: "16px", gap: "20px", borderLeft: "1px solid rgb(51,65,85)" }}>
                             <Link to="/about" className="hover:text-white transition-colors">About Us</Link>
                             <span className="text-slate-700">|</span>
                             <Link to="/contact" className="hover:text-white transition-colors">Help</Link>
@@ -103,7 +103,7 @@ export default function Navbar() {
                             </Link>
 
                             {/* Desktop nav links */}
-                            <div className="hidden lg:flex items-center gap-1">
+                            <div className="hidden lg:flex items-center" style={{ gap: "4px" }}>
                                 {NAV_LINKS.map((link) => (
                                     <Link
                                         key={link.to}
@@ -127,7 +127,7 @@ export default function Navbar() {
                             </div>
 
                             {/* Right actions */}
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center" style={{ gap: "4px" }}>
 
                                 {/* Theme toggle */}
                                 <button
@@ -185,6 +185,12 @@ export default function Navbar() {
                                                             <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                                                 <HiOutlineShieldCheck className="w-4 h-4 text-slate-400" />
                                                                 Admin Dashboard
+                                                            </Link>
+                                                        )}
+                                                        {user && (
+                                                            <Link to="/orders" className="flex items-center gap-3 px-4 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                                                <HiOutlineClipboardList className="w-4 h-4 text-slate-400" />
+                                                                My Orders
                                                             </Link>
                                                         )}
                                                         <button
@@ -280,7 +286,7 @@ export default function Navbar() {
                             transition={{ duration: 0.22 }}
                             className="lg:hidden overflow-hidden bg-white dark:bg-[#0d1321] border-b border-slate-100 dark:border-slate-800"
                         >
-                            <div className="px-4 py-4 space-y-1">
+                            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "4px" }}>
                                 {NAV_LINKS.map((link) => (
                                     <Link
                                         key={link.to}

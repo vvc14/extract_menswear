@@ -102,13 +102,13 @@ export default function Home() {
                         className="max-w-xl"
                     >
                         {/* Label pill */}
-                        <span className="inline-flex items-center gap-2 text-[13px] font-bold px-4 py-1.5 rounded-full mb-8 border"
-                            style={{ background: "rgba(201,168,76,0.12)", borderColor: "rgba(201,168,76,0.3)", color: "#c9a84c" }}>
+                        <span className="inline-flex items-center gap-2 text-[13px] font-bold px-4 py-1.5 rounded-full border"
+                            style={{ background: "rgba(201,168,76,0.12)", borderColor: "rgba(201,168,76,0.3)", color: "#c9a84c", marginBottom: "32px" }}>
                             <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: "#c9a84c" }} />
                             New Collection 2026
                         </span>
 
-                        <h1 className="text-[38px] sm:text-[50px] lg:text-[60px] font-extrabold text-white leading-[1.08] tracking-tight mb-6">
+                        <h1 className="text-[38px] sm:text-[50px] lg:text-[60px] font-extrabold text-white leading-[1.08] tracking-tight" style={{ marginBottom: "24px" }}>
                             Premium Menswear<br />
                             <span className="text-slate-300 font-semibold">for the </span>
                             <span className="italic font-extrabold" style={{ fontFamily: "Playfair Display, Georgia, serif", color: "#c9a84c" }}>
@@ -116,11 +116,11 @@ export default function Home() {
                             </span>
                         </h1>
 
-                        <p className="text-[16px] sm:text-[18px] leading-[1.8] mb-10 max-w-md" style={{ color: "rgba(255,255,255,0.7)" }}>
+                        <p className="text-[16px] sm:text-[18px] leading-[1.8] max-w-md" style={{ color: "rgba(255,255,255,0.7)", marginBottom: "40px" }}>
                             Curated shirts and trousers made from the finest Linen, Oxford, Twill & Satin fabrics. Free delivery across India.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
                             <Link
                                 to="/shirts"
                                 className="btn-gold group inline-flex items-center justify-center gap-2.5 px-8 py-4 text-[15px]"
@@ -150,8 +150,8 @@ export default function Home() {
 
             {/* ════════════════════════════════ TRUST STRIP ════════════════════════════════ */}
             <section className="bg-white dark:bg-[#0d1321] border-b border-slate-100 dark:border-slate-800">
-                <div className="page-wrap py-10 sm:py-12">
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-16">
+                <div className="page-wrap" style={{ paddingTop: "40px", paddingBottom: "40px" }}>
+                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "64px" }}>
                         {TRUST.map(({ Icon, text }) => (
                             <div key={text} className="flex items-center gap-3.5">
                                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#f0f4fd] dark:bg-slate-800">
@@ -166,9 +166,9 @@ export default function Home() {
 
             {/* ════════════════════════════════ NEW ARRIVALS ════════════════════════════════ */}
             <section id="new-arrivals" className="bg-slate-50 dark:bg-[#0a0f1a] border-t border-b border-slate-100 dark:border-slate-800">
-                <div className="page-wrap py-20 sm:py-28">
+                <div className="page-wrap" style={{ paddingTop: "80px", paddingBottom: "80px" }}>
                     {/* Section header */}
-                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-14 gap-4">
+                    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "56px", gap: "16px" }}>
                         <div>
                             <p className="section-label">
                                 <HiOutlineSparkles className="w-4 h-4 inline-block mr-1.5 -mt-0.5" style={{ color: "#c9a84c" }} />
@@ -205,7 +205,7 @@ export default function Home() {
                             ))}
                         </div>
                     ) : newArrivals.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
                             {newArrivals.map((product, i) => (
                                 <motion.div
                                     key={product._id}
@@ -235,7 +235,7 @@ export default function Home() {
             <section className="bg-white dark:bg-[#0d1321]">
                 <div className="page-wrap py-20 sm:py-28">
                     {/* Section header */}
-                    <div className="mb-14">
+                    <div style={{ marginBottom: "56px" }}>
                         <p className="section-label">Collections</p>
                         <h2 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
                             Shop by Category
@@ -245,7 +245,7 @@ export default function Home() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "32px" }}>
                         {CATEGORIES.map((cat, i) => (
                             <motion.div key={cat.name} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
                                 <Link to={cat.to} className="group relative block rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10" }}>
@@ -274,7 +274,7 @@ export default function Home() {
             {/* ════════════════════════════════ SIGNATURE FABRICS ════════════════════════════════ */}
             <section className="bg-slate-50 dark:bg-[#0a0f1a] border-t border-slate-100 dark:border-slate-800">
                 <div className="page-wrap py-20 sm:py-28">
-                    <div className="mb-14">
+                    <div style={{ marginBottom: "56px" }}>
                         <p className="section-label">Materials</p>
                         <h2 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
                             Our Signature Fabrics
@@ -284,7 +284,7 @@ export default function Home() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
                         {FABRICS.map((fabric, i) => (
                             <motion.div
                                 key={fabric.name}
@@ -336,13 +336,13 @@ export default function Home() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.55 }}
                     >
-                        <p className="section-label justify-center mb-6" style={{ color: "#c9a84c" }}>
+                        <p className="section-label justify-center" style={{ color: "#c9a84c", marginBottom: "24px" }}>
                             Get Started
                         </p>
-                        <h2 className="text-[30px] sm:text-[44px] font-extrabold text-white tracking-tight mb-6">
+                        <h2 className="text-[30px] sm:text-[44px] font-extrabold text-white tracking-tight" style={{ marginBottom: "24px" }}>
                             Elevate Your Wardrobe Today
                         </h2>
-                        <p className="text-[16px] sm:text-[18px] max-w-lg mx-auto mb-12 leading-[1.8]" style={{ color: "rgba(255,255,255,0.5)" }}>
+                        <p className="text-[16px] sm:text-[18px] max-w-lg mx-auto leading-[1.8]" style={{ color: "rgba(255,255,255,0.5)", marginBottom: "48px" }}>
                             Join thousands of satisfied customers who trust Extract Menswear for premium-quality clothing.
                         </p>
                         <Link

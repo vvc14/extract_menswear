@@ -51,7 +51,7 @@ export default function Contact() {
             {/* ── Hero ── */}
             <section style={{ background: "#1a2744" }} className="py-20 sm:py-24">
                 <div className="page-wrap">
-                    <nav className="flex items-center gap-2 text-[13px] mb-8" aria-label="Breadcrumb">
+                    <nav className="flex items-center gap-2 text-[13px]" style={{ marginBottom: "32px" }} aria-label="Breadcrumb">
                         <a href="/" className="text-slate-500 hover:text-slate-300 transition-colors">Home</a>
                         <span className="text-slate-700">/</span>
                         <span className="font-semibold text-slate-300">Contact</span>
@@ -74,10 +74,10 @@ export default function Contact() {
             {/* ── Contact content ── */}
             <section className="bg-slate-50 dark:bg-[#0a0f1a] border-b border-slate-100 dark:border-slate-800">
                 <div className="page-wrap py-16 sm:py-24">
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">
+                    <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: "56px" }}>
 
                         {/* Info column */}
-                        <div className="lg:col-span-2 space-y-5">
+                        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                             {INFO.map(({ Icon, title, detail, sub }) => (
                                 <motion.div
                                     key={title}
@@ -103,9 +103,9 @@ export default function Contact() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.05 }}
-                            className="lg:col-span-3 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 sm:p-10"
+                            className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700" style={{ padding: "40px" }}
                         >
-                            <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-8">Send a Message</h2>
+                            <h2 className="text-[22px] font-bold text-slate-900 dark:text-white" style={{ marginBottom: "32px" }}>Send a Message</h2>
                             {success ? (
                                 <div className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-6 rounded-xl border border-emerald-200 dark:border-emerald-500/20 text-center">
                                     <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -118,7 +118,7 @@ export default function Contact() {
                             ) : (
                             <form className="space-y-6" onSubmit={handleSubmit}>
                                 {error && <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">{error}</div>}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
                                     <div>
                                         <label className="block text-[13px] font-semibold text-slate-600 dark:text-slate-400 mb-2" htmlFor="name">
                                             Full Name

@@ -26,8 +26,8 @@ export default function Footer() {
 
             {/* ── Trust strip ── */}
             <div className="border-b border-slate-800">
-                <div className="page-wrap py-10 sm:py-12">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+                <div className="page-wrap" style={{ paddingTop: "40px", paddingBottom: "48px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px" }}>
                         {TRUST.map(({ Icon, title, desc }) => (
                             <div key={title} className="flex items-start gap-4">
                                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -45,15 +45,15 @@ export default function Footer() {
             </div>
 
             {/* ── Main footer columns ── */}
-            <div className="page-wrap py-16 sm:py-20">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-10 lg:gap-14">
+            <div className="page-wrap" style={{ paddingTop: "64px", paddingBottom: "80px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "56px" }}>
 
                     {/* Brand */}
-                    <div className="col-span-2 md:col-span-1">
-                        <div className="mb-5">
+                    <div>
+                        <div style={{ marginBottom: "20px" }}>
                             <img src="/images/logo.png" alt="Extract Menswear" className="h-[48px] w-auto object-contain rounded-lg" />
                         </div>
-                        <p className="text-[15px] text-slate-400 leading-[1.75] mb-6">
+                        <p className="text-[15px] text-slate-400 leading-[1.75]" style={{ marginBottom: "24px" }}>
                             Premium menswear crafted from the finest fabrics for the modern man.
                         </p>
                         <div className="flex items-center gap-3">
@@ -75,7 +75,7 @@ export default function Footer() {
 
                     {/* Shop */}
                     <div>
-                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500 mb-5">Shop</h4>
+                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500" style={{ marginBottom: "20px" }}>Shop</h4>
                         <ul className="space-y-3.5">
                             {SHOP_LINKS.map(({ to, label }) => (
                                 <li key={label}>
@@ -89,7 +89,7 @@ export default function Footer() {
 
                     {/* Company */}
                     <div>
-                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500 mb-5">Company</h4>
+                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500" style={{ marginBottom: "20px" }}>Company</h4>
                         <ul className="space-y-3.5">
                             {COMPANY_LINKS.map(({ to, label }) => (
                                 <li key={label}>
@@ -103,7 +103,7 @@ export default function Footer() {
 
                     {/* Help */}
                     <div>
-                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500 mb-5">Help</h4>
+                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500" style={{ marginBottom: "20px" }}>Help</h4>
                         <ul className="space-y-3.5">
                             {HELP_ITEMS.map((item) => (
                                 <li key={item.label}>
@@ -123,7 +123,7 @@ export default function Footer() {
 
             {/* ── Bottom bar ── */}
             <div className="border-t border-slate-800">
-                <div className="page-wrap py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="page-wrap" style={{ paddingTop: "24px", paddingBottom: "24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
                     <p className="text-slate-500 text-[13px]">
                         © {new Date().getFullYear()} Extract Menswear. All rights reserved.
                     </p>

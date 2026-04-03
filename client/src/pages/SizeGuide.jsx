@@ -57,8 +57,8 @@ export default function SizeGuide() {
                 </div>
             </div>
 
-            <div className="page-wrap py-12 sm:py-16 lg:py-20">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="flex flex-col items-center gap-8 lg:gap-10">
+            <div className="page-wrap" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "40px" }}>
 
                     {/* Header */}
                     <div className="flex flex-col items-center text-center w-full">
@@ -164,11 +164,11 @@ export default function SizeGuide() {
                     </div>
 
                     {/* How to measure */}
-                    <div className="w-full max-w-4xl flex flex-col gap-12">
+                    <div className="w-full max-w-4xl" style={{ display: "flex", flexDirection: "column", gap: "48px" }}>
                         <h2 className="text-[24px] sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight text-center">
                             How to Measure
                         </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
                             {MEASURE_TIPS.map((tip) => (
                                 <div
                                     key={tip.title}

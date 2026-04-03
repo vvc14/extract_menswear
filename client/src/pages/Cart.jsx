@@ -14,6 +14,7 @@ export default function Cart() {
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+    const shipping = items.reduce((sum, i) => sum + (Number(i.shippingCost) || 0) * i.quantity, 0);
 
     const handleCheckout = async () => {
         if (!user) {
@@ -23,11 +24,16 @@ export default function Cart() {
         try {
             const { data } = await API.post("/payment/razorpay/order", {
                 amount: subtotal,
+                shipping,
+                userId: user._id || user.id,
+                userEmail: user.email,
+                userName: user.name,
                 items: items.map((i) => ({
                     productId: i._id,
                     name: i.name,
                     price: i.price,
                     quantity: i.quantity,
+                    imageUrl: i.imageUrl || "",
                 })),
             });
 
@@ -36,9 +42,9 @@ export default function Cart() {
                 amount: data.amount,
                 currency: data.currency,
                 onSuccess: async (response) => {
-                    await API.post("/payment/razorpay/verify", response);
+                    const verifyRes = await API.post("/payment/razorpay/verify", response);
                     dispatch(clearCart());
-                    navigate("/payment-success");
+                    navigate("/payment-success", { state: { orderId: verifyRes.data.orderId, invoiceNumber: verifyRes.data.invoiceNumber } });
                 },
                 onFailure: () => { },
             });
@@ -68,7 +74,7 @@ export default function Cart() {
         <main id="main-content" className="page-wrap py-10 sm:py-16">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 {/* Breadcrumb */}
-                <nav aria-label="Breadcrumb" className="mb-8">
+                <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }}>
                     <ol className="flex items-center gap-2 text-[15px]">
                         <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
                         <li className="text-slate-300 dark:text-slate-600">/</li>
@@ -76,10 +82,10 @@ export default function Cart() {
                     </ol>
                 </nav>
 
-                <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Shopping Cart</h1>
-                <p className="text-[16px] text-slate-500 dark:text-slate-400 mb-10">{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
+                <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight" style={{ marginBottom: "8px" }}>Shopping Cart</h1>
+                <p className="text-[16px] text-slate-500 dark:text-slate-400" style={{ marginBottom: "40px" }}>{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
 
-                <div className="flex flex-col lg:flex-row gap-10 lg:gap-14">
+                <div style={{ display: "flex", flexDirection: "row", gap: "56px" }}>
                     {/* Cart items */}
                     <div className="flex-1">
                         <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
@@ -147,8 +153,8 @@ export default function Cart() {
 
                     {/* Order summary */}
                     <div className="lg:w-[400px] shrink-0">
-                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-7 sm:p-9 sticky top-[100px]">
-                            <h3 className="text-[22px] font-extrabold text-slate-900 dark:text-white mb-7">Order Summary</h3>
+                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 sticky top-[100px]" style={{ padding: "32px" }}>
+                            <h3 className="text-[22px] font-extrabold text-slate-900 dark:text-white" style={{ marginBottom: "28px" }}>Order Summary</h3>
 
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between text-[16px]">
@@ -157,14 +163,16 @@ export default function Cart() {
                                 </div>
                                 <div className="flex justify-between text-[16px]">
                                     <span className="text-slate-500 dark:text-slate-400">Shipping</span>
-                                    <span className="font-semibold text-emerald">{subtotal >= 999 ? "FREE" : "₹99"}</span>
+                                    <span className={`font-semibold ${shipping === 0 ? "text-emerald" : "text-slate-900 dark:text-white"}`}>
+                                        {shipping === 0 ? "FREE" : `₹${shipping.toLocaleString("en-IN")}`}
+                                    </span>
                                 </div>
                             </div>
 
                             <div className="border-t border-slate-200 dark:border-slate-700 pt-5 mb-8">
                                 <div className="flex justify-between">
                                     <span className="text-[18px] font-extrabold text-slate-900 dark:text-white">Total</span>
-                                    <span className="text-[26px] font-extrabold text-slate-900 dark:text-white">₹{(subtotal + (subtotal >= 999 ? 0 : 99)).toLocaleString("en-IN")}</span>
+                                    <span className="text-[26px] font-extrabold text-slate-900 dark:text-white">₹{(subtotal + shipping).toLocaleString("en-IN")}</span>
                                 </div>
                             </div>
 

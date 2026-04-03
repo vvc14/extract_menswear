@@ -68,13 +68,13 @@ export default function About() {
             {/* ── Values ── */}
             <section className="bg-white dark:bg-[#0d1321] border-b border-slate-100 dark:border-slate-800">
                 <div className="page-wrap py-20 sm:py-28">
-                    <div className="mb-14">
+                    <div style={{ marginBottom: "56px" }}>
                         <p className="section-label">What We Stand For</p>
                         <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight">
                             Our Core Values
                         </h2>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
                         {VALUES.map(({ Icon, title, desc }, i) => (
                             <motion.div
                                 key={title}
@@ -99,7 +99,7 @@ export default function About() {
             {/* ── Story section ── */}
             <section className="bg-slate-50 dark:bg-[#0a0f1a] border-b border-slate-100 dark:border-slate-800">
                 <div className="page-wrap py-20 sm:py-28">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -151,13 +151,13 @@ export default function About() {
             {/* ── Stats ── */}
             <section className="bg-white dark:bg-[#0d1321]">
                 <div className="page-wrap py-20 sm:py-28">
-                    <div className="mb-14 text-center">
+                    <div style={{ marginBottom: "56px" }} className="text-center">
                         <p className="section-label justify-center">By the Numbers</p>
                         <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight">
                             Extract Menswear at a Glance
                         </h2>
                     </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }} className="text-center">
                         {STATS.map((stat, i) => (
                             <motion.div
                                 key={stat.label}

@@ -52,7 +52,7 @@ export default function Wishlist() {
         <main id="main-content" className="page-wrap py-10 sm:py-16">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 {/* Breadcrumb */}
-                <nav aria-label="Breadcrumb" className="mb-8">
+                <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }}>
                     <ol className="flex items-center gap-2 text-[15px]">
                         <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
                         <li className="text-slate-300 dark:text-slate-600">/</li>
@@ -60,9 +60,9 @@ export default function Wishlist() {
                     </ol>
                 </nav>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", marginBottom: "40px" }}>
                     <div>
-                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">My Wishlist</h1>
+                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight" style={{ marginBottom: "8px" }}>My Wishlist</h1>
                         <p className="text-[16px] text-slate-500 dark:text-slate-400">{items.length} item{items.length !== 1 ? "s" : ""} saved</p>
                     </div>
                     <div className="flex gap-3">
@@ -84,7 +84,7 @@ export default function Wishlist() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
                     <AnimatePresence mode="popLayout">
                         {items.map((item) => {
                             const discount = item.discount || 0;

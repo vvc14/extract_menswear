@@ -86,12 +86,12 @@ export default function ProductDetail() {
                 </div>
             </div>
 
-            <div className="page-wrap py-12 sm:py-16 lg:py-20">
+            <div className="page-wrap" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
-                    className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20"
+                    style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px" }}
                 >
                     {/* Image */}
                     <div className="relative group">
@@ -221,7 +221,7 @@ export default function ProductDetail() {
                         {/* Trust features */}
                         <div className="border border-slate-200 dark:border-slate-700 rounded-2xl divide-y divide-slate-100 dark:divide-slate-700">
                             {[
-                                { icon: HiOutlineTruck, text: "Free delivery on orders above ₹999", sub: "Estimated 3-5 business days" },
+                                { icon: HiOutlineTruck, text: "Standard & Express Delivery", sub: "Shipping dynamically calculated at checkout" },
                                 { icon: HiOutlineRefresh, text: "7-day easy return & exchange", sub: "No questions asked" },
                                 { icon: HiOutlineShieldCheck, text: "100% genuine product guarantee", sub: "Quality checked by our experts" },
                             ].map((item) => (

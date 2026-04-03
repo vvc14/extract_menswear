@@ -55,7 +55,7 @@ export default function Shirts() {
             </section>
 
             {/* Content */}
-            <div className="page-wrap py-10 sm:py-14 flex flex-col gap-8 lg:gap-10">
+            <div className="page-wrap" style={{ paddingTop: "40px", paddingBottom: "56px", display: "flex", flexDirection: "column", gap: "32px" }}>
                 {/* Toolbar */}
                 <div className="flex items-center justify-between">
                     <p className="text-[15px] text-slate-500 dark:text-slate-400">
@@ -90,7 +90,7 @@ export default function Shirts() {
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+                <div style={{ display: "flex", flexDirection: "row", gap: "40px" }}>
                     {/* Filter sidebar */}
                     <div className={`${showMobileFilter ? "block" : "hidden"} lg:block`}>
                         <FilterSidebar category="shirt" onFilterChange={setFilters} />
@@ -127,7 +127,7 @@ export default function Shirts() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "28px" }}>
                                 {products.map((p) => (
                                     <ProductCard key={p._id} product={p} />
                                 ))}

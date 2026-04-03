@@ -38,13 +38,13 @@ export default function AdminDashboard() {
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             {/* Welcome header */}
-            <div className="mb-10">
-                <h1 className="text-[32px] sm:text-[36px] font-extrabold tracking-tight text-slate-900 mb-2">Dashboard</h1>
-                <p className="text-[16px] text-slate-500">Here's what's happening with your store today.</p>
+            <div style={{ marginBottom: "40px" }}>
+                <h1 style={{ fontSize: "36px", fontWeight: 800, letterSpacing: "-0.025em", color: "#0f172a", marginBottom: "8px" }}>Dashboard</h1>
+                <p style={{ fontSize: "16px", color: "#64748b" }}>Here's what's happening with your store today.</p>
             </div>
 
             {/* Stat cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6 mb-12">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px", marginBottom: "48px" }}>
                 {cards.map((card) => (
                     <Link
                         to={card.link}
@@ -65,8 +65,8 @@ export default function AdminDashboard() {
 
             {/* Recent products */}
             {stats.recent.length > 0 && (
-                <div>
-                    <div className="flex items-center justify-between mb-5">
+                <div style={{ marginBottom: "24px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
                         <h2 className="text-[22px] font-bold text-slate-900">Recently Added</h2>
                         <Link to="/admin/products" className="text-[15px] font-semibold text-primary hover:text-primary-dark transition-colors flex items-center gap-1.5">
                             View all <HiOutlineArrowRight className="w-4 h-4" />

@@ -9,6 +9,9 @@ const loadRazorpayScript = () =>
         document.body.appendChild(script);
     });
 
+// Preload SDK eagerly so checkout opens instantly
+export const preloadRazorpay = () => { loadRazorpayScript(); };
+
 export const initiateRazorpayPayment = async ({ orderId, amount, currency, onSuccess, onFailure }) => {
     const loaded = await loadRazorpayScript();
     if (!loaded) {
