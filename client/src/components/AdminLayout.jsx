@@ -22,6 +22,9 @@ export default function AdminLayout() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const admin = useSelector((s) => s.auth.admin);
+    const user = useSelector((s) => s.auth.user);
+    const authAdmin = admin || (user?.role === "admin" ? user : null);
+    const displayName = authAdmin?.username || authAdmin?.name || "Admin";
 
     const handleLogout = () => { dispatch(logout()); navigate("/admin/login"); };
     const pageTitle = NAV.find((n) => pathname.startsWith(n.to))?.label || "Admin";
@@ -77,13 +80,13 @@ export default function AdminLayout() {
 
                 {/* Bottom */}
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "16px 12px" }}>
-                    {admin && (
+                    {authAdmin && (
                         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", marginBottom: 8 }}>
                             <div style={{ width: 36, height: 36, borderRadius: 8, background: "linear-gradient(135deg, #475569, #334155)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <span style={{ color: "#fff", fontSize: 14, fontWeight: 800 }}>{admin.username?.charAt(0).toUpperCase()}</span>
+                                <span style={{ color: "#fff", fontSize: 14, fontWeight: 800 }}>{displayName.charAt(0).toUpperCase()}</span>
                             </div>
                             <div style={{ minWidth: 0 }}>
-                                <p style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{admin.username}</p>
+                                <p style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayName}</p>
                                 <p style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em" }}>Administrator</p>
                             </div>
                         </div>

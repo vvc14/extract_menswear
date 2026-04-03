@@ -181,16 +181,10 @@ export default function Navbar() {
                                                         <p className="text-[13px] text-slate-400 truncate">{user?.email || admin?.username}</p>
                                                     </div>
                                                     <div className="py-2">
-                                                        {admin && (
+                                                        {(admin || user?.role === "admin") && (
                                                             <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                                                 <HiOutlineShieldCheck className="w-4 h-4 text-slate-400" />
                                                                 Admin Dashboard
-                                                            </Link>
-                                                        )}
-                                                        {user?.role === "admin" && (
-                                                            <Link to="/admin/login" className="flex items-center gap-3 px-4 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                                                                <HiOutlineShieldCheck className="w-4 h-4 text-slate-400" />
-                                                                Admin Panel
                                                             </Link>
                                                         )}
                                                         <button
