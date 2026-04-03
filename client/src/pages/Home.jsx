@@ -65,7 +65,7 @@ export default function Home() {
                 {/* Background image + overlays */}
                 <div className="absolute inset-0">
                     <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80"
+                        src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80&w=1920"
                         alt=""
                         className="w-full h-full object-cover"
                     />
