@@ -63,8 +63,8 @@ export default function AdminLayout() {
                                     display: "flex", alignItems: "center", gap: 12,
                                     padding: "12px 14px", borderRadius: 12, fontSize: 16, fontWeight: 600,
                                     textDecoration: "none", marginBottom: 4,
-                                    color: active ? "var(--color-primary)" : "#94a3b8",
-                                    background: active ? "rgba(var(--color-primary-rgb, 59,130,246), 0.12)" : "transparent",
+                                    color: active ? "#ffffff" : "#94a3b8",
+                                    background: active ? "#2563eb" : "transparent",
                                     transition: "all 0.2s",
                                 }}
                                 onMouseEnter={(e) => { if (!active) { e.currentTarget.style.color = "#e2e8f0"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
