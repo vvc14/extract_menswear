@@ -27,7 +27,7 @@ export const submitContact = async (req, res) => {
                 text: `You have received a new message from your website contact form.\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
             };
 
-            await transporter.sendMail(mailOptions);
+            transporter.sendMail(mailOptions).catch(err => console.error("Background email error:", err));
         } else {
             console.warn("EMAIL_USER and EMAIL_PASS are not set in .env. Email was not sent.");
         }
