@@ -55,9 +55,9 @@ export default function Trousers() {
             </section>
 
             {/* Content */}
-            <div className="page-wrap py-10 sm:py-14">
+            <div className="page-wrap py-10 sm:py-14 flex flex-col gap-8 lg:gap-10">
                 {/* Toolbar */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between">
                     <p className="text-[15px] text-slate-500 dark:text-slate-400">
                         {loading ? "Loading..." : <><span className="font-bold text-slate-900 dark:text-white">{products.length}</span> product{products.length !== 1 ? "s" : ""} found</>}
                     </p>
