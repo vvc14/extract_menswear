@@ -4,6 +4,7 @@ import { Provider, useSelector } from "react-redux";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import store from "./redux/store";
 import useCartSync from "./hooks/useCartSync";
+import useWishlistSync from "./hooks/useWishlistSync";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 import Home from "./pages/Home";
@@ -20,6 +21,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminUsers from "./pages/AdminUsers";
+import Wishlist from "./pages/Wishlist";
 
 function ProtectedRoute({ children }) {
   const token = useSelector((s) => s.auth.token);
@@ -29,6 +31,7 @@ function ProtectedRoute({ children }) {
 
 function AppRoutes() {
   useCartSync();
+  useWishlistSync();
   return (
     <>
     <ScrollToTop />
@@ -44,6 +47,7 @@ function AppRoutes() {
         <Route path="payment-success" element={<PaymentSuccess />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+        <Route path="wishlist" element={<Wishlist />} />
       </Route>
 
       <Route path="admin/login" element={<AdminLogin />} />

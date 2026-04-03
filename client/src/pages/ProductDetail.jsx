@@ -1,18 +1,23 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
+import { toggleWishlist } from "../redux/wishlistSlice";
 import API from "../services/api";
 import { motion } from "framer-motion";
-import { HiOutlineShoppingCart, HiStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart } from "react-icons/hi";
+import { HiOutlineShoppingCart, HiStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart } from "react-icons/hi";
 
 export default function ProductDetail() {
     const { id } = useParams();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const user = useSelector((s) => s.auth.user);
+    const wishlistItems = useSelector((s) => s.wishlist.items);
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [added, setAdded] = useState(false);
     const [qty, setQty] = useState(1);
+    const isWishlisted = wishlistItems.some((i) => i._id === product?._id);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -195,11 +200,22 @@ export default function ProductDetail() {
                                 )}
                             </button>
                             <button
-                                className="flex items-center justify-center gap-2.5 text-[17px] font-bold py-[22px] px-10 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose hover:text-rose dark:hover:border-rose dark:hover:text-rose transition-colors"
-                                aria-label="Add to wishlist"
+                                onClick={() => {
+                                    if (!user) {
+                                        navigate("/login?redirect=/product/" + id);
+                                        return;
+                                    }
+                                    dispatch(toggleWishlist(product));
+                                }}
+                                className={`flex items-center justify-center gap-2.5 text-[17px] font-bold py-[22px] px-10 rounded-2xl border-2 transition-colors ${
+                                    isWishlisted
+                                        ? "border-rose-400 text-rose-500 bg-rose-50 dark:bg-rose-500/10 dark:border-rose-500"
+                                        : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-500 dark:hover:border-rose-400 dark:hover:text-rose-500"
+                                }`}
+                                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                             >
-                                <HiOutlineHeart className="w-5 h-5" />
-                                Wishlist
+                                {isWishlisted ? <HiHeart className="w-5 h-5" /> : <HiOutlineHeart className="w-5 h-5" />}
+                                {isWishlisted ? "Wishlisted" : "Wishlist"}
                             </button>
                         </div>
 

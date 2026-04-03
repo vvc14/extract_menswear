@@ -48,12 +48,12 @@ export default function Cart() {
     if (items.length === 0) {
         return (
             <main id="main-content" className="page-wrap py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <div className="w-24 h-24 mx-auto mb-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                        <HiOutlineShoppingCart className="w-10 h-10 text-slate-400" />
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
+                    <div className="w-28 h-28 mb-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+                        <HiOutlineShoppingCart className="w-12 h-12 text-slate-400" />
                     </div>
-                    <h2 className="text-[28px] font-extrabold text-slate-900 dark:text-white mb-3">Your cart is empty</h2>
-                    <p className="text-[16px] text-slate-500 dark:text-slate-400 mb-10 max-w-md mx-auto leading-[1.7]">
+                    <h2 className="text-[30px] font-extrabold text-slate-900 dark:text-white mb-5">Your cart is empty</h2>
+                    <p className="text-[16px] text-slate-500 dark:text-slate-400 mb-12 max-w-md text-center leading-[1.7]">
                         Looks like you haven't added anything to your cart yet. Explore our collection and find something you love.
                     </p>
                     <Link to="/shirts" className="btn-primary">

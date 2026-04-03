@@ -1,13 +1,18 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
-import { Link } from "react-router-dom";
+import { toggleWishlist } from "../redux/wishlistSlice";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { HiOutlineShoppingCart, HiStar, HiOutlineHeart, HiOutlineEye } from "react-icons/hi";
+import { HiOutlineShoppingCart, HiStar, HiOutlineHeart, HiHeart, HiOutlineEye } from "react-icons/hi";
 import { useState } from "react";
 
 export default function ProductCard({ product }) {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [added, setAdded] = useState(false);
+    const user = useSelector((s) => s.auth.user);
+    const wishlistItems = useSelector((s) => s.wishlist.items);
+    const isWishlisted = wishlistItems.some((i) => i._id === product._id);
 
     const handleAdd = (e) => {
         e.preventDefault();
@@ -15,6 +20,16 @@ export default function ProductCard({ product }) {
         dispatch(addToCart(product));
         setAdded(true);
         setTimeout(() => setAdded(false), 1800);
+    };
+
+    const handleWishlistToggle = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!user) {
+            navigate("/login?redirect=" + encodeURIComponent(window.location.pathname));
+            return;
+        }
+        dispatch(toggleWishlist(product));
     };
 
     const discount = product.discount || 0;
@@ -83,11 +98,15 @@ export default function ProductCard({ product }) {
                     {/* Quick actions */}
                     <div className="absolute bottom-4 right-4 z-10 flex gap-2.5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                         <button
-                            className="w-9 h-9 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-rose-500 transition-colors shadow-lg"
-                            aria-label="Add to wishlist"
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            className={`w-9 h-9 backdrop-blur-sm rounded-xl flex items-center justify-center transition-colors shadow-lg ${
+                                isWishlisted
+                                    ? "bg-rose-500/90 text-white"
+                                    : "bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:text-rose-500"
+                            }`}
+                            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                            onClick={handleWishlistToggle}
                         >
-                            <HiOutlineHeart className="w-4 h-4" />
+                            {isWishlisted ? <HiHeart className="w-4 h-4" /> : <HiOutlineHeart className="w-4 h-4" />}
                         </button>
                         <button
                             className="w-9 h-9 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors shadow-lg"
