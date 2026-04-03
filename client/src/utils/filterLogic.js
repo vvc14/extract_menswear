@@ -6,6 +6,7 @@ export const buildQueryString = (filters) => {
     if (filters.style?.length) params.set("style", filters.style.join(","));
     if (filters.minPrice) params.set("minPrice", filters.minPrice);
     if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+    if (filters.sort) params.set("sort", filters.sort);
 
     return params.toString();
 };

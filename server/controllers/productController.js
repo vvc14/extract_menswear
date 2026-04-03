@@ -2,7 +2,7 @@ import Product from "../models/Product.js";
 
 export const getProducts = async (req, res) => {
     try {
-        const { category, fabric, style, minPrice, maxPrice, search } = req.query;
+        const { category, fabric, style, minPrice, maxPrice, search, sort } = req.query;
         const filter = {};
 
         if (category) filter.category = category;
@@ -15,7 +15,17 @@ export const getProducts = async (req, res) => {
         }
         if (search) filter.name = { $regex: search, $options: "i" };
 
-        const products = await Product.find(filter).sort({ createdAt: -1 });
+        const sortMap = {
+            newest: { createdAt: -1 },
+            oldest: { createdAt: 1 },
+            "price-low": { price: 1 },
+            "price-high": { price: -1 },
+            "name-az": { name: 1 },
+            "name-za": { name: -1 },
+        };
+        const sortOrder = sortMap[sort] || { createdAt: -1 };
+
+        const products = await Product.find(filter).sort(sortOrder);
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });

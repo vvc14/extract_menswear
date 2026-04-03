@@ -1,141 +1,137 @@
-import { useState } from "react";
-import API from "../services/api";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { HiOutlineMail, HiOutlineUser, HiOutlineChatAlt2, HiOutlineClock, HiOutlineArrowRight } from "react-icons/hi";
+import { HiOutlineMail, HiOutlineClock, HiOutlineChat } from "react-icons/hi";
+
+const INFO = [
+    {
+        Icon: HiOutlineMail,
+        title: "Email Us",
+        detail: "hello@extractmenswear.com",
+        sub: "We'll respond within 24 hours",
+    },
+    {
+        Icon: HiOutlineClock,
+        title: "Working Hours",
+        detail: "Mon — Sat, 9 AM to 7 PM",
+        sub: "IST (India Standard Time)",
+    },
+    {
+        Icon: HiOutlineChat,
+        title: "Live Chat",
+        detail: "Chat with our support team",
+        sub: "Available during business hours",
+    },
+];
 
 export default function Contact() {
-    const [form, setForm] = useState({ name: "", email: "", message: "" });
-    const [status, setStatus] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setSubmitting(true);
-        try {
-            await API.post("/contact", form);
-            setStatus("success");
-            setForm({ name: "", email: "", message: "" });
-        } catch {
-            setStatus("error");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
     return (
         <main id="main-content">
-            {/* Hero */}
-            <section className="bg-slate-900 py-20">
-                <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16">
+
+            {/* ── Hero ── */}
+            <section style={{ background: "#1a2744" }} className="py-20 sm:py-24">
+                <div className="page-wrap">
+                    <nav className="flex items-center gap-2 text-[13px] mb-8" aria-label="Breadcrumb">
+                        <a href="/" className="text-slate-500 hover:text-slate-300 transition-colors">Home</a>
+                        <span className="text-slate-700">/</span>
+                        <span className="font-semibold text-slate-300">Contact</span>
+                    </nav>
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                        <nav aria-label="Breadcrumb" className="mb-6">
-                            <ol className="flex items-center gap-2 text-[15px]">
-                                <li><Link to="/" className="text-slate-400 hover:text-white transition-colors">Home</Link></li>
-                                <li className="text-slate-600">/</li>
-                                <li className="text-white font-semibold">Contact</li>
-                            </ol>
-                        </nav>
-                        <h1 className="text-[34px] sm:text-[44px] font-extrabold text-white tracking-tight mb-4">
+                        <span className="inline-block text-[12px] font-bold tracking-[0.15em] uppercase px-4 py-1.5 rounded-full mb-6"
+                            style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
                             Get in Touch
+                        </span>
+                        <h1 className="text-[34px] sm:text-[48px] font-extrabold text-white tracking-tight mb-4">
+                            We'd Love to Hear<br />From You
                         </h1>
-                        <p className="text-[18px] text-slate-300 leading-[1.7]">We'd love to hear from you. Send us a message below.</p>
+                        <p className="text-[16px]" style={{ color: "rgba(255,255,255,0.55)" }}>
+                            Send us a message below and we'll get back to you shortly.
+                        </p>
                     </motion.div>
                 </div>
             </section>
 
-            <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-16 sm:py-20">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-14">
-                    {/* Info cards */}
-                    <div className="lg:col-span-1 space-y-5">
-                        {[
-                            { icon: HiOutlineMail, title: "Email Us", desc: "hello@extractmenswear.com", sub: "We'll respond within 24 hours" },
-                            { icon: HiOutlineClock, title: "Working Hours", desc: "Mon — Sat, 9 AM to 7 PM", sub: "IST (India Standard Time)" },
-                            { icon: HiOutlineChatAlt2, title: "Live Chat", desc: "Chat with our support team", sub: "Available during business hours" },
-                        ].map((card) => (
-                            <div key={card.title} className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 flex items-start gap-5">
-                                <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
-                                    <card.icon className="w-5.5 h-5.5 text-primary" />
-                                </div>
-                                <div>
-                                    <p className="text-[16px] font-bold text-slate-900 mb-1">{card.title}</p>
-                                    <p className="text-[15px] text-slate-600 font-medium leading-[1.6]">{card.desc}</p>
-                                    <p className="text-[14px] text-slate-400 mt-1">{card.sub}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+            {/* ── Contact content ── */}
+            <section className="bg-slate-50 dark:bg-[#0a0f1a] border-b border-slate-100 dark:border-slate-800">
+                <div className="page-wrap py-16 sm:py-24">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">
 
-                    {/* Form */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white rounded-2xl border border-slate-200 p-7 sm:p-10">
-                            <h2 className="text-[24px] font-extrabold text-slate-900 mb-8">Send a Message</h2>
-
-                            {status === "success" && (
-                                <div className="bg-emerald/10 border border-emerald/20 text-emerald text-[16px] font-semibold px-6 py-4 rounded-xl mb-7 flex items-center gap-2">
-                                    ✓ Thank you! Your message has been sent.
-                                </div>
-                            )}
-                            {status === "error" && (
-                                <div className="bg-rose/10 border border-rose/20 text-rose text-[16px] font-semibold px-6 py-4 rounded-xl mb-7">
-                                    Something went wrong. Please try again.
-                                </div>
-                            )}
-
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {/* Info column */}
+                        <div className="lg:col-span-2 space-y-5">
+                            {INFO.map(({ Icon, title, detail, sub }) => (
+                                <motion.div
+                                    key={title}
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 flex gap-4 items-start"
+                                >
+                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-[#f0f4fd] dark:bg-slate-700">
+                                        <Icon className="w-5 h-5 text-[#1a2744] dark:text-gold" />
+                                    </div>
                                     <div>
-                                        <label htmlFor="name" className="block text-[15px] font-bold text-slate-700 mb-2">Full Name</label>
+                                        <p className="text-[15px] font-bold text-slate-900 dark:text-white mb-0.5">{title}</p>
+                                        <p className="text-[14px] text-slate-700 dark:text-slate-300 font-medium mb-0.5">{detail}</p>
+                                        <p className="text-[13px] text-slate-400">{sub}</p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* Form column */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.05 }}
+                            className="lg:col-span-3 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 sm:p-10"
+                        >
+                            <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-8">Send a Message</h2>
+                            <form className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div>
+                                        <label className="block text-[13px] font-semibold text-slate-600 dark:text-slate-400 mb-2" htmlFor="name">
+                                            Full Name
+                                        </label>
                                         <input
-                                            id="name"
-                                            type="text"
-                                            value={form.name}
-                                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                            required
-                                            placeholder="John Doe"
-                                            className="w-full border border-slate-200 px-5 py-3.5 text-[16px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300"
+                                            id="name" type="text" placeholder="John Doe"
+                                            className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none"
+                                            style={{ "--tw-ring-color": "#c9a84c" }}
+                                            onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
+                                            onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="email" className="block text-[15px] font-bold text-slate-700 mb-2">Email Address</label>
+                                        <label className="block text-[13px] font-semibold text-slate-600 dark:text-slate-400 mb-2" htmlFor="email">
+                                            Email Address
+                                        </label>
                                         <input
-                                            id="email"
-                                            type="email"
-                                            value={form.email}
-                                            onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                            required
-                                            placeholder="john@example.com"
-                                            className="w-full border border-slate-200 px-5 py-3.5 text-[16px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300"
+                                            id="email" type="email" placeholder="john@example.com"
+                                            className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none"
+                                            onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
+                                            onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
                                         />
                                     </div>
                                 </div>
-
                                 <div>
-                                    <label htmlFor="message" className="block text-[15px] font-bold text-slate-700 mb-2">Message</label>
+                                    <label className="block text-[13px] font-semibold text-slate-600 dark:text-slate-400 mb-2" htmlFor="message">
+                                        Message
+                                    </label>
                                     <textarea
-                                        id="message"
-                                        value={form.message}
-                                        onChange={(e) => setForm({ ...form, message: e.target.value })}
-                                        required
-                                        rows={6}
-                                        placeholder="Tell us about your inquiry..."
-                                        className="w-full border border-slate-200 px-5 py-3.5 text-[16px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none placeholder:text-slate-300"
+                                        id="message" rows={6} placeholder="Tell us about your inquiry..."
+                                        className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none resize-none"
+                                        onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
+                                        onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
                                     />
                                 </div>
-
                                 <button
                                     type="submit"
-                                    disabled={submitting}
-                                    className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-primary text-white text-[17px] font-bold px-14 py-5 rounded-2xl hover:bg-primary-dark transition-colors disabled:opacity-50"
+                                    className="btn-primary w-full justify-center py-4 text-[15px]"
                                 >
-                                    {submitting ? "Sending..." : "Send Message"}
-                                    {!submitting && <HiOutlineArrowRight className="w-4 h-4" />}
+                                    Send Message →
                                 </button>
                             </form>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
-            </div>
+            </section>
         </main>
     );
 }

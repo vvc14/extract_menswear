@@ -1,63 +1,104 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { HiOutlineArrowRight } from "react-icons/hi";
+import { HiOutlineArrowRight, HiOutlineSparkles, HiOutlineScissors, HiOutlineShieldCheck, HiOutlineTruck } from "react-icons/hi";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.4 } }),
+    visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.09, duration: 0.42 } }),
 };
 
 const VALUES = [
-    { icon: "🧵", title: "Premium Fabrics", desc: "Sourced from the world's finest mills — Linen, Oxford, Twill, and Satin." },
-    { icon: "✂️", title: "Modern Tailoring", desc: "Every piece is precision-cut for a fit that flatters and feels natural." },
-    { icon: "🛡️", title: "Quality Guaranteed", desc: "Crafted to last. We stand behind every stitch with confidence." },
-    { icon: "🚚", title: "Fast Delivery", desc: "Free shipping across India on orders above ₹999." },
+    {
+        Icon: HiOutlineSparkles,
+        title: "Premium Fabrics",
+        desc: "Sourced from the world's finest mills — Linen, Oxford, Twill, and Satin."
+    },
+    {
+        Icon: HiOutlineScissors,
+        title: "Modern Tailoring",
+        desc: "Every piece is precision-cut for a fit that flatters and feels natural."
+    },
+    {
+        Icon: HiOutlineShieldCheck,
+        title: "Quality Guaranteed",
+        desc: "Crafted to last. We stand behind every stitch with confidence."
+    },
+    {
+        Icon: HiOutlineTruck,
+        title: "Fast Delivery",
+        desc: "Free shipping across India on orders above ₹999."
+    },
+];
+
+const STATS = [
+    { value: "4", label: "Premium Fabrics" },
+    { value: "500+", label: "Happy Customers" },
+    { value: "100%", label: "Quality Guaranteed" },
+    { value: "2", label: "Core Categories" },
 ];
 
 export default function About() {
     return (
         <main id="main-content">
-            {/* Hero */}
-            <section className="bg-slate-900 py-20 md:py-28">
-                <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16">
-                    <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-2xl">
-                        <span className="inline-block bg-amber/20 text-amber text-[15px] font-bold px-5 py-2 rounded-full mb-7">
+
+            {/* ── Hero ── */}
+            <section style={{ background: "#1a2744" }} className="py-24 md:py-32">
+                <div className="page-wrap">
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55 }}
+                        className="max-w-2xl"
+                    >
+                        <span className="inline-block text-[12px] font-bold tracking-[0.15em] uppercase px-4 py-1.5 rounded-full mb-8"
+                            style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
                             Our Story
                         </span>
-                        <h1 className="text-[34px] sm:text-[48px] font-extrabold text-white leading-tight tracking-tight mb-7">
-                            Redefining Men's Fashion Through Premium Fabrics
+                        <h1 className="text-[34px] sm:text-[50px] font-extrabold text-white leading-tight tracking-tight mb-7">
+                            Redefining Men's Fashion<br />Through Premium Fabrics
                         </h1>
-                        <p className="text-[18px] text-slate-300 leading-[1.8]">
-                            Extract Menswear was born from a simple belief — every man deserves clothing that fits impeccably and feels extraordinary against the skin.
+                        <p className="text-[17px] leading-[1.85]" style={{ color: "rgba(255,255,255,0.65)" }}>
+                            Extract Menswear was born from a simple belief — every man deserves clothing
+                            that fits impeccably and feels extraordinary against the skin.
                         </p>
                     </motion.div>
                 </div>
             </section>
 
-            {/* Values */}
-            <section className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-20 sm:py-24">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 lg:gap-8">
-                    {VALUES.map((v, i) => (
-                        <motion.div
-                            key={v.title}
-                            custom={i}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            variants={fadeUp}
-                            className="bg-white rounded-2xl border border-slate-200 p-7 sm:p-8 hover:shadow-md hover:border-slate-300 transition-all"
-                        >
-                            <span className="text-[36px] block mb-5">{v.icon}</span>
-                            <h3 className="text-[18px] font-bold text-slate-900 mb-3">{v.title}</h3>
-                            <p className="text-[16px] text-slate-500 leading-[1.8]">{v.desc}</p>
-                        </motion.div>
-                    ))}
+            {/* ── Values ── */}
+            <section className="bg-white dark:bg-[#0d1321] border-b border-slate-100 dark:border-slate-800">
+                <div className="page-wrap py-20 sm:py-28">
+                    <div className="mb-14">
+                        <p className="section-label">What We Stand For</p>
+                        <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            Our Core Values
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {VALUES.map(({ Icon, title, desc }, i) => (
+                            <motion.div
+                                key={title}
+                                custom={i}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={fadeUp}
+                                className="card-hover group bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-8"
+                            >
+                                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#f0f4fd] dark:bg-slate-700">
+                                    <Icon className="w-5 h-5 text-[#1a2744] dark:text-gold" />
+                                </div>
+                                <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mb-3">{title}</h3>
+                                <p className="text-[15px] text-slate-500 dark:text-slate-400 leading-[1.75]">{desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
-            {/* Story section */}
-            <section className="bg-slate-50 py-20 sm:py-28">
-                <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16">
+            {/* ── Story section ── */}
+            <section className="bg-slate-50 dark:bg-[#0a0f1a] border-b border-slate-100 dark:border-slate-800">
+                <div className="page-wrap py-20 sm:py-28">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
@@ -65,7 +106,7 @@ export default function About() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5 }}
                         >
-                            <div className="aspect-[4/5] overflow-hidden rounded-2xl">
+                            <div className="rounded-2xl overflow-hidden" style={{ aspectRatio: "4/5" }}>
                                 <img
                                     src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80"
                                     alt="Extract Menswear workshop"
@@ -80,21 +121,24 @@ export default function About() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.1 }}
                         >
-                            <h2 className="text-[30px] sm:text-[36px] font-extrabold text-slate-900 tracking-tight mb-8">
-                                Craftsmanship Meets Modern Design
+                            <p className="section-label">The Story</p>
+                            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">
+                                Craftsmanship Meets<br />Modern Design
                             </h2>
-                            <div className="space-y-5 text-[17px] text-slate-600 leading-[1.8]">
+                            <div className="space-y-5 text-[16px] text-slate-600 dark:text-slate-400 leading-[1.85]">
                                 <p>
-                                    We source the finest Linen, Oxford, Twill, and Satin fabrics from trusted mills to create shirts that look and feel premium.
-                                    Our trousers blend formal elegance with casual comfort, designed for every setting in a modern man's life.
+                                    We source the finest Linen, Oxford, Twill, and Satin fabrics from trusted mills
+                                    to create shirts that look and feel premium. Our trousers blend formal elegance
+                                    with casual comfort, designed for every setting in a modern man's life.
                                 </p>
                                 <p>
-                                    Every stitch, every seam, every button placement is considered with intention. We don't follow fast fashion — we craft lasting wardrobe staples that elevate your everyday style.
+                                    Every stitch, every seam, every button placement is considered with intention.
+                                    We don't follow fast fashion — we craft lasting wardrobe staples that elevate your everyday style.
                                 </p>
                             </div>
                             <Link
                                 to="/shirts"
-                                className="inline-flex items-center gap-2.5 mt-10 bg-primary text-white text-[16px] font-bold px-9 py-4 rounded-2xl hover:bg-primary-dark transition-colors"
+                                className="btn-primary inline-flex mt-10"
                             >
                                 View Collection
                                 <HiOutlineArrowRight className="w-4 h-4" />
@@ -104,28 +148,35 @@ export default function About() {
                 </div>
             </section>
 
-            {/* Stats */}
-            <section className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-20 sm:py-24">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-7 lg:gap-8 text-center">
-                    {[
-                        { value: "4", label: "Premium Fabrics" },
-                        { value: "500+", label: "Happy Customers" },
-                        { value: "100%", label: "Quality Guaranteed" },
-                        { value: "2", label: "Core Categories" },
-                    ].map((stat, i) => (
-                        <motion.div
-                            key={stat.label}
-                            custom={i}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            variants={fadeUp}
-                            className="bg-slate-50 rounded-2xl p-8 sm:p-10"
-                        >
-                            <p className="text-[38px] sm:text-[48px] font-extrabold text-primary mb-2">{stat.value}</p>
-                            <p className="text-[14px] font-semibold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                        </motion.div>
-                    ))}
+            {/* ── Stats ── */}
+            <section className="bg-white dark:bg-[#0d1321]">
+                <div className="page-wrap py-20 sm:py-28">
+                    <div className="mb-14 text-center">
+                        <p className="section-label justify-center">By the Numbers</p>
+                        <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            Extract Menswear at a Glance
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                        {STATS.map((stat, i) => (
+                            <motion.div
+                                key={stat.label}
+                                custom={i}
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={fadeUp}
+                                className="rounded-2xl border border-slate-200 dark:border-slate-700 py-10 px-6"
+                            >
+                                <p className="text-[40px] sm:text-[48px] font-extrabold mb-2" style={{ color: "#1a2744" }}>
+                                    {stat.value}
+                                </p>
+                                <p className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">
+                                    {stat.label}
+                                </p>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </section>
         </main>

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import { Provider, useSelector } from "react-redux";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import store from "./redux/store";
@@ -29,6 +30,8 @@ function ProtectedRoute({ children }) {
 function AppRoutes() {
   useCartSync();
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
@@ -58,8 +61,11 @@ function AppRoutes() {
         <Route path="users" element={<AdminUsers />} />
       </Route>
     </Routes>
+    </>
   );
 }
+
+import { ThemeProvider } from "./context/ThemeContext";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
@@ -67,9 +73,11 @@ export default function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Provider store={store}>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <ThemeProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </ThemeProvider>
       </Provider>
     </GoogleOAuthProvider>
   );

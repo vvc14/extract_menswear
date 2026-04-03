@@ -9,15 +9,15 @@ function FilterSection({ title, defaultOpen = false, children }) {
     const [open, setOpen] = useState(defaultOpen);
 
     return (
-        <div className="border-b border-slate-100 last:border-0">
+        <div className="border-b border-slate-100 dark:border-slate-700 last:border-0">
             <button
                 onClick={() => setOpen(!open)}
                 className="w-full flex items-center justify-between py-3.5 text-left group"
                 aria-expanded={open}
             >
-                <span className="text-[15px] font-bold text-slate-900 uppercase tracking-wider">{title}</span>
+                <span className="text-[15px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">{title}</span>
                 <HiChevronDown
-                    className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 ${open ? "rotate-180" : ""
+                    className={`w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform duration-200 ${open ? "rotate-180" : ""
                         }`}
                 />
             </button>
@@ -76,11 +76,11 @@ export default function FilterSidebar({ category, onFilterChange }) {
 
     return (
         <aside className="w-full lg:w-[250px] shrink-0" aria-label="Product filters">
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[16px] font-extrabold text-slate-900">Filters</h3>
+                        <h3 className="text-[16px] font-extrabold text-slate-900 dark:text-white">Filters</h3>
                         {activeCount > 0 && (
                             <span className="text-[11px] font-bold text-white bg-primary w-5 h-5 rounded-full flex items-center justify-center">
                                 {activeCount}
@@ -90,7 +90,7 @@ export default function FilterSidebar({ category, onFilterChange }) {
                     {hasActiveFilters && (
                         <button
                             onClick={clearAll}
-                            className="text-[14px] font-bold text-primary hover:text-primary-dark transition-colors"
+                            className="text-[14px] font-bold text-primary dark:text-gold hover:text-primary-dark dark:hover:text-gold-dark transition-colors"
                         >
                             Clear all
                         </button>
@@ -108,13 +108,13 @@ export default function FilterSidebar({ category, onFilterChange }) {
                                             type="checkbox"
                                             checked={selectedFabrics.includes(fabric)}
                                             onChange={() => toggleItem(selectedFabrics, setSelectedFabrics, fabric)}
-                                            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary accent-primary cursor-pointer"
                                         />
-                                        <span className="text-[15px] text-slate-600 group-hover:text-slate-900 font-medium transition-colors">
+                                        <span className="text-[15px] text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white font-medium transition-colors">
                                             {fabric}
                                         </span>
                                         {selectedFabrics.includes(fabric) && (
-                                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary dark:bg-gold" />
                                         )}
                                     </label>
                                 ))}
@@ -130,13 +130,13 @@ export default function FilterSidebar({ category, onFilterChange }) {
                                         type="checkbox"
                                         checked={selectedStyles.includes(style)}
                                         onChange={() => toggleItem(selectedStyles, setSelectedStyles, style)}
-                                        className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary accent-primary cursor-pointer"
                                     />
-                                    <span className="text-[15px] text-slate-600 group-hover:text-slate-900 font-medium transition-colors">
+                                    <span className="text-[15px] text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white font-medium transition-colors">
                                         {style}
                                     </span>
                                     {selectedStyles.includes(style) && (
-                                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary dark:bg-gold" />
                                     )}
                                 </label>
                             ))}
@@ -146,7 +146,7 @@ export default function FilterSidebar({ category, onFilterChange }) {
                     <FilterSection title="Price" defaultOpen={false}>
                         <div>
                             <div className="flex items-center justify-between mb-3">
-                                <span className="text-[15px] font-semibold text-slate-900">
+                                <span className="text-[15px] font-semibold text-slate-900 dark:text-white">
                                     Up to ₹{priceRange[1].toLocaleString("en-IN")}
                                 </span>
                             </div>
@@ -157,7 +157,7 @@ export default function FilterSidebar({ category, onFilterChange }) {
                                 step={100}
                                 value={priceRange[1]}
                                 onChange={(e) => handlePriceChange(e.target.value)}
-                                className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer"
+                                className="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full appearance-none cursor-pointer"
                                 aria-label="Maximum price filter"
                             />
                             <div className="flex justify-between mt-2 text-[13px] text-slate-400 font-medium">

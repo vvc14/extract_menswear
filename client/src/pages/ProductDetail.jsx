@@ -36,15 +36,15 @@ export default function ProductDetail() {
 
     if (loading) {
         return (
-            <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-pulse">
-                    <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-50 rounded-2xl" />
+            <div className="page-wrap py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
+                    <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl" />
                     <div className="space-y-5 py-4">
-                        <div className="h-4 bg-slate-100 rounded-full w-1/4" />
-                        <div className="h-8 bg-slate-100 rounded-full w-3/4" />
-                        <div className="h-4 bg-slate-100 rounded-full w-1/2" />
-                        <div className="h-6 bg-slate-100 rounded-full w-1/3" />
-                        <div className="h-14 bg-slate-100 rounded-xl w-full mt-8" />
+                        <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded-full w-1/4" />
+                        <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded-full w-3/4" />
+                        <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded-full w-1/2" />
+                        <div className="h-6 bg-slate-100 dark:bg-slate-700 rounded-full w-1/3" />
+                        <div className="h-14 bg-slate-100 dark:bg-slate-700 rounded-xl w-full mt-8" />
                     </div>
                 </div>
             </div>
@@ -53,10 +53,10 @@ export default function ProductDetail() {
 
     if (!product) {
         return (
-            <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center">
+            <div className="page-wrap py-28 text-center">
                 <div className="text-[56px] mb-4">😞</div>
-                <h2 className="text-[28px] font-extrabold text-slate-900 mb-3">Product not found</h2>
-                <Link to="/" className="text-primary font-bold hover:underline">Back to Home</Link>
+                <h2 className="text-[28px] font-extrabold text-slate-900 dark:text-white mb-3">Product not found</h2>
+                <Link to="/" className="text-primary dark:text-gold font-bold hover:underline">Back to Home</Link>
             </div>
         );
     }
@@ -67,33 +67,32 @@ export default function ProductDetail() {
     return (
         <main id="main-content">
             {/* Breadcrumb bar */}
-            <div className="bg-slate-50 border-b border-slate-200">
-                <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-4">
+            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
+                <div className="page-wrap py-4">
                     <nav aria-label="Breadcrumb">
                         <ol className="flex items-center gap-2 text-[15px]">
-                            <li><Link to="/" className="text-slate-400 hover:text-primary transition-colors">Home</Link></li>
-                            <li className="text-slate-300">/</li>
-                            <li><Link to={product.category === "shirt" ? "/shirts" : "/trousers"} className="text-slate-400 hover:text-primary transition-colors capitalize">{product.category}s</Link></li>
-                            <li className="text-slate-300">/</li>
-                            <li className="text-slate-900 font-semibold line-clamp-1">{product.name}</li>
+                            <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
+                            <li className="text-slate-300 dark:text-slate-600">/</li>
+                            <li><Link to={product.category === "shirt" ? "/shirts" : "/trousers"} className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors capitalize">{product.category}s</Link></li>
+                            <li className="text-slate-300 dark:text-slate-600">/</li>
+                            <li className="text-slate-900 dark:text-white font-semibold line-clamp-1">{product.name}</li>
                         </ol>
                     </nav>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-12 sm:py-16">
+            <div className="page-wrap py-12 sm:py-16 lg:py-20">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
-                    className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16"
+                    className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20"
                 >
                     {/* Image */}
                     <div className="relative group">
-                        <div className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200">
+                        <div className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700">
                             <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                         </div>
-                        {/* Floating badges */}
                         <div className="absolute top-4 left-4 flex gap-2">
                             {discount > 0 && (
                                 <span className="text-[12px] font-extrabold text-white bg-emerald px-3 py-1.5 rounded-lg shadow-md">{discount}% OFF</span>
@@ -110,18 +109,18 @@ export default function ProductDetail() {
                     {/* Details */}
                     <div className="py-2">
                         {/* Badges */}
-                        <div className="flex flex-wrap items-center gap-3 mb-5">
+                        <div className="flex flex-wrap items-center gap-2.5 mb-6">
                             {product.fabric && (
-                                <span className="text-[13px] font-bold text-primary bg-primary-light px-3.5 py-2 rounded-xl">{product.fabric}</span>
+                                <span className="text-[13px] font-bold text-primary dark:text-blue-300 bg-primary-light dark:bg-blue-900/30 px-3.5 py-2 rounded-xl">{product.fabric}</span>
                             )}
                             {product.style && (
-                                <span className="text-[13px] font-bold text-slate-600 bg-slate-100 px-3.5 py-2 rounded-xl">{product.style}</span>
+                                <span className="text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 rounded-xl">{product.style}</span>
                             )}
-                            <span className="text-[13px] font-bold text-slate-600 bg-slate-100 px-3.5 py-2 rounded-xl capitalize">{product.category}</span>
+                            <span className="text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 rounded-xl capitalize">{product.category}</span>
                         </div>
 
                         {/* Name */}
-                        <h1 className="text-[28px] sm:text-[34px] lg:text-[40px] font-extrabold text-slate-900 tracking-tight leading-tight mb-5">
+                        <h1 className="text-[28px] sm:text-[34px] lg:text-[42px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
                             {product.name}
                         </h1>
 
@@ -130,13 +129,13 @@ export default function ProductDetail() {
                             <div className="flex items-center gap-1 bg-emerald text-white text-[15px] font-bold px-3 py-1.5 rounded-xl">
                                 4.0 <HiStar className="w-3.5 h-3.5" />
                             </div>
-                            <span className="text-[15px] font-semibold text-slate-500">24 ratings & 8 reviews</span>
+                            <span className="text-[15px] font-semibold text-slate-500 dark:text-slate-400">24 ratings & 8 reviews</span>
                         </div>
 
                         {/* Price */}
-                        <div className="bg-slate-50 rounded-2xl p-6 sm:p-7 mb-8">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 sm:p-8 mb-8">
                             <div className="flex items-baseline gap-3 mb-2">
-                                <span className="text-[36px] sm:text-[44px] font-extrabold text-slate-900">₹{product.price.toLocaleString("en-IN")}</span>
+                                <span className="text-[36px] sm:text-[44px] font-extrabold text-slate-900 dark:text-white">₹{product.price.toLocaleString("en-IN")}</span>
                                 {originalPrice > 0 && (
                                     <span className="text-[20px] text-slate-400 line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
                                 )}
@@ -144,7 +143,7 @@ export default function ProductDetail() {
                                     <span className="text-[17px] font-bold text-emerald">{discount}% off</span>
                                 )}
                             </div>
-                            <p className="text-[15px] text-slate-500 leading-[1.6]">Inclusive of all taxes</p>
+                            <p className="text-[15px] text-slate-500 dark:text-slate-400">Inclusive of all taxes</p>
                         </div>
 
                         {/* Stock */}
@@ -159,25 +158,21 @@ export default function ProductDetail() {
 
                         {/* Quantity */}
                         <div className="flex items-center gap-5 mb-8">
-                            <label className="text-[16px] font-bold text-slate-700">Quantity:</label>
-                            <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden">
+                            <label className="text-[16px] font-bold text-slate-700 dark:text-slate-300">Quantity:</label>
+                            <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
                                 <button
                                     onClick={() => setQty(Math.max(1, qty - 1))}
-                                    className="px-6 py-4.5 text-[16px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                                    className="px-6 py-4 text-[16px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                                     aria-label="Decrease quantity"
-                                >
-                                    −
-                                </button>
-                                <span className="px-8 py-4.5 text-[15px] font-extrabold text-slate-900 border-x border-slate-200 min-w-[60px] text-center bg-white">
+                                >−</button>
+                                <span className="px-8 py-4 text-[15px] font-extrabold text-slate-900 dark:text-white border-x border-slate-200 dark:border-slate-700 min-w-[60px] text-center bg-white dark:bg-transparent">
                                     {qty}
                                 </span>
                                 <button
                                     onClick={() => setQty(Math.min(product.stock, qty + 1))}
-                                    className="px-6 py-4.5 text-[16px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                                    className="px-6 py-4 text-[16px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                                     aria-label="Increase quantity"
-                                >
-                                    +
-                                </button>
+                                >+</button>
                             </div>
                         </div>
 
@@ -200,7 +195,7 @@ export default function ProductDetail() {
                                 )}
                             </button>
                             <button
-                                className="flex items-center justify-center gap-2.5 text-[17px] font-bold py-[22px] px-10 rounded-2xl border-2 border-slate-200 text-slate-700 hover:border-rose hover:text-rose transition-colors"
+                                className="flex items-center justify-center gap-2.5 text-[17px] font-bold py-[22px] px-10 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose hover:text-rose dark:hover:border-rose dark:hover:text-rose transition-colors"
                                 aria-label="Add to wishlist"
                             >
                                 <HiOutlineHeart className="w-5 h-5" />
@@ -209,18 +204,18 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Trust features */}
-                        <div className="border border-slate-200 rounded-2xl divide-y divide-slate-100">
+                        <div className="border border-slate-200 dark:border-slate-700 rounded-2xl divide-y divide-slate-100 dark:divide-slate-700">
                             {[
                                 { icon: HiOutlineTruck, text: "Free delivery on orders above ₹999", sub: "Estimated 3-5 business days" },
                                 { icon: HiOutlineRefresh, text: "7-day easy return & exchange", sub: "No questions asked" },
                                 { icon: HiOutlineShieldCheck, text: "100% genuine product guarantee", sub: "Quality checked by our experts" },
                             ].map((item) => (
                                 <div key={item.text} className="flex items-start gap-5 px-6 py-5">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 mt-0.5">
-                                        <item.icon className="w-4.5 h-4.5 text-slate-500" />
+                                    <div className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 mt-0.5">
+                                        <item.icon className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                                     </div>
                                     <div>
-                                        <p className="text-[15px] font-bold text-slate-900 leading-[1.5]">{item.text}</p>
+                                        <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-[1.5]">{item.text}</p>
                                         <p className="text-[14px] text-slate-400 mt-1">{item.sub}</p>
                                     </div>
                                 </div>
