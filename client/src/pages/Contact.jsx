@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import API from "../services/api";
 import { HiOutlineMail, HiOutlineClock, HiOutlineChat } from "react-icons/hi";
 
 const INFO = [
@@ -23,6 +25,26 @@ const INFO = [
 ];
 
 export default function Contact() {
+    const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+        try {
+            await API.post("/contact", formData);
+            setSuccess(true);
+            setFormData({ name: "", email: "", message: "" });
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to send message. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <main id="main-content">
 
@@ -84,14 +106,26 @@ export default function Contact() {
                             className="lg:col-span-3 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 sm:p-10"
                         >
                             <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-8">Send a Message</h2>
-                            <form className="space-y-6">
+                            {success ? (
+                                <div className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-6 rounded-xl border border-emerald-200 dark:border-emerald-500/20 text-center">
+                                    <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                    </div>
+                                    <h3 className="text-lg font-bold mb-1">Message Sent Successfully!</h3>
+                                    <p className="text-sm opacity-80">We've received your message and will get back to you shortly.</p>
+                                    <button onClick={() => setSuccess(false)} className="mt-4 text-sm font-semibold underline">Send another message</button>
+                                </div>
+                            ) : (
+                            <form className="space-y-6" onSubmit={handleSubmit}>
+                                {error && <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">{error}</div>}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
                                         <label className="block text-[13px] font-semibold text-slate-600 dark:text-slate-400 mb-2" htmlFor="name">
                                             Full Name
                                         </label>
                                         <input
-                                            id="name" type="text" placeholder="John Doe"
+                                            id="name" type="text" placeholder="John Doe" required
+                                            value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
                                             className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none"
                                             style={{ "--tw-ring-color": "#c9a84c" }}
                                             onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
@@ -103,7 +137,8 @@ export default function Contact() {
                                             Email Address
                                         </label>
                                         <input
-                                            id="email" type="email" placeholder="john@example.com"
+                                            id="email" type="email" placeholder="john@example.com" required
+                                            value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
                                             className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none"
                                             onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
                                             onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
@@ -115,7 +150,8 @@ export default function Contact() {
                                         Message
                                     </label>
                                     <textarea
-                                        id="message" rows={6} placeholder="Tell us about your inquiry..."
+                                        id="message" rows={6} placeholder="Tell us about your inquiry..." required
+                                        value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}
                                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none resize-none"
                                         onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
                                         onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
@@ -123,11 +159,13 @@ export default function Contact() {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="btn-primary w-full justify-center py-4 text-[15px]"
+                                    disabled={loading}
+                                    className="btn-primary w-full justify-center py-4 text-[15px] disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
-                                    Send Message →
+                                    {loading ? "Sending..." : "Send Message →"}
                                 </button>
                             </form>
+                            )}
                         </motion.div>
                     </div>
                 </div>
