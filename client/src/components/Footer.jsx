@@ -12,7 +12,7 @@ const TRUST = [
 ];
 
 const SHOP_LINKS = [{ to: "/shirts", label: "All Shirts" }, { to: "/trousers", label: "All Trousers" }, { to: "/#new-arrivals", label: "New Arrivals" }];
-const COMPANY_LINKS = [{ to: "/about", label: "About Us" }, { to: "/contact", label: "Contact" }, { to: "/admin/login", label: "Admin Panel" }];
+const COMPANY_LINKS = [{ to: "/about", label: "About Us" }, { to: "/contact", label: "Contact" }];
 const HELP_ITEMS = ["Shipping Info", "Returns & Exchanges", "Size Guide", "FAQ"];
 
 export default function Footer() {

@@ -15,12 +15,13 @@ export default function Wishlist() {
         dispatch(addToCart(item));
         setAddedIds((prev) => new Set(prev).add(item._id));
         setTimeout(() => {
+            dispatch(removeFromWishlist(item._id));
             setAddedIds((prev) => {
                 const next = new Set(prev);
                 next.delete(item._id);
                 return next;
             });
-        }, 1800);
+        }, 800);
     };
 
     const handleMoveAllToCart = () => {
