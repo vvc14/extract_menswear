@@ -5,7 +5,7 @@ const INFO = [
     {
         Icon: HiOutlineMail,
         title: "Email Us",
-        detail: "hello@extractmenswear.com",
+        detail: "janassistai@gmail.com",
         sub: "We'll respond within 24 hours",
     },
     {

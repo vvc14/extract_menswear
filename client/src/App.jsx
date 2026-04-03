@@ -22,6 +22,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminUsers from "./pages/AdminUsers";
 import Wishlist from "./pages/Wishlist";
+import SizeGuide from "./pages/SizeGuide";
 
 function ProtectedRoute({ children }) {
   const token = useSelector((s) => s.auth.token);
@@ -49,6 +50,7 @@ function AppRoutes() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="wishlist" element={<Wishlist />} />
+        <Route path="size-guide" element={<SizeGuide />} />
       </Route>
 
       <Route path="admin/login" element={<AdminLogin />} />

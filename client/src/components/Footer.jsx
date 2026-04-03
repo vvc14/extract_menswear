@@ -13,7 +13,12 @@ const TRUST = [
 
 const SHOP_LINKS = [{ to: "/shirts", label: "All Shirts" }, { to: "/trousers", label: "All Trousers" }, { to: "/#new-arrivals", label: "New Arrivals" }];
 const COMPANY_LINKS = [{ to: "/about", label: "About Us" }, { to: "/contact", label: "Contact" }];
-const HELP_ITEMS = ["Shipping Info", "Returns & Exchanges", "Size Guide", "FAQ"];
+const HELP_ITEMS = [
+    { label: "Shipping Info" },
+    { label: "Returns & Exchanges" },
+    { label: "Size Guide", to: "/size-guide" },
+    { label: "FAQ" },
+];
 
 export default function Footer() {
     return (
@@ -101,8 +106,14 @@ export default function Footer() {
                         <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500 mb-5">Help</h4>
                         <ul className="space-y-3.5">
                             {HELP_ITEMS.map((item) => (
-                                <li key={item}>
-                                    <span className="text-[15px] text-slate-400 cursor-default">{item}</span>
+                                <li key={item.label}>
+                                    {item.to ? (
+                                        <Link to={item.to} className="text-[15px] text-slate-400 hover:text-white transition-colors">
+                                            {item.label}
+                                        </Link>
+                                    ) : (
+                                        <span className="text-[15px] text-slate-400 cursor-default">{item.label}</span>
+                                    )}
                                 </li>
                             ))}
                         </ul>
