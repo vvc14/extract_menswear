@@ -32,12 +32,12 @@ export default function Wishlist() {
     if (items.length === 0) {
         return (
             <main id="main-content" className="page-wrap py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
-                    <div className="w-28 h-28 mb-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-8 lg:gap-10">
+                    <div className="w-28 h-28 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
                         <HiOutlineHeart className="w-12 h-12 text-slate-400" />
                     </div>
-                    <h2 className="text-[30px] font-extrabold text-slate-900 dark:text-white mb-5">Your wishlist is empty</h2>
-                    <p className="text-[16px] text-slate-500 dark:text-slate-400 mb-12 max-w-md text-center leading-[1.7]">
+                    <h2 className="text-[30px] font-extrabold text-slate-900 dark:text-white">Your wishlist is empty</h2>
+                    <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-md text-center leading-[1.7]">
                         Save the items you love by tapping the heart icon. They'll appear here so you can easily find them later.
                     </p>
                     <Link to="/shirts" className="btn-primary">
