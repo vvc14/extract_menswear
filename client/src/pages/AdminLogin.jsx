@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { loginSuccess } from "../redux/authSlice";
 import API from "../services/api";
@@ -14,6 +14,14 @@ export default function AdminLogin() {
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const admin = useSelector((s) => s.auth.admin);
+    const user = useSelector((s) => s.auth.user);
+
+    useEffect(() => {
+        if (admin || user?.role === "admin") {
+            navigate("/admin/dashboard");
+        }
+    }, [admin, user, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

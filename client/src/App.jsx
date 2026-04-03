@@ -24,7 +24,8 @@ import AdminUsers from "./pages/AdminUsers";
 function ProtectedRoute({ children }) {
   const token = useSelector((s) => s.auth.token);
   const admin = useSelector((s) => s.auth.admin);
-  return token && admin ? children : <Navigate to="/admin/login" replace />;
+  const user = useSelector((s) => s.auth.user);
+  return token && (admin || user?.role === "admin") ? children : <Navigate to="/admin/login" replace />;
 }
 
 function AppRoutes() {
