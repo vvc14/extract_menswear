@@ -1,4 +1,5 @@
 import Contact from "../models/Contact.js";
+import nodemailer from "nodemailer";
 
 export const submitContact = async (req, res) => {
     try {
@@ -8,8 +9,32 @@ export const submitContact = async (req, res) => {
         }
 
         const contact = await Contact.create({ name, email, message });
+
+        // Send email using nodemailer
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+            const transporter = nodemailer.createTransport({
+                service: "gmail",
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS,
+                },
+            });
+
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: "janassistai@gmail.com",
+                subject: `New Contact Request from ${name}`,
+                text: `You have received a new message from your website contact form.\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
+            };
+
+            await transporter.sendMail(mailOptions);
+        } else {
+            console.warn("EMAIL_USER and EMAIL_PASS are not set in .env. Email was not sent.");
+        }
+
         res.status(201).json({ message: "Message sent successfully", id: contact._id });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Error submitting contact:", error);
+        res.status(500).json({ message: "Failed to process request. Please check email configuration." });
     }
 };
