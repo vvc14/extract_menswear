@@ -55,21 +55,27 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
 body {
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   color: var(--color-slate-900);
   background-color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.65;
+  line-height: 1.6;
   font-size: 16px;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ─── Dark Mode Body ─── */
-html.dark body {
-  color: #e2e8f0;
-  background-color: #0a0f1a;
+::selection {
+  background-color: var(--color-primary);
+  color: white;
 }
 
 :focus-visible {

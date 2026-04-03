@@ -72,15 +72,12 @@ export default function Home() {
                     <div className="absolute inset-0" style={{ background: "linear-gradient(100deg,rgba(15,23,42,0.93) 0%,rgba(15,23,42,0.65) 55%,rgba(15,23,42,0.25) 100%)" }} />
                 </div>
 
-                {/* Floating info card – desktop only */}
-                <div className="hidden xl:block absolute right-16 top-1/2 -translate-y-1/2">
-                    <div className="w-[300px] rounded-2xl p-8 border"
-                        style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(14px)", borderColor: "rgba(255,255,255,0.1)" }}>
-                        <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4" style={{ color: "#c9a84c" }}>This Season</p>
-                        <p className="text-white text-[26px] font-extrabold leading-tight mb-3">Premium Fabrics</p>
-                        <p className="text-[14px] leading-relaxed mb-7" style={{ color: "rgba(255,255,255,0.55)" }}>
-                            Linen · Oxford · Twill · Satin — each handpicked for comfort & lasting style.
-                        </p>
+                {/* Right side — decorative glass element */}
+                <div className="hidden lg:block absolute right-12 xl:right-24 top-1/2 -translate-y-1/2">
+                    <div className="w-[280px] xl:w-[320px] bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8">
+                        <p className="text-white/40 text-[11px] font-semibold tracking-[0.2em] uppercase mb-4">This Season</p>
+                        <p className="text-white text-[28px] xl:text-[32px] font-extrabold leading-tight mb-2">Premium Fabrics</p>
+                        <p className="text-white/60 text-[14px] leading-relaxed mb-6">Linen · Oxford · Twill · Satin — handpicked for comfort & style.</p>
                         <div className="flex gap-3">
                             {[
                                 { bg: "rgba(201,168,76,0.15)", icon: "🧵" },
@@ -96,8 +93,8 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* Hero content */}
-                <div className="relative w-full page-wrap py-32 sm:py-40">
+                {/* Hero content — generous left padding */}
+                <div className="relative w-full max-w-7xl mx-auto px-8 sm:px-12 lg:px-20 xl:px-24 py-20 sm:py-24 md:py-28">
                     <motion.div
                         initial={{ opacity: 0, y: 32 }}
                         animate={{ opacity: 1, y: 0 }}

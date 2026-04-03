@@ -6,9 +6,12 @@ const API = axios.create({
 
 API.interceptors.request.use((config) => {
     try {
-        const auth = JSON.parse(localStorage.getItem("extractAuth"));
-        if (auth?.token) {
-            config.headers.Authorization = `Bearer ${auth.token}`;
+        // Check admin session first (sessionStorage), then user session (localStorage)
+        const adminAuth = JSON.parse(sessionStorage.getItem("extractAdminAuth"));
+        const userAuth = JSON.parse(localStorage.getItem("extractAuth"));
+        const token = adminAuth?.token || userAuth?.token;
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
     } catch { }
     return config;
