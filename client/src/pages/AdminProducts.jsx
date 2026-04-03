@@ -38,6 +38,20 @@ export default function AdminProducts() {
         setShowForm(true);
     };
 
+    const handleFormChange = (key, value) => {
+        let updated = { ...form, [key]: value };
+        if (key === "price" || key === "originalPrice") {
+            const p = Number(updated.price) || 0;
+            const op = Number(updated.originalPrice) || 0;
+            if (op > p && p > 0) {
+                updated.discount = Math.round(((op - p) / op) * 100);
+            } else {
+                updated.discount = 0;
+            }
+        }
+        setForm(updated);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -136,27 +150,38 @@ export default function AdminProducts() {
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Fabric</label>
-                                    <input type="text" value={form.fabric} onChange={(e) => setForm({ ...form, fabric: e.target.value })} placeholder="Linen, Oxford" className={inputClass} />
+                                    <select value={form.fabric} onChange={(e) => handleFormChange("fabric", e.target.value)} className={inputClass + " bg-white"}>
+                                        <option value="">Select Fabric</option>
+                                        <option value="Linen">Linen</option>
+                                        <option value="Oxford">Oxford</option>
+                                        <option value="Twill">Twill</option>
+                                        <option value="Satin">Satin</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Style / Type</label>
-                                    <input type="text" value={form.style} onChange={(e) => setForm({ ...form, style: e.target.value })} placeholder="Plain, Formal" className={inputClass} />
+                                    <select value={form.style} onChange={(e) => handleFormChange("style", e.target.value)} className={inputClass + " bg-white"}>
+                                        <option value="">Select Style</option>
+                                        <option value="Plain">Plain</option>
+                                        <option value="Checks">Checks</option>
+                                        <option value="Print">Print</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Price (₹)</label>
-                                    <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required placeholder="2499" className={inputClass} />
+                                    <input type="number" value={form.price} onChange={(e) => handleFormChange("price", e.target.value)} required placeholder="2499" className={inputClass} />
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stock</label>
-                                    <input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="50" className={inputClass} />
+                                    <input type="number" value={form.stock} onChange={(e) => handleFormChange("stock", e.target.value)} placeholder="50" className={inputClass} />
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Original Price / MRP (₹)</label>
-                                    <input type="number" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} placeholder="3999" className={inputClass} />
+                                    <input type="number" value={form.originalPrice} onChange={(e) => handleFormChange("originalPrice", e.target.value)} placeholder="3999" className={inputClass} />
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Discount (%)</label>
-                                    <input type="number" min="0" max="100" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value })} placeholder="30" className={inputClass} />
+                                    <input type="number" readOnly value={form.discount} placeholder="Auto-calculated" className={inputClass + " bg-slate-50 text-slate-500 cursor-not-allowed"} />
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Image URL</label>
