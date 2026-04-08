@@ -34,8 +34,8 @@ const buildEmailHtml = (order) => {
         </div>
         <div style="padding:32px">
             <div style="text-align:center;margin-bottom:28px">
-                <div style="width:56px;height:56px;background:#ecfdf5;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px">
-                    <span style="font-size:28px">✓</span>
+                <div style="width:56px;height:56px;background:#ecfdf5;border-radius:50%;display:inline-block;text-align:center;line-height:56px;margin-bottom:12px">
+                    <span style="font-size:28px;color:#10b981">✓</span>
                 </div>
                 <h2 style="margin:0;font-size:22px;font-weight:700;color:#0f172a">Payment Successful!</h2>
                 <p style="margin:6px 0 0;font-size:14px;color:#64748b">Thank you for your purchase, ${order.userName || "Customer"}</p>
