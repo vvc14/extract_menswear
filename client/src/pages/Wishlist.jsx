@@ -2,7 +2,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeFromWishlist, clearWishlist } from "../redux/wishlistSlice";
 import { addToCart } from "../redux/cartSlice";
 import { Link } from "react-router-dom";
-import { HiOutlineHeart, HiOutlineTrash, HiOutlineShoppingCart, HiStar } from "react-icons/hi";
+import { HiOutlineHeart, HiOutlineTrash, HiOutlineShoppingCart, HiStar, HiOutlineArrowLeft } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
@@ -52,7 +52,11 @@ export default function Wishlist() {
         <main id="main-content" className="page-wrap py-10 sm:py-16">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 {/* Breadcrumb */}
-                <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }}>
+                <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }} className="flex items-center gap-4">
+                    <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                        <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                    </button>
+                    <span className="text-slate-300 dark:text-slate-600">|</span>
                     <ol className="flex items-center gap-2 text-[15px]">
                         <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
                         <li className="text-slate-300 dark:text-slate-600">/</li>
@@ -105,7 +109,7 @@ export default function Wishlist() {
                                         {/* Image */}
                                         <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900" style={{ aspectRatio: "3/4" }}>
                                             <img
-                                                src={item.imageUrl}
+                                                src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl}
                                                 alt={item.name}
                                                 loading="lazy"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"

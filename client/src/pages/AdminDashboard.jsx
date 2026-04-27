@@ -88,7 +88,7 @@ export default function AdminDashboard() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-11 h-14 bg-slate-100 rounded-lg overflow-hidden shrink-0">
-                                                    <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                                                    <img src={p.images && p.images.length > 0 ? p.images[0] : p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                                                 </div>
                                                 <span className="font-semibold text-slate-900 text-[16px]">{p.name}</span>
                                             </div>

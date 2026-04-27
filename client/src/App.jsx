@@ -26,6 +26,10 @@ import AdminUsers from "./pages/AdminUsers";
 import Wishlist from "./pages/Wishlist";
 import SizeGuide from "./pages/SizeGuide";
 import Orders from "./pages/Orders";
+import ShippingInfo from "./pages/ShippingInfo";
+import ReturnsExchange from "./pages/ReturnsExchange";
+import FAQ from "./pages/FAQ";
+import { ThemeProvider } from "./context/ThemeContext";
 import { preloadRazorpay } from "./services/razorpay";
 
 function ProtectedRoute({ children }) {
@@ -57,6 +61,9 @@ function AppRoutes() {
         <Route path="wishlist" element={<Wishlist />} />
         <Route path="size-guide" element={<SizeGuide />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="shipping" element={<ShippingInfo />} />
+        <Route path="returns" element={<ReturnsExchange />} />
+        <Route path="faq" element={<FAQ />} />
       </Route>
 
 
@@ -78,8 +85,6 @@ function AppRoutes() {
     </>
   );
 }
-
-import { ThemeProvider } from "./context/ThemeContext";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 

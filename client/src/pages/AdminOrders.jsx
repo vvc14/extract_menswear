@@ -197,7 +197,7 @@ export default function AdminOrders() {
                                                         {order.items.map((item, i) => (
                                                             <div key={i} className="flex items-center gap-3">
                                                                 <div className="w-9 h-11 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200/50">
-                                                                    {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> : <HiOutlineShoppingCart className="w-4 h-4 text-slate-300 m-auto mt-3" />}
+                                                                    {item.imageUrl ? <img src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> : <HiOutlineShoppingCart className="w-4 h-4 text-slate-300 m-auto mt-3" />}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
                                                                     <p className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</p>

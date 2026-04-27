@@ -5,9 +5,11 @@ const cartItemSchema = new mongoose.Schema({
     name: { type: String, required: true },
     price: { type: Number, required: true },
     imageUrl: { type: String },
+    images: { type: [String], default: [] },
     category: { type: String },
     fabric: { type: String },
     style: { type: String },
+    shippingCost: { type: Number, default: 0 },
     quantity: { type: Number, required: true, default: 1, min: 1 },
 });
 

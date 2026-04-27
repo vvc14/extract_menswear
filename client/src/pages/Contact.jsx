@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import API from "../services/api";
-import { HiOutlineMail, HiOutlineClock, HiOutlineChat } from "react-icons/hi";
+import { HiOutlineMail, HiOutlineClock, HiOutlineChat, HiOutlineArrowLeft } from "react-icons/hi";
 
 const INFO = [
     {
@@ -30,9 +30,17 @@ export default function Contact() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
+    const emailPattern = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,}$/;
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+
+        if (!emailPattern.test(formData.email)) {
+            setError("Please enter a valid email address (e.g., john@example.com)");
+            return;
+        }
+
         setLoading(true);
         try {
             await API.post("/contact", formData);
@@ -47,6 +55,14 @@ export default function Contact() {
 
     return (
         <main id="main-content">
+            {/* Back bar */}
+            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
+                <div className="page-wrap py-4">
+                    <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                    </button>
+                </div>
+            </div>
 
             {/* ── Hero ── */}
             <section style={{ background: "#1a2744" }} className="py-20 sm:py-24">
@@ -138,6 +154,8 @@ export default function Contact() {
                                         </label>
                                         <input
                                             id="email" type="email" placeholder="john@example.com" required
+                                            pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+                                            title="Please enter a valid email (e.g., john@example.com)"
                                             value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
                                             className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none"
                                             onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}

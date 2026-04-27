@@ -4,12 +4,12 @@ import { buildQueryString } from "../utils/filterLogic";
 import ProductCard from "../components/ProductCard";
 import FilterSidebar from "../components/FilterSidebar";
 import { Link } from "react-router-dom";
-import { HiOutlineAdjustments, HiOutlineArrowRight, HiOutlineSortDescending } from "react-icons/hi";
+import { HiOutlineAdjustments, HiOutlineArrowRight, HiOutlineSortDescending, HiOutlineArrowLeft } from "react-icons/hi";
 
 export default function Shirts() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filters, setFilters] = useState({ fabric: [], style: [], minPrice: 0, maxPrice: 10000 });
+    const [filters, setFilters] = useState({ fabric: [], style: [], size: [], minPrice: 0, maxPrice: 10000 });
     const [sortBy, setSortBy] = useState("newest");
     const [showMobileFilter, setShowMobileFilter] = useState(false);
 
@@ -39,7 +39,11 @@ export default function Shirts() {
                     <div className="absolute inset-0" style={{ background: "linear-gradient(100deg,rgba(26,39,68,0.98) 30%,rgba(26,39,68,0.7) 100%)" }} />
                 </div>
                 <div className="relative page-wrap py-16 sm:py-24">
-                    <nav aria-label="Breadcrumb" className="mb-6">
+                    <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-4">
+                        <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-400 hover:text-white transition-colors shrink-0">
+                            <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                        </button>
+                        <span className="text-slate-700">|</span>
                         <ol className="flex items-center gap-2 text-[13px]">
                             <li><Link to="/" className="text-slate-500 hover:text-slate-300 transition-colors">Home</Link></li>
                             <li className="text-slate-700">/</li>

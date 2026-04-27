@@ -31,8 +31,9 @@ function FilterSection({ title, defaultOpen = false, children }) {
 export default function FilterSidebar({ category, onFilterChange }) {
     const [selectedFabrics, setSelectedFabrics] = useState([]);
     const [selectedStyles, setSelectedStyles] = useState([]);
+    const [selectedSizes, setSelectedSizes] = useState([]);
     const [priceRange, setPriceRange] = useState([0, 10000]);
-    const [catOptions, setCatOptions] = useState({ fabrics: [], styles: [] });
+    const [catOptions, setCatOptions] = useState({ fabrics: [], styles: [], sizes: [] });
 
     useEffect(() => {
         API.get("/products/category-options").then(({ data }) => {
@@ -42,6 +43,7 @@ export default function FilterSidebar({ category, onFilterChange }) {
 
     const filterOptions = catOptions.fabrics;
     const styleOptions = catOptions.styles;
+    const sizeOptions = catOptions.sizes || [];
 
     const toggleItem = (list, setList, item) => {
         const updated = list.includes(item) ? list.filter((i) => i !== item) : [...list, item];
@@ -49,20 +51,22 @@ export default function FilterSidebar({ category, onFilterChange }) {
         emitFilters(
             list === selectedFabrics ? updated : selectedFabrics,
             list === selectedStyles ? updated : selectedStyles,
+            list === selectedSizes ? updated : selectedSizes,
             priceRange
         );
     };
 
     const handlePriceChange = (value) => {
-        const updated = [0, Number(value)];
+        const updated = [0, Math.max(0, Number(value))];
         setPriceRange(updated);
-        emitFilters(selectedFabrics, selectedStyles, updated);
+        emitFilters(selectedFabrics, selectedStyles, selectedSizes, updated);
     };
 
-    const emitFilters = (fabrics, styles, price) => {
+    const emitFilters = (fabrics, styles, sizes, price) => {
         onFilterChange({
             fabric: fabrics,
             style: styles,
+            size: sizes,
             minPrice: price[0],
             maxPrice: price[1],
         });
@@ -71,13 +75,14 @@ export default function FilterSidebar({ category, onFilterChange }) {
     const clearAll = () => {
         setSelectedFabrics([]);
         setSelectedStyles([]);
+        setSelectedSizes([]);
         setPriceRange([0, 10000]);
-        onFilterChange({ fabric: [], style: [], minPrice: 0, maxPrice: 10000 });
+        onFilterChange({ fabric: [], style: [], size: [], minPrice: 0, maxPrice: 10000 });
     };
 
     const styleLabel = category === "shirt" ? "Style" : "Type";
-    const hasActiveFilters = selectedFabrics.length > 0 || selectedStyles.length > 0 || priceRange[1] < 10000;
-    const activeCount = selectedFabrics.length + selectedStyles.length + (priceRange[1] < 10000 ? 1 : 0);
+    const hasActiveFilters = selectedFabrics.length > 0 || selectedStyles.length > 0 || selectedSizes.length > 0 || priceRange[1] < 10000;
+    const activeCount = selectedFabrics.length + selectedStyles.length + selectedSizes.length + (priceRange[1] < 10000 ? 1 : 0);
 
     return (
         <aside className="w-full lg:w-[250px] shrink-0" aria-label="Product filters">
@@ -147,6 +152,26 @@ export default function FilterSidebar({ category, onFilterChange }) {
                             ))}
                         </div>
                     </FilterSection>
+
+                    {sizeOptions.length > 0 && (
+                        <FilterSection title="Size" defaultOpen={true}>
+                            <div className="flex flex-wrap gap-2">
+                                {sizeOptions.map((size) => (
+                                    <button
+                                        key={size}
+                                        onClick={() => toggleItem(selectedSizes, setSelectedSizes, size)}
+                                        className={`min-w-[44px] h-[38px] px-3 rounded-xl text-[14px] font-bold border-2 transition-all duration-200 cursor-pointer ${
+                                            selectedSizes.includes(size)
+                                                ? "bg-primary dark:bg-gold text-white border-primary dark:border-gold shadow-sm shadow-primary/20 dark:shadow-gold/20 scale-105"
+                                                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-primary/40 dark:hover:border-gold/40 hover:text-slate-900 dark:hover:text-white"
+                                        }`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                        </FilterSection>
+                    )}
 
                     <FilterSection title="Price" defaultOpen={false}>
                         <div>

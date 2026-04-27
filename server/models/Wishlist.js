@@ -5,6 +5,7 @@ const wishlistItemSchema = new mongoose.Schema({
     name: { type: String, required: true },
     price: { type: Number, required: true },
     imageUrl: { type: String },
+    images: { type: [String], default: [] },
     category: { type: String },
     fabric: { type: String },
     style: { type: String },

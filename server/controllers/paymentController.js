@@ -127,12 +127,15 @@ export const verifyPayment = async (req, res) => {
                 .filter((item) => item.productId)
                 .map((item) => ({
                     updateOne: {
-                        filter: { _id: item.productId },
+                        filter: { _id: item.productId, stock: { $gte: item.quantity } },
                         update: { $inc: { stock: -item.quantity } },
                     },
                 }));
             if (bulkOps.length) {
-                Product.bulkWrite(bulkOps).catch((err) => console.error("Stock update error:", err));
+                const result = await Product.bulkWrite(bulkOps);
+                if (result.modifiedCount !== bulkOps.length) {
+                    console.warn(`Stock update: ${result.modifiedCount}/${bulkOps.length} items had sufficient stock`);
+                }
             }
         }
 

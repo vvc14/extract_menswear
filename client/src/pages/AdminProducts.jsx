@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSearch, HiOutlinePhotograph, HiOutlineCollection, HiOutlineTruck, HiOutlineCog } from "react-icons/hi";
 
-const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", image: null, imageUrl: "" };
+const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", selectedSizes: [], existingImages: [] };
 
 export default function AdminProducts() {
     const [products, setProducts] = useState([]);
@@ -16,10 +16,19 @@ export default function AdminProducts() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkShipping, setBulkShipping] = useState("");
     const [bulkUpdating, setBulkUpdating] = useState(false);
-    const [catOptions, setCatOptions] = useState({ shirt: { fabrics: [], styles: [] }, trouser: { fabrics: [], styles: [] } });
+    const [catOptions, setCatOptions] = useState({ shirt: { fabrics: [], styles: [], sizes: [] }, trouser: { fabrics: [], styles: [], sizes: [] } });
     const [newFabric, setNewFabric] = useState("");
     const [newStyle, setNewStyle] = useState("");
+    const [newSize, setNewSize] = useState("");
     const [showManage, setShowManage] = useState(false);
+    const objectUrlsRef = useRef([]);
+
+    // Revoke old object URLs when images change to prevent memory leaks
+    useEffect(() => {
+        objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+        objectUrlsRef.current = Array.from(form.images || []).map((file) => URL.createObjectURL(file));
+        return () => objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    }, [form.images]);
 
     const fetchProducts = async () => {
         try {
@@ -50,7 +59,7 @@ export default function AdminProducts() {
     const openAdd = () => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
     const openEdit = (p) => {
         setEditing(p._id);
-        setForm({ name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price, originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "", stock: p.stock || 0, image: null, imageUrl: p.imageUrl || "" });
+        setForm({ name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price, originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "", stock: p.stock || 0, images: [], imageUrl: p.imageUrl || "", selectedSizes: p.sizes || [], existingImages: p.images || [p.imageUrl].filter(Boolean) });
         setShowForm(true);
     };
 
@@ -81,8 +90,19 @@ export default function AdminProducts() {
         formData.append("discount", form.discount || 0);
         formData.append("shippingCost", form.shippingCost || 0);
         formData.append("stock", form.stock);
-        if (form.image) formData.append("image", form.image);
-        else if (form.imageUrl) formData.append("imageUrl", form.imageUrl);
+        formData.append("sizes", JSON.stringify(form.selectedSizes || []));
+        // Multiple images upload
+        if (form.images && form.images.length > 0) {
+            for (let i = 0; i < form.images.length; i++) {
+                formData.append("images", form.images[i]);
+            }
+        }
+        // Send existing images as JSON so server can preserve/combine them
+        if (form.existingImages && form.existingImages.length > 0) {
+            formData.append("existingImages", JSON.stringify(form.existingImages));
+        } else if (form.imageUrl && (!form.images || form.images.length === 0)) {
+            formData.append("imageUrl", form.imageUrl);
+        }
 
         try {
             if (editing) {
@@ -210,15 +230,15 @@ export default function AdminProducts() {
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Price (₹)</label>
-                                    <input type="text" inputMode="numeric" value={form.price} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) handleFormChange("price", v); }} required placeholder="2499" className={inputClass} />
+                                    <input type="number" min="0" value={form.price} onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) handleFormChange("price", v); }} required placeholder="2499" className={inputClass} />
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stock</label>
-                                    <input type="text" inputMode="numeric" value={form.stock} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) handleFormChange("stock", v); }} placeholder="50" className={inputClass} />
+                                    <input type="number" min="0" value={form.stock} onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) handleFormChange("stock", v); }} placeholder="50" className={inputClass} />
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Original Price / MRP (₹)</label>
-                                    <input type="text" inputMode="numeric" value={form.originalPrice} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) handleFormChange("originalPrice", v); }} placeholder="3999" className={inputClass} />
+                                    <input type="number" min="0" value={form.originalPrice} onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) handleFormChange("originalPrice", v); }} placeholder="3999" className={inputClass} />
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Discount (%)</label>
@@ -226,19 +246,78 @@ export default function AdminProducts() {
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Shipping Cost (₹)</label>
-                                    <input type="text" inputMode="numeric" value={form.shippingCost} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) handleFormChange("shippingCost", v); }} placeholder="0 or 99" className={inputClass} />
+                                    <input type="number" min="0" value={form.shippingCost} onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) handleFormChange("shippingCost", v); }} placeholder="0 or 99" className={inputClass} />
                                 </div>
-                                <div>
-                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Image URL</label>
-                                    <input type="url" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." className={inputClass} />
+                                <div className="md:col-span-2">
+                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Sizes</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(catOptions[form.category]?.sizes || []).map((s) => (
+                                            <button
+                                                key={s}
+                                                type="button"
+                                                onClick={() => {
+                                                    const current = form.selectedSizes || [];
+                                                    const updated = current.includes(s) ? current.filter((x) => x !== s) : [...current, s];
+                                                    setForm({ ...form, selectedSizes: updated });
+                                                }}
+                                                className={`min-w-[44px] h-[38px] px-3 rounded-xl text-[14px] font-bold border-2 transition-all duration-200 cursor-pointer ${
+                                                    (form.selectedSizes || []).includes(s)
+                                                        ? "bg-primary text-white border-primary shadow-sm shadow-primary/20 scale-105"
+                                                        : "bg-white text-slate-600 border-slate-200 hover:border-primary/40 hover:text-slate-900"
+                                                }`}
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
+                                        {(catOptions[form.category]?.sizes || []).length === 0 && (
+                                            <p className="text-[14px] text-slate-400 italic">No sizes configured. Add them in Manage Options below.</p>
+                                        )}
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Or Upload</label>
-                                    <label className="flex items-center gap-3 border-2 border-dashed border-slate-200 rounded-xl px-4 py-3.5 cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all">
-                                        <HiOutlinePhotograph className="w-6 h-6 text-slate-400" />
-                                        <span className="text-[15px] text-slate-500 font-medium">{form.image ? form.image.name : "Choose file..."}</span>
-                                        <input type="file" accept="image/*" onChange={(e) => setForm({ ...form, image: e.target.files[0] })} className="hidden" />
-                                    </label>
+                                <div className="md:col-span-2">
+                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Images (up to 5)</label>
+                                    {/* Existing images preview */}
+                                    {form.existingImages && form.existingImages.length > 0 && (
+                                        <div className="flex flex-wrap gap-3 mb-3">
+                                            {form.existingImages.map((url, idx) => (
+                                                <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200 group">
+                                                    <img src={url} alt={`Existing ${idx + 1}`} className="w-full h-full object-cover" />
+                                                    <button type="button" onClick={() => {
+                                                        const updated = form.existingImages.filter((_, i) => i !== idx);
+                                                        setForm({ ...form, existingImages: updated });
+                                                    }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-rose-500 text-white rounded-full text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {/* New files preview */}
+                                    {form.images && form.images.length > 0 && (
+                                        <div className="flex flex-wrap gap-3 mb-3">
+                                            {objectUrlsRef.current.map((url, idx) => (
+                                                <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200 group">
+                                                    <img src={url} alt={`New ${idx + 1}`} className="w-full h-full object-cover" />
+                                                    <button type="button" onClick={() => {
+                                                        const updated = Array.from(form.images).filter((_, i) => i !== idx);
+                                                        setForm({ ...form, images: updated });
+                                                    }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-rose-500 text-white rounded-full text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="flex gap-3">
+                                        <label className="flex items-center gap-3 border-2 border-dashed border-slate-200 rounded-xl px-4 py-3.5 cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all flex-1">
+                                            <HiOutlinePhotograph className="w-6 h-6 text-slate-400" />
+                                            <span className="text-[15px] text-slate-500 font-medium">{form.images && form.images.length > 0 ? `${form.images.length} file(s) selected` : "Choose files..."}</span>
+                                            <input type="file" accept="image/*" multiple onChange={(e) => {
+                                                const currentFiles = Array.from(form.images || []);
+                                                const newFiles = Array.from(e.target.files);
+                                                const combined = [...currentFiles, ...newFiles].slice(0, 5);
+                                                setForm({ ...form, images: combined });
+                                            }} className="hidden" />
+                                        </label>
+                                    </div>
+                                    <p className="text-[12px] text-slate-400 mt-2">Or enter image URL below (first URL will be the main image)</p>
+                                    <input type="url" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." className={inputClass + " mt-2"} />
                                 </div>
                                 <div className="md:col-span-2 flex items-center gap-3 pt-3">
                                     <button type="submit" disabled={submitting}
@@ -259,7 +338,7 @@ export default function AdminProducts() {
             <div style={{ marginBottom: "40px" }}>
                 <button onClick={() => setShowManage(!showManage)} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: 700, color: "#64748b", background: "none", border: "none", cursor: "pointer", marginBottom: "16px", padding: 0 }}>
                     <HiOutlineCog className="w-4 h-4" />
-                    {showManage ? "Hide" : "Manage"} Fabric & Style Options
+                    {showManage ? "Hide" : "Manage"} Fabric, Style & Size Options
                 </button>
                 <AnimatePresence>
                     {showManage && (
@@ -322,6 +401,33 @@ export default function AdminProducts() {
                                                 }} style={{ background: "#0f172a", color: "#fff", fontSize: "15px", fontWeight: 700, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer" }}>Add</button>
                                             </div>
                                         </div>
+
+                                        {/* Sizes */}
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                            <p style={{ fontSize: "13px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>Sizes</p>
+                                            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                                                {(catOptions[cat]?.sizes || []).map((sz) => (
+                                                    <span key={sz} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#f1f5f9", color: "#334155", fontSize: "14px", fontWeight: 500, padding: "8px 16px", borderRadius: "12px" }}>
+                                                        {sz}
+                                                        <button onClick={async () => {
+                                                            const updated = (catOptions[cat]?.sizes || []).filter((x) => x !== sz);
+                                                            await API.put("/admin/category-options", { category: cat, sizes: updated });
+                                                            fetchCatOptions();
+                                                        }} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "16px", padding: "0 2px", lineHeight: 1 }}>×</button>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
+                                                <input type="text" placeholder="New size..." value={cat === form.category ? newSize : ""} onChange={(e) => { setForm(f => ({...f, category: cat})); setNewSize(e.target.value); }} style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px 16px", fontSize: "15px", borderRadius: "12px", outline: "none" }} />
+                                                <button onClick={async () => {
+                                                    if (!newSize.trim()) return;
+                                                    const updated = [...(catOptions[cat]?.sizes || []), newSize.trim()];
+                                                    await API.put("/admin/category-options", { category: cat, sizes: updated });
+                                                    setNewSize("");
+                                                    fetchCatOptions();
+                                                }} style={{ background: "#0f172a", color: "#fff", fontSize: "15px", fontWeight: 700, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer" }}>Add</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -357,7 +463,7 @@ export default function AdminProducts() {
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-11 h-14 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200/50">
-                                            <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                                            <img src={p.images && p.images.length > 0 ? p.images[0] : p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                                         </div>
                                         <div className="min-w-0">
                                             <p className="font-semibold text-slate-900 text-[16px] truncate">{p.name}</p>
@@ -425,8 +531,9 @@ export default function AdminProducts() {
                             <HiOutlineTruck className="w-5 h-5 text-slate-400 shrink-0" />
                             <input
                                 type="number"
+                                min="0"
                                 value={bulkShipping}
-                                onChange={(e) => setBulkShipping(e.target.value)}
+                                onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) setBulkShipping(v); }}
                                 placeholder="₹ shipping"
                                 className="bg-slate-800 border border-slate-700 text-white text-[15px] font-bold px-3 py-2 rounded-xl w-28 focus:outline-none focus:ring-2 focus:ring-primary/40 placeholder:text-slate-500"
                             />

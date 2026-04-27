@@ -5,7 +5,7 @@ import { addToCart } from "../redux/cartSlice";
 import { toggleWishlist } from "../redux/wishlistSlice";
 import API from "../services/api";
 import { motion } from "framer-motion";
-import { HiOutlineShoppingCart, HiStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart } from "react-icons/hi";
+import { HiOutlineShoppingCart, HiStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart, HiOutlineArrowLeft, HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -17,9 +17,12 @@ export default function ProductDetail() {
     const [loading, setLoading] = useState(true);
     const [added, setAdded] = useState(false);
     const [qty, setQty] = useState(1);
+    const [activeImg, setActiveImg] = useState(0);
     const isWishlisted = wishlistItems.some((i) => i._id === product?._id);
 
     useEffect(() => {
+        setActiveImg(0);
+        setQty(1);
         const fetchProduct = async () => {
             try {
                 const { data } = await API.get(`/products/${id}`);
@@ -74,7 +77,11 @@ export default function ProductDetail() {
             {/* Breadcrumb bar */}
             <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
-                    <nav aria-label="Breadcrumb">
+                    <nav aria-label="Breadcrumb" className="flex items-center gap-4">
+                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                            <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                        </button>
+                        <span className="text-slate-300 dark:text-slate-600">|</span>
                         <ol className="flex items-center gap-2 text-[15px]">
                             <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
                             <li className="text-slate-300 dark:text-slate-600">/</li>
@@ -93,12 +100,39 @@ export default function ProductDetail() {
                     transition={{ duration: 0.3 }}
                     style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px" }}
                 >
-                    {/* Image */}
+                    {/* Image Gallery */}
                     <div className="relative group">
-                        <div className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                        </div>
-                        <div className="absolute top-4 left-4 flex gap-2">
+                        {(() => {
+                            const allImages = product.images && product.images.length > 0 ? product.images : [product.imageUrl];
+                            const currentImg = allImages[activeImg] || allImages[0];
+                            return (
+                                <>
+                                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 relative">
+                                        <img src={currentImg} alt={`${product.name} - Image ${activeImg + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                        {allImages.length > 1 && (
+                                            <>
+                                                <button onClick={() => setActiveImg((prev) => (prev - 1 + allImages.length) % allImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Previous image">
+                                                    <HiOutlineChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                                                </button>
+                                                <button onClick={() => setActiveImg((prev) => (prev + 1) % allImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Next image">
+                                                    <HiOutlineChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                    {allImages.length > 1 && (
+                                        <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
+                                            {allImages.map((img, idx) => (
+                                                <button key={idx} onClick={() => setActiveImg(idx)} className={`shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${activeImg === idx ? "border-primary shadow-md" : "border-slate-200 dark:border-slate-700 hover:border-slate-400"}`}>
+                                                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                        <div className="absolute top-4 left-4 flex gap-2 z-10">
                             {discount > 0 && (
                                 <span className="text-[12px] font-extrabold text-white bg-emerald px-3 py-1.5 rounded-lg shadow-md">{discount}% OFF</span>
                             )}
@@ -174,7 +208,7 @@ export default function ProductDetail() {
                                     {qty}
                                 </span>
                                 <button
-                                    onClick={() => setQty(Math.min(product.stock, qty + 1))}
+                                    onClick={() => setQty(Math.min(Math.max(product.stock, 1), qty + 1))}
                                     className="px-6 py-4 text-[16px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                                     aria-label="Increase quantity"
                                 >+</button>

@@ -19,9 +19,11 @@ export const syncCartToDB = createAsyncThunk("cart/syncToDB", async (_, { getSta
             name: i.name,
             price: i.price,
             imageUrl: i.imageUrl,
+            images: i.images || [],
             category: i.category,
             fabric: i.fabric,
             style: i.style,
+            shippingCost: i.shippingCost || 0,
             quantity: i.quantity,
         })),
     });
@@ -67,9 +69,11 @@ const cartSlice = createSlice({
                 name: i.name,
                 price: i.price,
                 imageUrl: i.imageUrl,
+                images: i.images || [],
                 category: i.category,
                 fabric: i.fabric,
                 style: i.style,
+                shippingCost: i.shippingCost || 0,
                 quantity: i.quantity,
             }));
             state.synced = true;

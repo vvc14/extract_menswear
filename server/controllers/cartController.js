@@ -28,20 +28,20 @@ export const syncCart = async (req, res) => {
 // Add item to cart
 export const addToCart = async (req, res) => {
     try {
-        const { productId, name, price, imageUrl, category, fabric, style, quantity } = req.body;
+        const { productId, name, price, imageUrl, images, category, fabric, style, shippingCost, quantity } = req.body;
         let cart = await Cart.findOne({ userId: req.user.id });
 
         if (!cart) {
             cart = await Cart.create({
                 userId: req.user.id,
-                items: [{ productId, name, price, imageUrl, category, fabric, style, quantity: quantity || 1 }],
+                items: [{ productId, name, price, imageUrl, images: images || [], category, fabric, style, shippingCost: shippingCost || 0, quantity: quantity || 1 }],
             });
         } else {
             const existing = cart.items.find((i) => i.productId.toString() === productId);
             if (existing) {
                 existing.quantity += quantity || 1;
             } else {
-                cart.items.push({ productId, name, price, imageUrl, category, fabric, style, quantity: quantity || 1 });
+                cart.items.push({ productId, name, price, imageUrl, images: images || [], category, fabric, style, shippingCost: shippingCost || 0, quantity: quantity || 1 });
             }
             await cart.save();
         }

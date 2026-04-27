@@ -3,7 +3,7 @@ import { removeFromCart, updateQuantity, clearCart } from "../redux/cartSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { initiateRazorpayPayment } from "../services/razorpay";
 import API from "../services/api";
-import { HiOutlineTrash, HiMinus, HiPlus, HiOutlineShoppingCart, HiOutlineShieldCheck } from "react-icons/hi";
+import { HiOutlineTrash, HiMinus, HiPlus, HiOutlineShoppingCart, HiOutlineShieldCheck, HiOutlineArrowLeft } from "react-icons/hi";
 import { motion } from "framer-motion";
 
 export default function Cart() {
@@ -34,6 +34,7 @@ export default function Cart() {
                     price: i.price,
                     quantity: i.quantity,
                     imageUrl: i.imageUrl || "",
+                    images: i.images || [],
                 })),
             });
 
@@ -74,7 +75,11 @@ export default function Cart() {
         <main id="main-content" className="page-wrap py-10 sm:py-16">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 {/* Breadcrumb */}
-                <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }}>
+                <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }} className="flex items-center gap-4">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                        <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                    </button>
+                    <span className="text-slate-300 dark:text-slate-600">|</span>
                     <ol className="flex items-center gap-2 text-[15px]">
                         <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
                         <li className="text-slate-300 dark:text-slate-600">/</li>
@@ -94,7 +99,7 @@ export default function Cart() {
                                     {/* Image */}
                                     <Link to={`/product/${item._id}`} className="shrink-0">
                                         <div className="w-[90px] h-[110px] sm:w-[110px] sm:h-[140px] bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                                            <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                                            <img src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                                         </div>
                                     </Link>
 

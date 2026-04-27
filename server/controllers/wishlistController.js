@@ -28,13 +28,13 @@ export const syncWishlist = async (req, res) => {
 // Toggle item in wishlist (add if not present, remove if present)
 export const toggleWishlistItem = async (req, res) => {
     try {
-        const { productId, name, price, imageUrl, category, fabric, style, discount, originalPrice } = req.body;
+        const { productId, name, price, imageUrl, images, category, fabric, style, discount, originalPrice } = req.body;
         let wishlist = await Wishlist.findOne({ userId: req.user.id });
 
         if (!wishlist) {
             wishlist = await Wishlist.create({
                 userId: req.user.id,
-                items: [{ productId, name, price, imageUrl, category, fabric, style, discount, originalPrice }],
+                items: [{ productId, name, price, imageUrl, images: images || [], category, fabric, style, discount, originalPrice }],
             });
             return res.json({ items: wishlist.items, added: true });
         }
@@ -45,7 +45,7 @@ export const toggleWishlistItem = async (req, res) => {
             await wishlist.save();
             return res.json({ items: wishlist.items, added: false });
         } else {
-            wishlist.items.push({ productId, name, price, imageUrl, category, fabric, style, discount, originalPrice });
+            wishlist.items.push({ productId, name, price, imageUrl, images: images || [], category, fabric, style, discount, originalPrice });
             await wishlist.save();
             return res.json({ items: wishlist.items, added: true });
         }

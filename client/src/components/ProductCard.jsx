@@ -48,7 +48,7 @@ export default function ProductCard({ product }) {
                 {/* ── Image ── */}
                 <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900" style={{ aspectRatio: "3/4" }}>
                     <img
-                        src={product.imageUrl}
+                        src={product.images && product.images.length > 0 ? product.images[0] : product.imageUrl}
                         alt={product.name}
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"

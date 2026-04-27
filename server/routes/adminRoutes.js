@@ -8,9 +8,9 @@ const router = Router();
 router.use(authMiddleware);
 
 // Products
-router.post("/products", upload.single("image"), uploadToCloudinary, addProduct);
+router.post("/products", upload.array("images", 5), uploadToCloudinary, addProduct);
 router.put("/products/bulk-shipping", updateBulkShipping);
-router.put("/products/:id", upload.single("image"), uploadToCloudinary, updateProduct);
+router.put("/products/:id", upload.array("images", 5), uploadToCloudinary, updateProduct);
 router.delete("/products/:id", deleteProduct);
 
 // User management

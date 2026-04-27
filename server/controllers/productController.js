@@ -2,16 +2,17 @@ import Product from "../models/Product.js";
 
 export const getProducts = async (req, res) => {
     try {
-        const { category, fabric, style, minPrice, maxPrice, search, sort } = req.query;
+        const { category, fabric, style, size, minPrice, maxPrice, search, sort } = req.query;
         const filter = {};
 
         if (category) filter.category = category;
         if (fabric) filter.fabric = { $in: fabric.split(",") };
         if (style) filter.style = { $in: style.split(",") };
-        if (minPrice || maxPrice) {
+        if (size) filter.sizes = { $in: size.split(",") };
+        if (minPrice !== undefined || maxPrice !== undefined) {
             filter.price = {};
-            if (minPrice) filter.price.$gte = Number(minPrice);
-            if (maxPrice) filter.price.$lte = Number(maxPrice);
+            if (minPrice !== undefined) filter.price.$gte = Math.max(0, Number(minPrice));
+            if (maxPrice !== undefined) filter.price.$lte = Math.max(0, Number(maxPrice));
         }
         if (search) filter.name = { $regex: search, $options: "i" };
 
@@ -25,7 +26,10 @@ export const getProducts = async (req, res) => {
         };
         const sortOrder = sortMap[sort] || { createdAt: -1 };
 
-        const products = await Product.find(filter).sort(sortOrder);
+        const limit = parseInt(req.query.limit) || 0;
+        let query = Product.find(filter).sort(sortOrder);
+        if (limit > 0) query = query.limit(limit);
+        const products = await query;
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });

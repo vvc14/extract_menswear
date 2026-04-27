@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { HiOutlineArrowRight, HiOutlineSparkles, HiOutlineScissors, HiOutlineShieldCheck, HiOutlineTruck } from "react-icons/hi";
+import { HiOutlineArrowRight, HiOutlineSparkles, HiOutlineScissors, HiOutlineShieldCheck, HiOutlineTruck, HiOutlineArrowLeft } from "react-icons/hi";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 20 },
@@ -40,6 +40,14 @@ const STATS = [
 export default function About() {
     return (
         <main id="main-content">
+            {/* Back bar */}
+            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
+                <div className="page-wrap py-4">
+                    <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                    </button>
+                </div>
+            </div>
 
             {/* ── Hero ── */}
             <section style={{ background: "#1a2744" }} className="py-24 md:py-32">

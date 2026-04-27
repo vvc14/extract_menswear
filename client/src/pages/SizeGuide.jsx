@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { HiOutlineScale, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineScale, HiOutlineInformationCircle, HiOutlineArrowLeft } from "react-icons/hi";
 
 const SHIRT_SIZES = [
     { size: "S", chest: "36", body: "26", shoulder: "16.5", sleeve: "24" },
@@ -47,7 +47,11 @@ export default function SizeGuide() {
             {/* Breadcrumb bar */}
             <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
-                    <nav aria-label="Breadcrumb">
+                    <nav aria-label="Breadcrumb" className="flex items-center gap-4">
+                        <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                            <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                        </button>
+                        <span className="text-slate-300 dark:text-slate-600">|</span>
                         <ol className="flex items-center gap-2 text-[15px]">
                             <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
                             <li className="text-slate-300 dark:text-slate-600">/</li>
