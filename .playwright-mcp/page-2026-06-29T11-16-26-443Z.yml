@@ -1,0 +1,44 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - link "E EXTRACT Admin Panel" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e8]: E
+      - generic [ref=e9]:
+        - generic [ref=e10]: EXTRACT
+        - text: Admin Panel
+    - navigation "Admin navigation" [ref=e11]:
+      - paragraph [ref=e12]: Menu
+      - link "Dashboard" [ref=e13] [cursor=pointer]:
+        - /url: /admin/dashboard
+        - img [ref=e14]
+        - text: Dashboard
+      - link "Products" [ref=e16] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e17]
+        - text: Products
+      - link "Orders" [ref=e19] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e20]
+        - text: Orders
+        - img [ref=e22]
+      - link "Users" [ref=e24] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e25]
+        - text: Users
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e30]: E
+        - generic [ref=e31]:
+          - paragraph [ref=e32]: extractadmin
+          - paragraph [ref=e33]: Administrator
+      - link "View Storefront" [ref=e34] [cursor=pointer]:
+        - /url: /
+        - img [ref=e35]
+        - text: View Storefront
+      - button "Sign Out" [ref=e37] [cursor=pointer]:
+        - img [ref=e38]
+        - text: Sign Out
+  - generic [ref=e40]:
+    - banner [ref=e41]:
+      - heading "Orders" [level=2] [ref=e42]
+    - main [ref=e43]

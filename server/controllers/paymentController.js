@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import razorpayInstance from "../config/razorpay.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import Cart from "../models/Cart.js";
 import { generateInvoicePDFBuffer } from "../utils/pdfGenerator.js";
 
 const generateInvoiceNumber = () => {
@@ -71,10 +72,60 @@ const buildEmailHtml = (order) => {
 
 export const createOrder = async (req, res) => {
     try {
-        const { amount, items, userId, userEmail, userName, shipping } = req.body;
+        const { items, userId, userEmail, userName, shippingAddress } = req.body;
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: "No items in order" });
+        }
+
+        let computedSubtotal = 0;
+        let computedShipping = 0;
+        const verifiedItems = [];
+
+        // Look up the user's cart to find reserved stock
+        const cart = await Cart.findOne({ userId });
+        const cartQtys = {};
+        if (cart && cart.items) {
+            cart.items.forEach(item => {
+                cartQtys[item.productId.toString()] = (cartQtys[item.productId.toString()] || 0) + item.quantity;
+            });
+        }
+
+        for (const item of items) {
+            const dbProduct = await Product.findById(item.productId);
+            if (!dbProduct) {
+                return res.status(404).json({ message: `Product ${item.name || item.productId} not found` });
+            }
+
+            // Check stock availability (adding back reserved items in user's own cart)
+            const reservedInCart = cartQtys[dbProduct._id.toString()] || 0;
+            const totalAvailableStock = dbProduct.stock + reservedInCart;
+
+            if (totalAvailableStock < item.quantity) {
+                return res.status(400).json({ message: `Insufficient stock for ${dbProduct.name}. Available: ${totalAvailableStock}` });
+            }
+
+            computedSubtotal += dbProduct.price * item.quantity;
+            computedShipping += (dbProduct.shippingCost || 0) * item.quantity;
+
+            verifiedItems.push({
+                productId: dbProduct._id,
+                name: dbProduct.name,
+                price: dbProduct.price,
+                quantity: item.quantity,
+                size: item.size || "",
+                imageUrl: dbProduct.imageUrl,
+                images: dbProduct.images || [],
+            });
+        }
+
+        const totalAmount = computedSubtotal + computedShipping;
+        if (totalAmount <= 0) {
+            return res.status(400).json({ message: "Order total must be greater than zero" });
+        }
 
         const options = {
-            amount: Math.round((amount + (shipping || 0)) * 100),
+            amount: Math.round(totalAmount * 100),
             currency: "INR",
             receipt: `receipt_${Date.now()}`,
         };
@@ -86,9 +137,10 @@ export const createOrder = async (req, res) => {
             userId: userId || null,
             userEmail: userEmail || "",
             userName: userName || "",
-            items,
-            totalAmount: amount,
-            shipping: shipping || 0,
+            items: verifiedItems,
+            totalAmount: computedSubtotal,
+            shipping: computedShipping,
+            shippingAddress: shippingAddress || {},
             status: "created",
         });
 
@@ -121,22 +173,9 @@ export const verifyPayment = async (req, res) => {
             { new: true }
         );
 
-        // Decrement stock for each purchased item
-        if (order?.items?.length) {
-            const bulkOps = order.items
-                .filter((item) => item.productId)
-                .map((item) => ({
-                    updateOne: {
-                        filter: { _id: item.productId, stock: { $gte: item.quantity } },
-                        update: { $inc: { stock: -item.quantity } },
-                    },
-                }));
-            if (bulkOps.length) {
-                const result = await Product.bulkWrite(bulkOps);
-                if (result.modifiedCount !== bulkOps.length) {
-                    console.warn(`Stock update: ${result.modifiedCount}/${bulkOps.length} items had sufficient stock`);
-                }
-            }
+        // Clear user's cart immediately on payment verification success (does not release/restore stock)
+        if (order && order.userId) {
+            await Cart.updateOne({ userId: order.userId }, { $set: { items: [] } });
         }
 
         // Send confirmation email with invoice PDF asynchronously

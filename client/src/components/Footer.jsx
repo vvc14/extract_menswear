@@ -27,12 +27,12 @@ export default function Footer() {
             {/* ── Trust strip ── */}
             <div className="border-b border-slate-800">
                 <div className="page-wrap" style={{ paddingTop: "40px", paddingBottom: "48px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px" }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {TRUST.map(({ Icon, title, desc }) => (
                             <div key={title} className="flex items-start gap-4">
                                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                                     style={{ background: "rgba(201,168,76,0.12)" }}>
-                                    <Icon className="w-5 h-5" style={{ color: "#c9a84c" }} />
+                                    <Icon className="w-5 h-5" style={{ color: "var(--gold)" }} />
                                 </div>
                                 <div>
                                     <p className="text-[15px] font-bold text-white mb-0.5">{title}</p>
@@ -46,7 +46,7 @@ export default function Footer() {
 
             {/* ── Main footer columns ── */}
             <div className="page-wrap" style={{ paddingTop: "64px", paddingBottom: "80px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "56px" }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 sm:gap-8">
 
                     {/* Brand */}
                     <div>
@@ -63,7 +63,7 @@ export default function Footer() {
                                     href="#"
                                     className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-all"
                                     style={{ transition: "background 0.2s, color 0.2s" }}
-                                    onMouseEnter={e => e.currentTarget.style.background = "#c9a84c"}
+                                    onMouseEnter={e => e.currentTarget.style.background = "var(--gold)"}
                                     onMouseLeave={e => e.currentTarget.style.background = ""}
                                     aria-label={["Instagram", "Twitter", "Facebook"][i]}
                                 >
@@ -75,7 +75,7 @@ export default function Footer() {
 
                     {/* Shop */}
                     <div>
-                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500" style={{ marginBottom: "20px" }}>Shop</h4>
+                        <h3 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-400" style={{ marginBottom: "20px" }}>Shop</h3>
                         <ul className="space-y-3.5">
                             {SHOP_LINKS.map(({ to, label }) => (
                                 <li key={label}>
@@ -89,7 +89,7 @@ export default function Footer() {
 
                     {/* Company */}
                     <div>
-                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500" style={{ marginBottom: "20px" }}>Company</h4>
+                        <h3 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-400" style={{ marginBottom: "20px" }}>Company</h3>
                         <ul className="space-y-3.5">
                             {COMPANY_LINKS.map(({ to, label }) => (
                                 <li key={label}>
@@ -103,7 +103,7 @@ export default function Footer() {
 
                     {/* Help */}
                     <div>
-                        <h4 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-500" style={{ marginBottom: "20px" }}>Help</h4>
+                        <h3 className="text-[12px] font-bold tracking-[0.12em] uppercase text-slate-400" style={{ marginBottom: "20px" }}>Help</h3>
                         <ul className="space-y-3.5">
                             {HELP_ITEMS.map((item) => (
                                 <li key={item.label}>
@@ -119,8 +119,8 @@ export default function Footer() {
 
             {/* ── Bottom bar ── */}
             <div className="border-t border-slate-800">
-                <div className="page-wrap" style={{ paddingTop: "24px", paddingBottom: "24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-                    <p className="text-slate-500 text-[13px]">
+                <div className="page-wrap flex flex-col sm:flex-row items-center justify-between gap-4" style={{ paddingTop: "24px", paddingBottom: "24px" }}>
+                    <p className="text-slate-400 text-[13px]">
                         © {new Date().getFullYear()} Extract Menswear. All rights reserved.
                     </p>
                 </div>

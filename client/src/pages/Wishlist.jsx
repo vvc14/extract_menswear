@@ -1,12 +1,13 @@
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromWishlist, clearWishlist } from "../redux/wishlistSlice";
 import { addToCart } from "../redux/cartSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineHeart, HiOutlineTrash, HiOutlineShoppingCart, HiStar, HiOutlineArrowLeft } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
 export default function Wishlist() {
+    const navigate = useNavigate();
     const items = useSelector((s) => s.wishlist.items);
     const dispatch = useDispatch();
     const [addedIds, setAddedIds] = useState(new Set());
@@ -53,7 +54,7 @@ export default function Wishlist() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 {/* Breadcrumb */}
                 <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }} className="flex items-center gap-4">
-                    <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
                         <HiOutlineArrowLeft className="w-4 h-4" /> Back
                     </button>
                     <span className="text-slate-300 dark:text-slate-600">|</span>
@@ -138,7 +139,7 @@ export default function Wishlist() {
 
                                         {/* Body */}
                                         <div className="p-5 sm:p-6">
-                                            <p className="text-[11px] font-bold uppercase tracking-[0.12em] mb-2" style={{ color: "#c9a84c" }}>
+                                            <p className="text-[11px] font-bold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--gold)" }}>
                                                 {item.category === "shirt" ? "Shirt" : "Trouser"}
                                             </p>
                                             <h3 className="text-[15px] sm:text-[16px] font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-3">
@@ -150,7 +151,7 @@ export default function Wishlist() {
                                                 <div className="flex items-center gap-0.5">
                                                     {[...Array(5)].map((_, i) => (
                                                         <HiStar key={i} className={`w-3.5 h-3.5 ${i < 4 ? "" : "text-slate-200 dark:text-slate-600"}`}
-                                                            style={i < 4 ? { color: "#c9a84c" } : {}} />
+                                                            style={i < 4 ? { color: "var(--gold)" } : {}} />
                                                     ))}
                                                 </div>
                                                 <span className="text-[12px] font-semibold text-slate-400">(4.0)</span>

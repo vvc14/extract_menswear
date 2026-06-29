@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineArrowRight, HiOutlineSparkles, HiOutlineScissors, HiOutlineShieldCheck, HiOutlineTruck, HiOutlineArrowLeft } from "react-icons/hi";
 
 const fadeUp = {
@@ -38,12 +38,13 @@ const STATS = [
 ];
 
 export default function About() {
+    const navigate = useNavigate();
     return (
         <main id="main-content">
             {/* Back bar */}
             <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
-                    <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
                         <HiOutlineArrowLeft className="w-4 h-4" /> Back
                     </button>
                 </div>
@@ -59,7 +60,7 @@ export default function About() {
                         className="max-w-2xl"
                     >
                         <span className="inline-block text-[12px] font-bold tracking-[0.15em] uppercase px-4 py-1.5 rounded-full mb-8"
-                            style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
+                            style={{ background: "rgba(201,168,76,0.15)", color: "var(--gold)" }}>
                             Our Story
                         </span>
                         <h1 className="text-[34px] sm:text-[50px] font-extrabold text-white leading-tight tracking-tight mb-7">
@@ -82,7 +83,7 @@ export default function About() {
                             Our Core Values
                         </h2>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {VALUES.map(({ Icon, title, desc }, i) => (
                             <motion.div
                                 key={title}
@@ -107,7 +108,7 @@ export default function About() {
             {/* ── Story section ── */}
             <section className="bg-slate-50 dark:bg-[#0a0f1a] border-b border-slate-100 dark:border-slate-800">
                 <div className="page-wrap py-20 sm:py-28">
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -165,7 +166,7 @@ export default function About() {
                             Extract Menswear at a Glance
                         </h2>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }} className="text-center">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
                         {STATS.map((stat, i) => (
                             <motion.div
                                 key={stat.label}
@@ -176,7 +177,7 @@ export default function About() {
                                 variants={fadeUp}
                                 className="rounded-2xl border border-slate-200 dark:border-slate-700 py-10 px-6"
                             >
-                                <p className="text-[40px] sm:text-[48px] font-extrabold mb-2" style={{ color: "#1a2744" }}>
+                                <p className="text-[40px] sm:text-[48px] font-extrabold mb-2 text-primary dark:text-gold">
                                     {stat.value}
                                 </p>
                                 <p className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">

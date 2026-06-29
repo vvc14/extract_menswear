@@ -1,10 +1,15 @@
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity, clearCart } from "../redux/cartSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { initiateRazorpayPayment } from "../services/razorpay";
 import API from "../services/api";
-import { HiOutlineTrash, HiMinus, HiPlus, HiOutlineShoppingCart, HiOutlineShieldCheck, HiOutlineArrowLeft } from "react-icons/hi";
-import { motion } from "framer-motion";
+import { 
+    HiOutlineTrash, HiMinus, HiPlus, HiOutlineShoppingCart, 
+    HiOutlineShieldCheck, HiOutlineArrowLeft, HiOutlineHome, 
+    HiOutlinePhone, HiOutlineUser, HiOutlinePlus, HiOutlineCheck 
+} from "react-icons/hi";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Cart() {
     const items = useSelector((s) => s.cart.items);
@@ -16,11 +21,112 @@ export default function Cart() {
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
     const shipping = items.reduce((sum, i) => sum + (Number(i.shippingCost) || 0) * i.quantity, 0);
 
+    const [addresses, setAddresses] = useState([]);
+    const [selectedIdx, setSelectedIdx] = useState(null);
+    
+    // Inline Add Address Form state
+    const [showForm, setShowForm] = useState(false);
+    const [savingAddress, setSavingAddress] = useState(false);
+    const [addressForm, setAddressForm] = useState({
+        name: "",
+        phone: "",
+        street: "",
+        city: "",
+        state: "",
+        pincode: "",
+        country: "India",
+    });
+
+    useEffect(() => {
+        if (user) {
+            const fetchProfile = async () => {
+                try {
+                    const { data } = await API.get("/auth/profile");
+                    const userAddresses = data.addresses || [];
+                    setAddresses(userAddresses);
+                    
+                    if (userAddresses.length > 0) {
+                        const defaultIdx = userAddresses.findIndex(a => a.isDefault);
+                        setSelectedIdx(defaultIdx !== -1 ? defaultIdx : 0);
+                    } else {
+                        setShowForm(true);
+                    }
+                } catch (err) {
+                    console.error("Failed to load user profile for shipping addresses:", err);
+                    setShowForm(true);
+                }
+            };
+            fetchProfile();
+        }
+    }, [user]);
+
+    const handleAddAddress = async (e) => {
+        e.preventDefault();
+        
+        // Strict Validation
+        if (!/^\d{10}$/.test(addressForm.phone)) {
+            alert("Phone number must be exactly 10 digits.");
+            return;
+        }
+        if (!/^\d{6}$/.test(addressForm.pincode)) {
+            alert("Pincode must be exactly 6 digits and numeric only.");
+            return;
+        }
+
+        setSavingAddress(true);
+        try {
+            const isFirst = addresses.length === 0;
+            const newAddress = { ...addressForm, isDefault: isFirst };
+            const updatedAddresses = [...addresses, newAddress];
+
+            const { data } = await API.put("/auth/profile", {
+                addresses: updatedAddresses,
+            });
+
+            setAddresses(data.addresses || updatedAddresses);
+            setSelectedIdx(updatedAddresses.length - 1);
+            setShowForm(false);
+            setAddressForm({
+                name: "",
+                phone: "",
+                street: "",
+                city: "",
+                state: "",
+                pincode: "",
+                country: "India",
+            });
+        } catch (err) {
+            console.error("Failed to save shipping address:", err);
+            alert(err.response?.data?.message || "Failed to save address. Please try again.");
+        } finally {
+            setSavingAddress(false);
+        }
+    };
+
     const handleCheckout = async () => {
         if (!user) {
             navigate("/login?redirect=cart");
             return;
         }
+
+        if (selectedIdx === null || !addresses[selectedIdx]) {
+            alert("Please provide and select a delivery address before proceeding to payment.");
+            setShowForm(true);
+            return;
+        }
+
+        const selectedAddress = addresses[selectedIdx];
+
+        // Format checks on checkout to ensure data compliance
+        if (!/^\d{10}$/.test(selectedAddress.phone)) {
+            alert("The selected address contains an invalid phone number. It must be exactly 10 digits.");
+            return;
+        }
+        if (!/^\d{6}$/.test(selectedAddress.pincode)) {
+            alert("The selected address contains an invalid pincode. It must be exactly 6 digits and numeric only.");
+            return;
+        }
+
         try {
             const { data } = await API.post("/payment/razorpay/order", {
                 amount: subtotal,
@@ -28,11 +134,13 @@ export default function Cart() {
                 userId: user._id || user.id,
                 userEmail: user.email,
                 userName: user.name,
+                shippingAddress: selectedAddress,
                 items: items.map((i) => ({
                     productId: i._id,
                     name: i.name,
                     price: i.price,
                     quantity: i.quantity,
+                    size: i.size || "",
                     imageUrl: i.imageUrl || "",
                     images: i.images || [],
                 })),
@@ -47,10 +155,17 @@ export default function Cart() {
                     dispatch(clearCart());
                     navigate("/payment-success", { state: { orderId: verifyRes.data.orderId, invoiceNumber: verifyRes.data.invoiceNumber } });
                 },
-                onFailure: () => { },
+                onFailure: (err) => {
+                    console.error("Razorpay payment failed:", err);
+                },
             });
-        } catch { }
+        } catch (err) {
+            console.error("Checkout process failed:", err);
+        }
     };
+
+    const inputClass = "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-[14px] rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all relative focus:z-10";
+    const labelClass = "block text-[12px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider";
 
     if (items.length === 0) {
         return (
@@ -90,9 +205,10 @@ export default function Cart() {
                 <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight" style={{ marginBottom: "8px" }}>Shopping Cart</h1>
                 <p className="text-[16px] text-slate-500 dark:text-slate-400" style={{ marginBottom: "40px" }}>{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
 
-                <div style={{ display: "flex", flexDirection: "row", gap: "56px" }}>
-                    {/* Cart items */}
-                    <div className="flex-1">
+                <div className="flex flex-col lg:flex-row gap-10 md:gap-14">
+                    {/* Left Column: Cart items & Address Details */}
+                    <div className="flex-1 space-y-8">
+                        {/* Cart items */}
                         <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                             {items.map((item) => (
                                 <div key={item._id} className="flex gap-5 p-5 sm:p-7">
@@ -110,16 +226,28 @@ export default function Cart() {
                                                 {item.name}
                                             </Link>
                                             <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1">
-                                                {item.fabric && item.fabric}{item.style && ` · ${item.style}`}
+                                                {item.fabric && item.fabric}{item.style && ` · ${item.style}`}{item.size && ` · Size: ${item.size}`}
                                             </p>
+                                            {item.stock !== undefined && item.stock <= 5 && (
+                                                <p className="text-[12px] font-bold text-rose-500 mt-1 flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                                    Only {item.stock} left in stock
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div className="flex items-center justify-between mt-4 gap-3">
                                             {/* Quantity */}
-                                            <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                                            <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
                                                 <button
-                                                    onClick={() => dispatch(updateQuantity({ id: item._id, quantity: item.quantity - 1 }))}
-                                                    className="px-3 py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                                    onClick={() => {
+                                                        if (item.quantity === 1) {
+                                                            dispatch(removeFromCart({ id: item._id, size: item.size }));
+                                                        } else {
+                                                            dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity - 1 }));
+                                                        }
+                                                    }}
+                                                    className="px-3 py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                                                     aria-label="Decrease quantity"
                                                 >
                                                     <HiMinus className="w-3.5 h-3.5" />
@@ -128,8 +256,9 @@ export default function Cart() {
                                                     {item.quantity}
                                                 </span>
                                                 <button
-                                                    onClick={() => dispatch(updateQuantity({ id: item._id, quantity: item.quantity + 1 }))}
-                                                    className="px-3 py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                                    disabled={item.quantity >= (item.stock || 99999)}
+                                                    onClick={() => dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity + 1 }))}
+                                                    className="px-3 py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                                                     aria-label="Increase quantity"
                                                 >
                                                     <HiPlus className="w-3.5 h-3.5" />
@@ -143,7 +272,7 @@ export default function Cart() {
 
                                             {/* Delete */}
                                             <button
-                                                onClick={() => dispatch(removeFromCart(item._id))}
+                                                onClick={() => dispatch(removeFromCart({ id: item._id, size: item.size }))}
                                                 className="p-2 rounded-lg text-slate-400 hover:text-rose hover:bg-rose/10 dark:hover:bg-rose/20 transition-colors"
                                                 aria-label={`Remove ${item.name} from cart`}
                                             >
@@ -154,6 +283,192 @@ export default function Cart() {
                                 </div>
                             ))}
                         </div>
+
+                        {/* Shipping Address Details Card */}
+                        {user ? (
+                            <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                                        <HiOutlineHome className="w-5.5 h-5.5 text-primary dark:text-gold" /> Delivery Address
+                                    </h2>
+                                    {!showForm && (
+                                        <button 
+                                            onClick={() => setShowForm(true)}
+                                            className="text-sm font-bold text-primary dark:text-gold hover:opacity-80 transition-all flex items-center gap-1.5 cursor-pointer bg-primary/5 dark:bg-gold/5 px-3 py-1.5 rounded-lg border border-primary/10 dark:border-gold/10"
+                                        >
+                                            <HiOutlinePlus className="w-4 h-4" /> Add Address
+                                        </button>
+                                    )}
+                                </div>
+
+                                <AnimatePresence mode="wait">
+                                    {showForm ? (
+                                        <motion.form 
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            onSubmit={handleAddAddress} 
+                                            className="space-y-4 overflow-hidden p-1"
+                                        >
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className={labelClass}>Recipient Name</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={addressForm.name} 
+                                                        onChange={(e) => setAddressForm({...addressForm, name: e.target.value})}
+                                                        placeholder="Full Name"
+                                                        required
+                                                        className={inputClass}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Phone Number</label>
+                                                    <input 
+                                                        type="tel" 
+                                                        value={addressForm.phone} 
+                                                        onChange={(e) => setAddressForm({...addressForm, phone: e.target.value})}
+                                                        placeholder="10-digit number"
+                                                        required
+                                                        className={inputClass}
+                                                    />
+                                                    <p className="text-[11px] text-slate-400 mt-1">Must be exactly 10 digits.</p>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className={labelClass}>Street Address</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={addressForm.street} 
+                                                    onChange={(e) => setAddressForm({...addressForm, street: e.target.value})}
+                                                    placeholder="Flat/House No., Street, Area"
+                                                    required
+                                                    className={inputClass}
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                                <div>
+                                                    <label className={labelClass}>City</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={addressForm.city} 
+                                                        onChange={(e) => setAddressForm({...addressForm, city: e.target.value})}
+                                                        placeholder="City"
+                                                        required
+                                                        className={inputClass}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>State</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={addressForm.state} 
+                                                        onChange={(e) => setAddressForm({...addressForm, state: e.target.value})}
+                                                        placeholder="State"
+                                                        required
+                                                        className={inputClass}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Pincode</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={addressForm.pincode} 
+                                                        onChange={(e) => setAddressForm({...addressForm, pincode: e.target.value})}
+                                                        placeholder="Pincode"
+                                                        required
+                                                        className={inputClass}
+                                                    />
+                                                    <p className="text-[11px] text-slate-400 mt-1">6 digits numeric.</p>
+                                                </div>
+                                                <div>
+                                                    <label className={labelClass}>Country</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={addressForm.country} 
+                                                        onChange={(e) => setAddressForm({...addressForm, country: e.target.value})}
+                                                        placeholder="Country"
+                                                        required
+                                                        className={inputClass}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end gap-3 pt-2">
+                                                {addresses.length > 0 && (
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setShowForm(false)}
+                                                        className="px-5 py-2 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 cursor-pointer"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                )}
+                                                <button 
+                                                    type="submit" 
+                                                    disabled={savingAddress}
+                                                    className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
+                                                >
+                                                    {savingAddress ? "Saving..." : "Save Delivery Info"}
+                                                </button>
+                                            </div>
+                                        </motion.form>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {addresses.map((addr, idx) => (
+                                                <div 
+                                                    key={idx} 
+                                                    onClick={() => setSelectedIdx(idx)}
+                                                    className={`p-5 rounded-xl border transition-all cursor-pointer text-left relative ${
+                                                        selectedIdx === idx 
+                                                            ? "border-primary dark:border-gold bg-primary/5 dark:bg-gold/5" 
+                                                            : "border-slate-200/60 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-900/50"
+                                                    }`}
+                                                >
+                                                    {selectedIdx === idx && (
+                                                        <span className="absolute top-4 right-4 bg-primary dark:bg-gold text-white dark:text-slate-900 rounded-full p-1 flex items-center justify-center">
+                                                            <HiOutlineCheck className="w-3.5 h-3.5" />
+                                                        </span>
+                                                    )}
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="font-bold text-slate-800 dark:text-white text-[15px]">{addr.name}</span>
+                                                            {addr.isDefault && (
+                                                                <span className="bg-primary/10 dark:bg-gold/10 text-primary dark:text-gold text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/10 dark:border-gold/10">
+                                                                    Default
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-slate-500 dark:text-slate-400 text-[14px] leading-relaxed">
+                                                            {addr.street}<br />
+                                                            {addr.city}, {addr.state} - {addr.pincode}<br />
+                                                            {addr.country}
+                                                        </p>
+                                                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[13px] pt-1.5">
+                                                            <HiOutlinePhone className="w-4 h-4" />
+                                                            <span>{addr.phone}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ) : (
+                            <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 text-center">
+                                <HiOutlineUser className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                                <h3 className="text-[18px] font-bold text-slate-900 dark:text-white mb-2">Checkout Delivery Information</h3>
+                                <p className="text-[14px] text-slate-500 dark:text-slate-400 mb-5 max-w-sm mx-auto">
+                                    Please sign in to provide a delivery address and complete your purchase securely.
+                                </p>
+                                <Link to="/login?redirect=cart" className="btn-primary inline-flex">
+                                    Sign In to Continue
+                                </Link>
+                            </div>
+                        )}
                     </div>
 
                     {/* Order summary */}
@@ -183,7 +498,7 @@ export default function Cart() {
 
                             <button
                                 onClick={handleCheckout}
-                                className="w-full bg-primary text-white text-[17px] font-bold py-[22px] rounded-2xl hover:bg-primary-dark transition-colors mb-5"
+                                className="btn-primary w-full py-[18px] text-[16px] mb-5 cursor-pointer"
                             >
                                 Proceed to Pay
                             </button>

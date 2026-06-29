@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineArrowLeft, HiOutlineQuestionMarkCircle, HiOutlineChevronDown } from "react-icons/hi";
 
@@ -82,12 +82,13 @@ function FaqItem({ item }) {
 }
 
 export default function FAQ() {
+    const navigate = useNavigate();
     return (
         <main id="main-content">
             <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-4">
-                        <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
                             <HiOutlineArrowLeft className="w-4 h-4" /> Back
                         </button>
                         <span className="text-slate-300 dark:text-slate-600">|</span>
@@ -125,13 +126,13 @@ export default function FAQ() {
 
                     <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.12)" }}>
-                            <HiOutlineQuestionMarkCircle className="w-5 h-5" style={{ color: "#c9a84c" }} />
+                            <HiOutlineQuestionMarkCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
                         </div>
                         <div>
                             <p className="text-[16px] font-bold text-slate-900 dark:text-white mb-1.5">Still have questions?</p>
                             <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.7]">
                                 We're here to help!{" "}
-                                <Link to="/contact" className="font-semibold hover:underline" style={{ color: "#c9a84c" }}>
+                                <Link to="/contact" className="font-semibold hover:underline" style={{ color: "var(--gold)" }}>
                                     Contact us
                                 </Link>{" "}
                                 and our team will get back to you within 24 hours.

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { HiOutlineShoppingCart, HiStar, HiOutlineHeart, HiHeart, HiOutlineEye } from "react-icons/hi";
 import { useState } from "react";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, compact = false }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [added, setAdded] = useState(false);
@@ -14,12 +14,18 @@ export default function ProductCard({ product }) {
     const wishlistItems = useSelector((s) => s.wishlist.items);
     const isWishlisted = wishlistItems.some((i) => i._id === product._id);
 
-    const handleAdd = (e) => {
+    const handleAddClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (product.stock <= 0) return;
+        // Immediately add 1 piece to cart
         dispatch(addToCart(product));
         setAdded(true);
-        setTimeout(() => setAdded(false), 1800);
+        // Navigate to product page after a brief confirmation flash
+        setTimeout(() => {
+            navigate(`/product/${product._id}`);
+        }, 600);
+        setTimeout(() => setAdded(false), 2000);
     };
 
     const handleWishlistToggle = (e) => {
@@ -32,6 +38,12 @@ export default function ProductCard({ product }) {
         dispatch(toggleWishlist(product));
     };
 
+    const handleQuickView = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(`/product/${product._id}`);
+    };
+
     const discount = product.discount || 0;
     const originalPrice = product.originalPrice || 0;
     const rating = 4.0;
@@ -41,9 +53,11 @@ export default function ProductCard({ product }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="group relative bg-white dark:bg-slate-800/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 card-hover"
+            className={`group relative bg-white dark:bg-slate-800/60 overflow-hidden border border-slate-200 dark:border-slate-700 card-hover flex flex-col h-full ${
+                compact ? "rounded-xl" : "rounded-2xl"
+            }`}
         >
-            <Link to={`/product/${product._id}`} className="block" aria-label={`View ${product.name}`}>
+            <Link to={`/product/${product._id}`} className="flex flex-col flex-1" aria-label={`View ${product.name}`}>
 
                 {/* ── Image ── */}
                 <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900" style={{ aspectRatio: "3/4" }}>
@@ -85,7 +99,17 @@ export default function ProductCard({ product }) {
                     )}
 
                     {/* Stock urgency */}
-                    {product.stock <= 5 && product.stock > 0 && (
+                    {product.stock <= 0 ? (
+                        <>
+                            <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 z-[5]" />
+                            <div className="absolute bottom-3 left-3 z-10">
+                                <span className="text-[11px] font-extrabold text-white backdrop-blur-sm px-3 py-1.5 rounded-lg"
+                                    style={{ background: "rgba(100,116,139,0.9)" }}>
+                                    Out of Stock
+                                </span>
+                            </div>
+                        </>
+                    ) : product.stock <= 5 ? (
                         <div className="absolute bottom-3 left-3 z-10">
                             <span className="text-[10px] font-bold text-white backdrop-blur-sm px-2.5 py-1 rounded-lg flex items-center gap-1.5"
                                 style={{ background: "rgba(244,63,94,0.88)" }}>
@@ -93,12 +117,12 @@ export default function ProductCard({ product }) {
                                 Only {product.stock} left
                             </span>
                         </div>
-                    )}
+                    ) : null}
 
                     {/* Quick actions */}
                     <div className="absolute bottom-4 right-4 z-10 flex gap-2.5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                         <button
-                            className={`w-9 h-9 backdrop-blur-sm rounded-xl flex items-center justify-center transition-colors shadow-lg ${
+                            className={`w-9 h-9 backdrop-blur-sm rounded-xl flex items-center justify-center transition-colors shadow-lg cursor-pointer ${
                                 isWishlisted
                                     ? "bg-rose-500/90 text-white"
                                     : "bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:text-rose-500"
@@ -109,9 +133,9 @@ export default function ProductCard({ product }) {
                             {isWishlisted ? <HiHeart className="w-4 h-4" /> : <HiOutlineHeart className="w-4 h-4" />}
                         </button>
                         <button
-                            className="w-9 h-9 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors shadow-lg"
+                            className="w-9 h-9 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-gold transition-colors shadow-lg cursor-pointer"
                             aria-label="Quick view"
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onClick={handleQuickView}
                         >
                             <HiOutlineEye className="w-4 h-4" />
                         </button>
@@ -119,63 +143,80 @@ export default function ProductCard({ product }) {
                 </div>
 
                 {/* ── Body ── */}
-                <div className="p-5 sm:p-6">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] mb-2" style={{ color: "#c9a84c" }}>
+                <div className={`${compact ? "p-3.5 sm:p-4" : "p-5 sm:p-6"} flex-1 flex flex-col`}>
+                    <p className={`${compact ? "text-[10px]" : "text-[11px]"} font-bold uppercase tracking-[0.12em] mb-1.5`} style={{ color: "var(--gold)" }}>
                         {product.category === "shirt" ? "Shirt" : "Trouser"}
                     </p>
-                    <h3 className="text-[15px] sm:text-[16px] font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-3 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300">
+                    <h3 className={`${compact ? "text-[13px] sm:text-[14px]" : "text-[15px] sm:text-[16px]"} font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-2 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300`}>
                         {product.name}
                     </h3>
 
-                    {/* Rating */}
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="flex items-center gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                                <HiStar key={i} className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? "" : "text-slate-200 dark:text-slate-600"}`}
-                                    style={i < Math.floor(rating) ? { color: "#c9a84c" } : {}} />
-                            ))}
-                        </div>
-                        <span className="text-[12px] font-semibold text-slate-400">({rating})</span>
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex items-baseline gap-2.5">
-                        <span className="text-[20px] sm:text-[22px] font-extrabold text-slate-900 dark:text-white">
-                            ₹{product.price.toLocaleString("en-IN")}
-                        </span>
-                        {originalPrice > 0 && (
-                            <span className="text-[13px] text-slate-400 line-through">
-                                ₹{originalPrice.toLocaleString("en-IN")}
-                            </span>
+                    <div className="mt-auto">
+                        {/* Rating */}
+                        {!compact && (
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="flex items-center gap-0.5">
+                                    {[...Array(5)].map((_, i) => (
+                                        <HiStar key={i} className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? "" : "text-slate-200 dark:text-slate-600"}`}
+                                            style={i < Math.floor(rating) ? { color: "var(--gold)" } : {}} />
+                                    ))}
+                                </div>
+                                <span className="text-[12px] font-semibold text-slate-400">({rating})</span>
+                            </div>
                         )}
+
+                        {/* Price */}
+                        <div className="flex items-baseline gap-2">
+                            <span className={`${compact ? "text-[17px] sm:text-[18px]" : "text-[20px] sm:text-[22px]"} font-extrabold text-slate-900 dark:text-white`}>
+                                ₹{product.price.toLocaleString("en-IN")}
+                            </span>
+                            {originalPrice > 0 && (
+                                <span className={`${compact ? "text-[11px]" : "text-[13px]"} text-slate-400 line-through`}>
+                                    ₹{originalPrice.toLocaleString("en-IN")}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </Link>
 
             {/* ── Add to Cart ── */}
-            <div className="px-5 sm:px-6 pb-5 sm:pb-6">
-                <button
-                    onClick={handleAdd}
-                    aria-label={`Add ${product.name} to cart`}
-                    className={`w-full flex items-center justify-center gap-2.5 text-[14px] font-bold py-3.5 rounded-xl transition-all duration-300 ${added
-                        ? "text-white scale-[0.99]"
-                        : "text-white hover:opacity-90 active:scale-[0.98]"
+            <div className={`${compact ? "px-3.5 sm:px-4 pb-3.5 sm:pb-4" : "px-5 sm:px-6 pb-5 sm:pb-6"}`}>
+                {product.stock <= 0 ? (
+                    <div
+                        className={`w-full flex items-center justify-center gap-2.5 font-bold rounded-xl text-slate-400 dark:text-slate-500 cursor-not-allowed ${
+                            compact ? "text-[13px] py-2.5" : "text-[14px] py-3.5"
                         }`}
-                    style={{
-                        background: added
-                            ? "#10b981"
-                            : "linear-gradient(135deg,#1a2744 0%,#2a3f6e 100%)"
-                    }}
-                >
-                    {added ? (
-                        <>✓ Added to Cart</>
-                    ) : (
-                        <>
-                            <HiOutlineShoppingCart className="w-4 h-4" />
-                            Add to Cart
-                        </>
-                    )}
-                </button>
+                        style={{ background: "#f1f5f9" }}
+                    >
+                        Out of Stock
+                    </div>
+                ) : (
+                    <button
+                        onClick={handleAddClick}
+                        aria-label={`Add ${product.name} to cart`}
+                        className={`w-full flex items-center justify-center gap-2.5 font-bold rounded-xl transition-all duration-300 cursor-pointer ${
+                            compact ? "text-[13px] py-2.5" : "text-[14px] py-3.5"
+                        } ${added
+                            ? "text-white scale-[0.99]"
+                            : "text-white hover:opacity-90 active:scale-[0.98]"
+                            }`}
+                        style={{
+                            background: added
+                                ? "#10b981"
+                                : "linear-gradient(135deg,#1a2744 0%,#2a3f6e 100%)"
+                        }}
+                    >
+                        {added ? (
+                            <>{compact ? "✓ Added" : "✓ Added — Opening Product..."}</>
+                        ) : (
+                            <>
+                                <HiOutlineShoppingCart className={compact ? "w-3.5 h-3.5" : "w-4 h-4"} />
+                                Add to Cart
+                            </>
+                        )}
+                    </button>
+                )}
             </div>
         </motion.article>
     );

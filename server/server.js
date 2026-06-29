@@ -19,7 +19,7 @@ const app = express();
 app.use(helmet());
 
 // ─── CORS — strict origin only ───
-const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173"].filter(Boolean);
+const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000"].filter(Boolean);
 app.use(cors({
     origin: (origin, cb) => {
         if (!origin || allowedOrigins.includes(origin)) cb(null, true);
@@ -32,6 +32,7 @@ app.use(cors({
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 200, // limit each IP to 200 requests per window
+    skip: (req) => req.method === "GET", // skip rate limiting for read-only browsing
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: "Too many requests, please try again later." },
@@ -69,5 +70,5 @@ const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+}); // reload comment for test run
 

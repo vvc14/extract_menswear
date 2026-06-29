@@ -1,0 +1,167 @@
+- generic [ref=e3]:
+  - link "Skip to main content" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - navigation "Main navigation" [ref=e5]:
+    - generic [ref=e7]:
+      - generic [ref=e9]:
+        - generic [ref=e10]: ✦ Free Shipping on Orders Above ₹999 🛡️ 100% Secure Payments 🔄 7-Day Easy Returns 🚚 Pan-India Delivery
+        - generic [ref=e11]: ✦ Free Shipping on Orders Above ₹999 🛡️ 100% Secure Payments 🔄 7-Day Easy Returns 🚚 Pan-India Delivery
+        - generic [ref=e12]: ✦ Free Shipping on Orders Above ₹999 🛡️ 100% Secure Payments 🔄 7-Day Easy Returns 🚚 Pan-India Delivery
+        - generic [ref=e13]: ✦ Free Shipping on Orders Above ₹999 🛡️ 100% Secure Payments 🔄 7-Day Easy Returns 🚚 Pan-India Delivery
+      - generic [ref=e14]:
+        - link "About Us" [ref=e15] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e16]: "|"
+        - link "Help" [ref=e17] [cursor=pointer]:
+          - /url: /contact
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - link "Extract Menswear Home" [ref=e23] [cursor=pointer]:
+          - /url: /
+          - img "Extract Menswear" [ref=e24]
+        - generic [ref=e25]:
+          - link "Home" [ref=e26] [cursor=pointer]:
+            - /url: /
+          - link "Shirts" [ref=e27] [cursor=pointer]:
+            - /url: /shirts
+            - text: Shirts
+          - link "Trousers" [ref=e29] [cursor=pointer]:
+            - /url: /trousers
+          - link "About" [ref=e30] [cursor=pointer]:
+            - /url: /about
+          - link "Contact" [ref=e31] [cursor=pointer]:
+            - /url: /contact
+        - button "Search products" [ref=e32] [cursor=pointer]:
+          - img [ref=e33]
+      - generic [ref=e36]:
+        - button "Switch to dark mode" [ref=e37] [cursor=pointer]:
+          - img [ref=e39]
+        - button "Account menu, extractadmin" [ref=e42]:
+          - generic [ref=e43]: E
+          - generic [ref=e44]: extractadmin
+          - img [ref=e45]
+        - link "Wishlist, 0 items" [ref=e47] [cursor=pointer]:
+          - /url: /wishlist
+          - img [ref=e49]
+        - link "Shopping cart, 0 items" [ref=e51] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e53]
+          - generic [ref=e55]: Cart
+  - main [ref=e56]:
+    - main [ref=e57]:
+      - generic [ref=e61]:
+        - navigation "Breadcrumb" [ref=e62]:
+          - button "Back" [ref=e63]:
+            - img [ref=e64]
+            - text: Back
+          - generic [ref=e66]: "|"
+          - list [ref=e67]:
+            - listitem [ref=e68]:
+              - link "Home" [ref=e69] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e70]: /
+            - listitem [ref=e71]: Shirts
+        - paragraph [ref=e72]: Men's Collection
+        - heading "Shirts Collection" [level=1] [ref=e73]
+        - paragraph [ref=e74]: Premium shirts crafted from the finest Linen, Oxford, Twill & Satin fabrics. Every piece, a statement.
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - paragraph [ref=e77]: Loading...
+          - generic [ref=e79]:
+            - img [ref=e80]
+            - combobox [ref=e82] [cursor=pointer]:
+              - option "Newest First" [selected]
+              - 'option "Price: Low → High"'
+              - 'option "Price: High → Low"'
+              - 'option "Name: A → Z"'
+              - 'option "Name: Z → A"'
+        - complementary "Product filters" [ref=e85]:
+          - generic [ref=e86]:
+            - heading "Filters" [level=3] [ref=e89]
+            - generic [ref=e90]:
+              - button "Style" [ref=e92]:
+                - generic [ref=e93]: Style
+                - img [ref=e94]
+              - generic [ref=e96]:
+                - button "Price" [ref=e97]:
+                  - generic [ref=e98]: Price
+                  - img [ref=e99]
+                - generic [ref=e101]:
+                  - generic [ref=e103]: Up to ₹10,000
+                  - slider "Maximum price filter" [ref=e104] [cursor=pointer]: "10000"
+                  - generic [ref=e105]:
+                    - generic [ref=e106]: ₹0
+                    - generic [ref=e107]: ₹10,000
+  - contentinfo [ref=e158]:
+    - generic [ref=e161]:
+      - generic [ref=e162]:
+        - img [ref=e164]
+        - generic [ref=e167]:
+          - paragraph [ref=e168]: Free Delivery
+          - paragraph [ref=e169]: On orders above ₹999
+      - generic [ref=e170]:
+        - img [ref=e172]
+        - generic [ref=e174]:
+          - paragraph [ref=e175]: Easy Returns
+          - paragraph [ref=e176]: 7-day return policy
+      - generic [ref=e177]:
+        - img [ref=e179]
+        - generic [ref=e181]:
+          - paragraph [ref=e182]: Secure Payment
+          - paragraph [ref=e183]: 100% protected
+      - generic [ref=e184]:
+        - img [ref=e186]
+        - generic [ref=e188]:
+          - paragraph [ref=e189]: Razorpay Checkout
+          - paragraph [ref=e190]: Cards, UPI, Wallets
+    - generic [ref=e192]:
+      - generic [ref=e193]:
+        - img "Extract Menswear" [ref=e195]
+        - paragraph [ref=e196]: Premium menswear crafted from the finest fabrics for the modern man.
+        - generic [ref=e197]:
+          - link "Instagram" [ref=e198] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e199]
+          - link "Twitter" [ref=e202] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e203]
+          - link "Facebook" [ref=e205] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e206]
+      - generic [ref=e208]:
+        - heading "Shop" [level=3] [ref=e209]
+        - list [ref=e210]:
+          - listitem [ref=e211]:
+            - link "All Shirts" [ref=e212] [cursor=pointer]:
+              - /url: /shirts
+          - listitem [ref=e213]:
+            - link "All Trousers" [ref=e214] [cursor=pointer]:
+              - /url: /trousers
+          - listitem [ref=e215]:
+            - link "New Arrivals" [ref=e216] [cursor=pointer]:
+              - /url: /#new-arrivals
+      - generic [ref=e217]:
+        - heading "Company" [level=3] [ref=e218]
+        - list [ref=e219]:
+          - listitem [ref=e220]:
+            - link "About Us" [ref=e221] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e222]:
+            - link "Contact" [ref=e223] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=e224]:
+        - heading "Help" [level=3] [ref=e225]
+        - list [ref=e226]:
+          - listitem [ref=e227]:
+            - link "Shipping Info" [ref=e228] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e229]:
+            - link "Returns & Exchanges" [ref=e230] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e231]:
+            - link "Size Guide" [ref=e232] [cursor=pointer]:
+              - /url: /size-guide
+          - listitem [ref=e233]:
+            - link "FAQ" [ref=e234] [cursor=pointer]:
+              - /url: /faq
+    - paragraph [ref=e237]: © 2026 Extract Menswear. All rights reserved.

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import API from "../services/api";
 import { HiOutlineMail, HiOutlineClock, HiOutlineChat, HiOutlineArrowLeft } from "react-icons/hi";
@@ -7,7 +8,7 @@ const INFO = [
     {
         Icon: HiOutlineMail,
         title: "Email Us",
-        detail: "janassistai@gmail.com",
+        detail: "support@extractmenswear.com",
         sub: "We'll respond within 24 hours",
     },
     {
@@ -25,12 +26,13 @@ const INFO = [
 ];
 
 export default function Contact() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
-    const emailPattern = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,}$/;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -58,7 +60,7 @@ export default function Contact() {
             {/* Back bar */}
             <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
-                    <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
                         <HiOutlineArrowLeft className="w-4 h-4" /> Back
                     </button>
                 </div>
@@ -74,7 +76,7 @@ export default function Contact() {
                     </nav>
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                         <span className="inline-block text-[12px] font-bold tracking-[0.15em] uppercase px-4 py-1.5 rounded-full mb-6"
-                            style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
+                            style={{ background: "rgba(201,168,76,0.15)", color: "var(--gold)" }}>
                             Get in Touch
                         </span>
                         <h1 className="text-[34px] sm:text-[48px] font-extrabold text-white tracking-tight mb-4">
@@ -90,10 +92,10 @@ export default function Contact() {
             {/* ── Contact content ── */}
             <section className="bg-slate-50 dark:bg-[#0a0f1a] border-b border-slate-100 dark:border-slate-800">
                 <div className="page-wrap py-16 sm:py-24">
-                    <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: "56px" }}>
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 md:gap-14">
 
                         {/* Info column */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                        <div className="lg:col-span-2 flex flex-col gap-5">
                             {INFO.map(({ Icon, title, detail, sub }) => (
                                 <motion.div
                                     key={title}
@@ -119,7 +121,7 @@ export default function Contact() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.05 }}
-                            className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700" style={{ padding: "40px" }}
+                            className="lg:col-span-3 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 sm:p-10"
                         >
                             <h2 className="text-[22px] font-bold text-slate-900 dark:text-white" style={{ marginBottom: "32px" }}>Send a Message</h2>
                             {success ? (
@@ -143,8 +145,8 @@ export default function Contact() {
                                             id="name" type="text" placeholder="John Doe" required
                                             value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
                                             className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none"
-                                            style={{ "--tw-ring-color": "#c9a84c" }}
-                                            onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
+                                            style={{ "--tw-ring-color": "var(--gold)" }}
+                                            onFocus={e => { e.target.style.borderColor = "var(--gold)"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
                                             onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
                                         />
                                     </div>
@@ -158,7 +160,7 @@ export default function Contact() {
                                             title="Please enter a valid email (e.g., john@example.com)"
                                             value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
                                             className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none"
-                                            onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
+                                            onFocus={e => { e.target.style.borderColor = "var(--gold)"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
                                             onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
                                         />
                                     </div>
@@ -171,7 +173,7 @@ export default function Contact() {
                                         id="message" rows={6} placeholder="Tell us about your inquiry..." required
                                         value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}
                                         className="w-full px-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[15px] text-slate-900 dark:text-white placeholder-slate-400 bg-white dark:bg-slate-900/50 transition-all outline-none resize-none"
-                                        onFocus={e => { e.target.style.borderColor = "#c9a84c"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
+                                        onFocus={e => { e.target.style.borderColor = "var(--gold)"; e.target.style.boxShadow = "0 0 0 3px rgba(201,168,76,0.12)"; }}
                                         onBlur={e => { e.target.style.borderColor = ""; e.target.style.boxShadow = ""; }}
                                     />
                                 </div>

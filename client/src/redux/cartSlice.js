@@ -25,6 +25,7 @@ export const syncCartToDB = createAsyncThunk("cart/syncToDB", async (_, { getSta
             style: i.style,
             shippingCost: i.shippingCost || 0,
             quantity: i.quantity,
+            size: i.size || "",
         })),
     });
     return data;
@@ -37,20 +38,30 @@ const cartSlice = createSlice({
     initialState: { items: [], synced: false },
     reducers: {
         addToCart: (state, action) => {
-            const existing = state.items.find((i) => i._id === action.payload._id);
+            const { _id, size, stock, qtyToAdd } = action.payload;
+            const existing = state.items.find((i) => i._id === _id && (i.size || "") === (size || ""));
+            const maxStock = stock !== undefined ? stock : 99999;
+            const amountToAdd = qtyToAdd !== undefined ? qtyToAdd : 1;
             if (existing) {
-                existing.quantity += 1;
+                existing.quantity = Math.min(maxStock, existing.quantity + amountToAdd);
             } else {
-                state.items.push({ ...action.payload, quantity: 1 });
+                state.items.push({ 
+                    ...action.payload, 
+                    quantity: Math.min(maxStock, amountToAdd), 
+                    size: size || "" 
+                });
             }
         },
         removeFromCart: (state, action) => {
-            state.items = state.items.filter((i) => i._id !== action.payload);
+            const { id, size } = action.payload;
+            state.items = state.items.filter((i) => !(i._id === id && (i.size || "") === (size || "")));
         },
         updateQuantity: (state, action) => {
-            const item = state.items.find((i) => i._id === action.payload.id);
+            const { id, size, quantity } = action.payload;
+            const item = state.items.find((i) => i._id === id && (i.size || "") === (size || ""));
             if (item) {
-                item.quantity = Math.max(1, action.payload.quantity);
+                const maxStock = item.stock !== undefined ? item.stock : 99999;
+                item.quantity = Math.min(maxStock, Math.max(1, quantity));
             }
         },
         clearCart: (state) => {
@@ -75,6 +86,8 @@ const cartSlice = createSlice({
                 style: i.style,
                 shippingCost: i.shippingCost || 0,
                 quantity: i.quantity,
+                size: i.size || "",
+                stock: i.productId?.stock !== undefined ? i.productId.stock : (i.stock !== undefined ? i.stock : 99999),
             }));
             state.synced = true;
         });

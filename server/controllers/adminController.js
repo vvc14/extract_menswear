@@ -4,7 +4,7 @@ import CategoryOption from "../models/CategoryOption.js";
 
 export const addProduct = async (req, res) => {
     try {
-        const { name, category, fabric, style, price, originalPrice, discount, stock, shippingCost, sizes } = req.body;
+        const { name, category, fabric, style, price, originalPrice, discount, stock, shippingCost, sizes, videoUrl } = req.body;
         const imageUrl = req.imageUrl || req.body.imageUrl;
         const additionalImages = req.additionalImages || [];
         const images = [imageUrl, ...additionalImages].filter(Boolean);
@@ -31,7 +31,7 @@ export const addProduct = async (req, res) => {
         } catch {
             parsedSizes = [];
         }
-        const product = await Product.create({ name, category, fabric, style, price: numPrice, originalPrice: numOriginalPrice, discount: numDiscount, shippingCost: numShippingCost, imageUrl, images, stock: numStock, sizes: parsedSizes });
+        const product = await Product.create({ name, category, fabric, style, price: numPrice, originalPrice: numOriginalPrice, discount: numDiscount, shippingCost: numShippingCost, imageUrl, images, videoUrl: videoUrl || "", stock: numStock, sizes: parsedSizes });
         res.status(201).json(product);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -48,6 +48,11 @@ export const updateProduct = async (req, res) => {
             try { updates.sizes = JSON.parse(updates.sizes); } catch { updates.sizes = []; }
         }
 
+        // Handle videoUrl
+        if (updates.videoUrl !== undefined) {
+            updates.videoUrl = updates.videoUrl || "";
+        }
+
         // Handle multiple images
         const additionalImages = req.additionalImages || [];
         const parseExistingImages = (val) => {
@@ -56,22 +61,18 @@ export const updateProduct = async (req, res) => {
             try { return JSON.parse(val); } catch { return []; }
         };
         if (req.imageUrl || additionalImages.length > 0) {
-            // New files uploaded — combine with any existing images sent from client
             const existingImages = parseExistingImages(updates.existingImages);
             const mainImage = req.imageUrl || updates.imageUrl;
             updates.images = [...existingImages, mainImage, ...additionalImages].filter(Boolean);
             updates.imageUrl = mainImage || existingImages[0] || updates.imageUrl;
         } else if (updates.existingImages) {
-            // No new uploads but existing images may have been modified (removed)
             const existingImages = parseExistingImages(updates.existingImages);
             updates.images = existingImages;
             updates.imageUrl = existingImages[0] || updates.imageUrl;
         }
 
-        // Remove helper fields that shouldn't be saved to DB
         delete updates.existingImages;
 
-        // Validate negative values
         if (updates.price !== undefined && Number(updates.price) < 0) return res.status(400).json({ message: "Price cannot be negative" });
         if (updates.originalPrice !== undefined && Number(updates.originalPrice) < 0) return res.status(400).json({ message: "Original price cannot be negative" });
         if (updates.stock !== undefined && Number(updates.stock) < 0) return res.status(400).json({ message: "Stock cannot be negative" });

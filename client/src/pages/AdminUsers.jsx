@@ -9,12 +9,21 @@ export default function AdminUsers() {
     const [search, setSearch] = useState("");
     const [filterRole, setFilterRole] = useState("all");
 
-    const fetchUsers = async () => {
-        try { const { data } = await API.get("/admin/users"); setUsers(data); } catch { }
-        setLoading(false);
+    const fetchUsers = async (isMounted = true) => {
+        try {
+            const { data } = await API.get("/admin/users");
+            if (isMounted) setUsers(data);
+        } catch (err) {
+            console.error("Failed to fetch users:", err);
+        }
+        if (isMounted) setLoading(false);
     };
 
-    useEffect(() => { fetchUsers(); }, []);
+    useEffect(() => {
+        let isMounted = true;
+        fetchUsers(isMounted);
+        return () => { isMounted = false; };
+    }, []);
 
     const toggleRole = async (userId, currentRole) => {
         const newRole = currentRole === "admin" ? "user" : "admin";
@@ -22,7 +31,9 @@ export default function AdminUsers() {
         try {
             const { data } = await API.put(`/admin/users/${userId}/role`, { role: newRole });
             setUsers((prev) => prev.map((u) => (u._id === data._id ? data : u)));
-        } catch { }
+        } catch (err) {
+            console.error("Failed to toggle role:", err);
+        }
     };
 
     const filtered = users.filter((u) => {
@@ -44,13 +55,13 @@ export default function AdminUsers() {
             </div>
 
             {/* Search & Filter */}
-            <div style={{ display: "flex", flexDirection: "row", gap: "16px", marginBottom: "32px" }}>
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
                 <div className="relative flex-1">
                     <HiOutlineSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input type="text" placeholder="Search by name or email..." value={search} onChange={(e) => setSearch(e.target.value)}
                         className="w-full bg-white border border-slate-200 pl-11 pr-4 py-3 text-[16px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400" />
                 </div>
-                <div style={{ display: "flex", gap: "6px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "6px" }}>
+                <div className="flex gap-1.5 bg-white border border-slate-200 rounded-xl p-1.5 shrink-0 overflow-x-auto">
                     {[
                         { key: "all", label: "All" },
                         { key: "admin", label: `Admins (${adminCount})` },

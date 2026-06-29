@@ -16,7 +16,24 @@ export const getUserOrders = async (req, res) => {
 // GET /api/orders/:id — single order detail
 export const getOrderById = async (req, res) => {
     try {
-        const order = await Order.findOne({ _id: req.params.id, userId: req.user.id }).lean();
+// Adjust fetch logic to allow admin access (no userId restriction)
+        let order;
+        try {
+            if (req.user && req.user.role === "admin") {
+                // Admin: fetch by ID or razorpayOrderId without user check
+                order = await Order.findOne({ _id: req.params.id }).lean();
+                if (!order) {
+                    order = await Order.findOne({ razorpayOrderId: req.params.id }).lean();
+                }
+            } else {
+                // Regular user: enforce ownership
+                order = await Order.findOne({ _id: req.params.id, userId: req.user.id }).lean();
+            }
+        } catch (e) {
+            // If ID is not a valid ObjectId, try razorpayOrderId fallback (for both admin and user)
+            order = await Order.findOne({ razorpayOrderId: req.params.id }).lean();
+        }
+        if (!order) return res.status(404).json({ message: "Order not found" });
         if (!order) return res.status(404).json({ message: "Order not found" });
         res.json(order);
     } catch (error) {
@@ -114,9 +131,31 @@ export const requestExchange = async (req, res) => {
 export const getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find({ status: { $ne: "created" } })
+            .populate("userId", "addresses name email")
             .sort({ createdAt: -1 })
             .lean();
-        res.json(orders);
+
+        const processed = orders.map((order) => {
+            // Fallback for older orders that don't have a snapshotted shippingAddress
+            if (!order.shippingAddress || !order.shippingAddress.street) {
+                const orderUser = order.userId;
+                if (orderUser && Array.isArray(orderUser.addresses) && orderUser.addresses.length > 0) {
+                    const defaultAddr = orderUser.addresses.find((a) => a.isDefault) || orderUser.addresses[0];
+                    order.shippingAddress = {
+                        name: defaultAddr.name || orderUser.name || order.userName || "",
+                        phone: defaultAddr.phone || "",
+                        street: defaultAddr.street || "",
+                        city: defaultAddr.city || "",
+                        state: defaultAddr.state || "",
+                        pincode: defaultAddr.pincode || "",
+                        country: defaultAddr.country || "India",
+                    };
+                }
+            }
+            return order;
+        });
+
+        res.json(processed);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -131,8 +170,24 @@ export const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ message: `Invalid status. Allowed: ${allowed.join(", ")}` });
         }
 
-        const order = await Order.findById(req.params.id);
-        if (!order) return res.status(404).json({ message: "Order not found" });
+// Adjust fetch logic to allow admin access (no userId restriction)
+        let order;
+        try {
+            if (req.admin) {
+                // Admin: fetch by ID or razorpayOrderId without user check
+                order = await Order.findOne({ _id: req.params.id }).lean();
+                if (!order) {
+                    order = await Order.findOne({ razorpayOrderId: req.params.id }).lean();
+                }
+            } else {
+                // Regular user: enforce ownership
+                order = await Order.findOne({ _id: req.params.id, userId: req.user.id }).lean();
+            }
+        } catch (e) {
+            // If ID is not a valid ObjectId, try razorpayOrderId fallback (for both admin and user)
+            order = await Order.findOne({ razorpayOrderId: req.params.id }).lean();
+        }
+        if (!order) return res.status(404).json({ message: "Order not found" }); return res.status(404).json({ message: "Order not found" });
 
         order.status = status;
         await order.save();

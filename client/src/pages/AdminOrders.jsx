@@ -114,7 +114,7 @@ export default function AdminOrders() {
             </div>
 
             {/* Stat Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "40px" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
                 {[
                     { label: "Total Orders", value: totalOrders, grad: "from-primary to-blue-600", icon: HiOutlineClipboardList },
                     { label: "Revenue", value: `₹${totalRevenue.toLocaleString("en-IN")}`, grad: "from-emerald-500 to-teal-500", icon: HiOutlineShoppingCart },
@@ -206,6 +206,19 @@ export default function AdminOrders() {
                                                                 <p className="text-[13px] font-bold text-slate-700 shrink-0">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
                                                             </div>
                                                         ))}
+                                                        {order.shippingAddress && order.shippingAddress.street && (
+                                                            <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 border border-slate-100 dark:border-slate-800/80 mt-3 text-[13px] text-slate-600 dark:text-slate-400">
+                                                                <p className="font-bold text-slate-800 dark:text-white mb-1 flex items-center gap-1.5">
+                                                                    <HiOutlineTruck className="w-4 h-4 text-primary dark:text-gold" /> Delivery Details
+                                                                </p>
+                                                                <p>
+                                                                    <strong>Recipient:</strong> {order.shippingAddress.name} ({order.shippingAddress.phone})
+                                                                </p>
+                                                                <p>
+                                                                    <strong>Address:</strong> {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}, {order.shippingAddress.country}
+                                                                </p>
+                                                            </div>
+                                                        )}
                                                         {hasReason && (
                                                             <div className="flex items-start gap-2 mt-2 p-2.5 bg-amber-50 rounded-lg border border-amber-200">
                                                                 <HiOutlineExclamation className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />

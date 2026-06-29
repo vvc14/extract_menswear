@@ -1,0 +1,132 @@
+- generic [ref=e42]:
+  - complementary [ref=e43]:
+    - link "E EXTRACT Admin Panel" [ref=e45] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e47]: E
+      - generic [ref=e48]:
+        - generic [ref=e49]: EXTRACT
+        - text: Admin Panel
+    - navigation "Admin navigation" [ref=e50]:
+      - paragraph [ref=e51]: Menu
+      - link "Dashboard" [ref=e52] [cursor=pointer]:
+        - /url: /admin/dashboard
+        - img [ref=e53]
+        - text: Dashboard
+        - img [ref=e55]
+      - link "Products" [ref=e57] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e58]
+        - text: Products
+      - link "Orders" [ref=e60] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e61]
+        - text: Orders
+      - link "Users" [ref=e63] [cursor=pointer]:
+        - /url: /admin/users
+        - img [ref=e64]
+        - text: Users
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e69]: E
+        - generic [ref=e70]:
+          - paragraph [ref=e71]: extractadmin
+          - paragraph [ref=e72]: Administrator
+      - link "View Storefront" [ref=e73] [cursor=pointer]:
+        - /url: /
+        - img [ref=e74]
+        - text: View Storefront
+      - button "Sign Out" [ref=e76] [cursor=pointer]:
+        - img [ref=e77]
+        - text: Sign Out
+  - generic [ref=e79]:
+    - banner [ref=e80]:
+      - heading "Dashboard" [level=2] [ref=e81]
+    - main [ref=e82]:
+      - generic [ref=e83]:
+        - generic [ref=e84]:
+          - heading "Dashboard" [level=1] [ref=e85]
+          - paragraph [ref=e86]: Here's what's happening with your store today.
+        - generic [ref=e87]:
+          - link "Total Products 8" [ref=e88] [cursor=pointer]:
+            - /url: /admin/products
+            - generic [ref=e89]:
+              - img [ref=e91]
+              - img [ref=e93]
+            - paragraph [ref=e95]: Total Products
+            - paragraph [ref=e96]: "8"
+          - link "Shirts 7" [ref=e97] [cursor=pointer]:
+            - /url: /admin/products
+            - generic [ref=e98]:
+              - img [ref=e100]
+              - img [ref=e102]
+            - paragraph [ref=e104]: Shirts
+            - paragraph [ref=e105]: "7"
+          - link "Trousers 1" [ref=e106] [cursor=pointer]:
+            - /url: /admin/products
+            - generic [ref=e107]:
+              - img [ref=e109]
+              - img [ref=e111]
+            - paragraph [ref=e113]: Trousers
+            - paragraph [ref=e114]: "1"
+          - link "Registered Users 15" [ref=e115] [cursor=pointer]:
+            - /url: /admin/users
+            - generic [ref=e116]:
+              - img [ref=e118]
+              - img [ref=e120]
+            - paragraph [ref=e122]: Registered Users
+            - paragraph [ref=e123]: "15"
+        - generic [ref=e124]:
+          - generic [ref=e125]:
+            - heading "Recently Added" [level=2] [ref=e126]
+            - link "View all" [ref=e127] [cursor=pointer]:
+              - /url: /admin/products
+              - text: View all
+              - img [ref=e128]
+          - table [ref=e131]:
+            - rowgroup [ref=e132]:
+              - row "Product Category Stock Price" [ref=e133]:
+                - columnheader "Product" [ref=e134]
+                - columnheader "Category" [ref=e135]
+                - columnheader "Stock" [ref=e136]
+                - columnheader "Price" [ref=e137]
+            - rowgroup [ref=e138]:
+              - row "Test Product Test Product shirt 4 ₹100" [ref=e139]:
+                - cell "Test Product Test Product" [ref=e140]:
+                  - generic [ref=e141]:
+                    - img "Test Product" [ref=e143]
+                    - generic [ref=e144]: Test Product
+                - cell "shirt" [ref=e145]
+                - cell "4" [ref=e146]
+                - cell "₹100" [ref=e147]
+              - row "sdasd sdasd shirt Out ₹1" [ref=e148]:
+                - cell "sdasd sdasd" [ref=e149]:
+                  - generic [ref=e150]:
+                    - img "sdasd" [ref=e152]
+                    - generic [ref=e153]: sdasd
+                - cell "shirt" [ref=e154]
+                - cell "Out" [ref=e155]
+                - cell "₹1" [ref=e156]
+              - row "Sample 4 Sample 4 shirt 27 ₹3,000" [ref=e157]:
+                - cell "Sample 4 Sample 4" [ref=e158]:
+                  - generic [ref=e159]:
+                    - img "Sample 4" [ref=e161]
+                    - generic [ref=e162]: Sample 4
+                - cell "shirt" [ref=e163]
+                - cell "27" [ref=e164]
+                - cell "₹3,000" [ref=e165]
+              - row "Sample 3 Sample 3 shirt Out ₹1,599" [ref=e166]:
+                - cell "Sample 3 Sample 3" [ref=e167]:
+                  - generic [ref=e168]:
+                    - img "Sample 3" [ref=e170]
+                    - generic [ref=e171]: Sample 3
+                - cell "shirt" [ref=e172]
+                - cell "Out" [ref=e173]
+                - cell "₹1,599" [ref=e174]
+              - row "Sample 2 Sample 2 shirt 98 ₹999" [ref=e175]:
+                - cell "Sample 2 Sample 2" [ref=e176]:
+                  - generic [ref=e177]:
+                    - img "Sample 2" [ref=e179]
+                    - generic [ref=e180]: Sample 2
+                - cell "shirt" [ref=e181]
+                - cell "98" [ref=e182]
+                - cell "₹999" [ref=e183]

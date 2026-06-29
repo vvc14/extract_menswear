@@ -23,7 +23,9 @@ export default function AdminDashboard() {
                     recent: data.slice(0, 5),
                 });
                 setUserCount(users.data.length || 0);
-            } catch { }
+            } catch (err) {
+                console.error("Failed to fetch stats:", err);
+            }
         };
         fetchStats();
     }, []);
@@ -44,12 +46,12 @@ export default function AdminDashboard() {
             </div>
 
             {/* Stat cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px", marginBottom: "48px" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {cards.map((card) => (
                     <Link
                         to={card.link}
                         key={card.label}
-                        className="group bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-7 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-0.5"
+                        className="group bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-7 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
                     >
                         <div className="flex items-start justify-between mb-5">
                             <div className={`w-13 h-13 bg-gradient-to-br ${card.grad} rounded-xl flex items-center justify-center shadow-lg`} style={{ width: 52, height: 52 }}>

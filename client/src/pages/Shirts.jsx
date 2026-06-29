@@ -3,10 +3,11 @@ import API from "../services/api";
 import { buildQueryString } from "../utils/filterLogic";
 import ProductCard from "../components/ProductCard";
 import FilterSidebar from "../components/FilterSidebar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineAdjustments, HiOutlineArrowRight, HiOutlineSortDescending, HiOutlineArrowLeft } from "react-icons/hi";
 
 export default function Shirts() {
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({ fabric: [], style: [], size: [], minPrice: 0, maxPrice: 10000 });
@@ -40,7 +41,7 @@ export default function Shirts() {
                 </div>
                 <div className="relative page-wrap py-16 sm:py-24">
                     <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-4">
-                        <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-400 hover:text-white transition-colors shrink-0">
+                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-400 hover:text-white transition-colors shrink-0">
                             <HiOutlineArrowLeft className="w-4 h-4" /> Back
                         </button>
                         <span className="text-slate-700">|</span>
@@ -50,7 +51,7 @@ export default function Shirts() {
                             <li className="font-semibold text-slate-300">Shirts</li>
                         </ol>
                     </nav>
-                    <p className="section-label" style={{ color: "#c9a84c", marginBottom: "1rem" }}>Men's Collection</p>
+                    <p className="section-label" style={{ color: "var(--gold)", marginBottom: "1rem" }}>Men's Collection</p>
                     <h1 className="text-[34px] sm:text-[46px] font-extrabold text-white tracking-tight mb-4">Shirts Collection</h1>
                     <p className="text-[16px] max-w-lg leading-[1.75]" style={{ color: "rgba(255,255,255,0.6)" }}>
                         Premium shirts crafted from the finest Linen, Oxford, Twill &amp; Satin fabrics. Every piece, a statement.
@@ -103,7 +104,7 @@ export default function Shirts() {
                     {/* Product grid */}
                     <div className="flex-1">
                         {loading ? (
-                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {[...Array(6)].map((_, i) => (
                                     <div key={i} className="animate-pulse bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                                         <div className="aspect-[3/4] bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900" />
@@ -131,7 +132,7 @@ export default function Shirts() {
                                 </div>
                             </div>
                         ) : (
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "28px" }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {products.map((p) => (
                                     <ProductCard key={p._id} product={p} />
                                 ))}

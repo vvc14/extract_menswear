@@ -1,16 +1,17 @@
 import { Router } from "express";
 import { addProduct, updateProduct, deleteProduct, getUsers, updateUserRole, updateBulkShipping, getCategoryOptions, updateCategoryOptions } from "../controllers/adminController.js";
-import authMiddleware from "../middleware/auth.js";
+import authMiddleware, { requireRole } from "../middleware/auth.js";
 import { upload, uploadToCloudinary } from "../middleware/upload.js";
 
 const router = Router();
 
 router.use(authMiddleware);
+router.use(requireRole("admin"));
 
 // Products
-router.post("/products", upload.array("images", 5), uploadToCloudinary, addProduct);
+router.post("/products", upload.array("images", 10), uploadToCloudinary, addProduct);
 router.put("/products/bulk-shipping", updateBulkShipping);
-router.put("/products/:id", upload.array("images", 5), uploadToCloudinary, updateProduct);
+router.put("/products/:id", upload.array("images", 10), uploadToCloudinary, updateProduct);
 router.delete("/products/:id", deleteProduct);
 
 // User management

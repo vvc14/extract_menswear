@@ -3,7 +3,7 @@ import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSearch, HiOutlinePhotograph, HiOutlineCollection, HiOutlineTruck, HiOutlineCog } from "react-icons/hi";
 
-const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", selectedSizes: [], existingImages: [] };
+const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", videoUrl: "", selectedSizes: [], existingImages: [] };
 
 export default function AdminProducts() {
     const [products, setProducts] = useState([]);
@@ -21,46 +21,65 @@ export default function AdminProducts() {
     const [newStyle, setNewStyle] = useState("");
     const [newSize, setNewSize] = useState("");
     const [showManage, setShowManage] = useState(false);
+    const [objectUrls, setObjectUrls] = useState([]);
     const objectUrlsRef = useRef([]);
 
     // Revoke old object URLs when images change to prevent memory leaks
     useEffect(() => {
         objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
-        objectUrlsRef.current = Array.from(form.images || []).map((file) => URL.createObjectURL(file));
-        return () => objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+        const urls = Array.from(form.images || []).map((file) => URL.createObjectURL(file));
+        objectUrlsRef.current = urls;
+        setObjectUrls(urls);
+        return () => urls.forEach((url) => URL.revokeObjectURL(url));
     }, [form.images]);
 
-    const fetchProducts = async () => {
+    const fetchProducts = async (isMounted = true) => {
         try {
             const { data } = await API.get("/products");
-            setProducts(data);
+            if (isMounted) setProducts(data);
         } catch (err) {
             console.error("Failed to fetch products:", err);
         }
     };
 
-    const fetchCatOptions = async () => {
+    const fetchCatOptions = async (isMounted = true) => {
         try {
             const { data } = await API.get("/admin/category-options");
-            setCatOptions(data);
+            if (isMounted) setCatOptions(data);
         } catch (err) {
             console.error("Failed to fetch category options:", err);
         }
     };
 
-    useEffect(() => { fetchProducts(); fetchCatOptions(); }, []);
+    useEffect(() => {
+        let isMounted = true;
+        fetchProducts(isMounted);
+        fetchCatOptions(isMounted);
+        return () => { isMounted = false; };
+    }, []);
 
     const filtered = products.filter((p) => {
-        const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+        const query = search.toLowerCase();
+        const matchSearch =
+            p.name.toLowerCase().includes(query) ||
+            (p.fabric || "").toLowerCase().includes(query) ||
+            (p.style || "").toLowerCase().includes(query) ||
+            p.category.toLowerCase().includes(query);
         const matchCat = filterCat === "all" || p.category === filterCat;
         return matchSearch && matchCat;
     });
 
-    const openAdd = () => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
+    const openAdd = () => {
+        setEditing(null);
+        setForm(EMPTY_FORM);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
     const openEdit = (p) => {
         setEditing(p._id);
-        setForm({ name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price, originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "", stock: p.stock || 0, images: [], imageUrl: p.imageUrl || "", selectedSizes: p.sizes || [], existingImages: p.images || [p.imageUrl].filter(Boolean) });
+        setForm({ name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price, originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "", stock: p.stock || 0, images: [], imageUrl: p.imageUrl || "", videoUrl: p.videoUrl || "", selectedSizes: p.sizes || [], existingImages: p.images || [p.imageUrl].filter(Boolean) });
         setShowForm(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const handleFormChange = (key, value) => {
@@ -79,6 +98,22 @@ export default function AdminProducts() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (Number(form.price) < 0) {
+            alert("Price cannot be negative");
+            return;
+        }
+        if (form.originalPrice && Number(form.originalPrice) < 0) {
+            alert("Original price cannot be negative");
+            return;
+        }
+        if (form.shippingCost && Number(form.shippingCost) < 0) {
+            alert("Shipping cost cannot be negative");
+            return;
+        }
+        if (Number(form.stock) < 0) {
+            alert("Stock cannot be negative");
+            return;
+        }
         setSubmitting(true);
         const formData = new FormData();
         formData.append("name", form.name);
@@ -91,6 +126,7 @@ export default function AdminProducts() {
         formData.append("shippingCost", form.shippingCost || 0);
         formData.append("stock", form.stock);
         formData.append("sizes", JSON.stringify(form.selectedSizes || []));
+        formData.append("videoUrl", form.videoUrl || "");
         // Multiple images upload
         if (form.images && form.images.length > 0) {
             for (let i = 0; i < form.images.length; i++) {
@@ -275,7 +311,7 @@ export default function AdminProducts() {
                                     </div>
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Images (up to 5)</label>
+                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Images (up to 10)</label>
                                     {/* Existing images preview */}
                                     {form.existingImages && form.existingImages.length > 0 && (
                                         <div className="flex flex-wrap gap-3 mb-3">
@@ -293,7 +329,7 @@ export default function AdminProducts() {
                                     {/* New files preview */}
                                     {form.images && form.images.length > 0 && (
                                         <div className="flex flex-wrap gap-3 mb-3">
-                                            {objectUrlsRef.current.map((url, idx) => (
+                                            {objectUrls.map((url, idx) => (
                                                 <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200 group">
                                                     <img src={url} alt={`New ${idx + 1}`} className="w-full h-full object-cover" />
                                                     <button type="button" onClick={() => {
@@ -311,13 +347,18 @@ export default function AdminProducts() {
                                             <input type="file" accept="image/*" multiple onChange={(e) => {
                                                 const currentFiles = Array.from(form.images || []);
                                                 const newFiles = Array.from(e.target.files);
-                                                const combined = [...currentFiles, ...newFiles].slice(0, 5);
+                                                const combined = [...currentFiles, ...newFiles].slice(0, 10);
                                                 setForm({ ...form, images: combined });
                                             }} className="hidden" />
                                         </label>
                                     </div>
                                     <p className="text-[12px] text-slate-400 mt-2">Or enter image URL below (first URL will be the main image)</p>
                                     <input type="url" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." className={inputClass + " mt-2"} />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Video URL (optional)</label>
+                                    <input type="url" value={form.videoUrl} onChange={(e) => setForm({ ...form, videoUrl: e.target.value })} placeholder="https://youtube.com/... or direct video URL" className={inputClass} />
+                                    <p className="text-[12px] text-slate-400 mt-2">Paste a YouTube, Vimeo, or direct .mp4 video link to showcase the product</p>
                                 </div>
                                 <div className="md:col-span-2 flex items-center gap-3 pt-3">
                                     <button type="submit" disabled={submitting}
@@ -488,10 +529,10 @@ export default function AdminProducts() {
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex items-center justify-end gap-1.5">
-                                        <button onClick={() => openEdit(p)} className="p-2.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-primary" aria-label={`Edit ${p.name}`}>
+                                        <button onClick={() => openEdit(p)} className="p-2.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-primary cursor-pointer" aria-label={`Edit ${p.name}`}>
                                             <HiOutlinePencil className="w-5 h-5" />
                                         </button>
-                                        <button onClick={() => handleDelete(p._id)} className="p-2.5 rounded-lg hover:bg-rose-50 transition-colors text-slate-400 hover:text-rose-500" aria-label={`Delete ${p.name}`}>
+                                        <button onClick={() => handleDelete(p._id)} className="p-2.5 rounded-lg hover:bg-rose-50 transition-colors text-slate-400 hover:text-rose-500 cursor-pointer" aria-label={`Delete ${p.name}`}>
                                             <HiOutlineTrash className="w-5 h-5" />
                                         </button>
                                     </div>

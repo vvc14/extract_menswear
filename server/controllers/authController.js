@@ -156,3 +156,40 @@ export const getProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// ─── Update Profile ───
+export const updateProfile = async (req, res) => {
+    try {
+        const { name, addresses } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (name) user.name = name;
+        
+        if (addresses !== undefined) {
+            if (!Array.isArray(addresses)) {
+                return res.status(400).json({ message: "Addresses must be an array" });
+            }
+
+            for (const addr of addresses) {
+                if (!addr.name || !addr.phone || !addr.street || !addr.city || !addr.state || !addr.pincode) {
+                    return res.status(400).json({ message: "All address fields (name, phone, street, city, state, pincode) are required." });
+                }
+                if (!/^\d{10}$/.test(addr.phone)) {
+                    return res.status(400).json({ message: `Phone number '${addr.phone}' must be exactly 10 digits.` });
+                }
+                if (!/^\d{6}$/.test(addr.pincode)) {
+                    return res.status(400).json({ message: `Pincode '${addr.pincode}' must be exactly 6 digits and numeric only.` });
+                }
+            }
+
+            user.addresses = addresses;
+        }
+
+        await user.save();
+        const updatedUser = await User.findById(req.user.id).select("-password");
+        res.json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

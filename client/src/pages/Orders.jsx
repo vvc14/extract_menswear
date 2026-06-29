@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineClipboardList, HiOutlineDownload, HiOutlineRefresh, HiOutlineReply, HiOutlineX, HiOutlineShoppingCart, HiOutlineArrowLeft } from "react-icons/hi";
 import API from "../services/api";
@@ -16,6 +16,7 @@ const STATUS_STYLES = {
 };
 
 export default function Orders() {
+    const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState(null); // { type: "return"|"exchange", orderId }
@@ -99,7 +100,7 @@ export default function Orders() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                 {/* Breadcrumb */}
                 <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }} className="flex items-center gap-4">
-                    <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
                         <HiOutlineArrowLeft className="w-4 h-4" /> Back
                     </button>
                     <span className="text-slate-300 dark:text-slate-600">|</span>

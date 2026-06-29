@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { HiOutlineRefresh, HiOutlineArrowLeft, HiOutlineShieldCheck, HiOutlineClock, HiOutlineCreditCard, HiOutlineInformationCircle } from "react-icons/hi";
 
@@ -17,12 +17,13 @@ const EXCHANGE_STEPS = [
 ];
 
 export default function ReturnsExchange() {
+    const navigate = useNavigate();
     return (
         <main id="main-content">
             <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-4">
-                        <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
                             <HiOutlineArrowLeft className="w-4 h-4" /> Back
                         </button>
                         <span className="text-slate-300 dark:text-slate-600">|</span>
@@ -55,7 +56,7 @@ export default function ReturnsExchange() {
                             { icon: HiOutlineShieldCheck, title: "Free Pickup", desc: "We arrange doorstep pickup — no extra charges" },
                         ].map((item) => (
                             <div key={item.title} className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-7 text-center">
-                                <item.icon className="w-7 h-7 mx-auto mb-3" style={{ color: "#c9a84c" }} />
+                                <item.icon className="w-7 h-7 mx-auto mb-3" style={{ color: "var(--gold)" }} />
                                 <h3 className="text-[16px] font-bold text-slate-900 dark:text-white mb-1.5">{item.title}</h3>
                                 <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.6]">{item.desc}</p>
                             </div>
@@ -93,7 +94,7 @@ export default function ReturnsExchange() {
                             <div className="space-y-6">
                                 {EXCHANGE_STEPS.map((step) => (
                                     <div key={step.step} className="flex gap-5">
-                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-[14px] font-extrabold text-white" style={{ background: "#c9a84c" }}>
+                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-[14px] font-extrabold text-white" style={{ background: "var(--gold)" }}>
                                             {step.step}
                                         </div>
                                         <div>
@@ -124,17 +125,17 @@ export default function ReturnsExchange() {
                     {/* Help note */}
                     <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.12)" }}>
-                            <HiOutlineInformationCircle className="w-5 h-5" style={{ color: "#c9a84c" }} />
+                            <HiOutlineInformationCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
                         </div>
                         <div>
                             <p className="text-[16px] font-bold text-slate-900 dark:text-white mb-1.5">Need help with a return or exchange?</p>
                             <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.7]">
                                 Visit{" "}
-                                <Link to="/orders" className="font-semibold hover:underline" style={{ color: "#c9a84c" }}>
+                                <Link to="/orders" className="font-semibold hover:underline" style={{ color: "var(--gold)" }}>
                                     your orders page
                                 </Link>{" "}
                                 to initiate a request, or{" "}
-                                <Link to="/contact" className="font-semibold hover:underline" style={{ color: "#c9a84c" }}>
+                                <Link to="/contact" className="font-semibold hover:underline" style={{ color: "var(--gold)" }}>
                                     contact us
                                 </Link>{" "}
                                 for assistance.

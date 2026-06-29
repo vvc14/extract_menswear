@@ -18,11 +18,13 @@ import Contact from "./pages/Contact";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Profile from "./pages/Profile";
 
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrders from "./pages/AdminOrders";
 import AdminUsers from "./pages/AdminUsers";
+import AdminLogin from "./pages/AdminLogin";
 import Wishlist from "./pages/Wishlist";
 import SizeGuide from "./pages/SizeGuide";
 import Orders from "./pages/Orders";
@@ -36,7 +38,14 @@ function ProtectedRoute({ children }) {
   const token = useSelector((s) => s.auth.token);
   const admin = useSelector((s) => s.auth.admin);
   const user = useSelector((s) => s.auth.user);
-  return token && (admin || user?.role === "admin") ? children : <Navigate to="/login" replace />;
+
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  if (!admin && user?.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+  return children;
 }
 
 function AppRoutes() {
@@ -61,13 +70,16 @@ function AppRoutes() {
         <Route path="wishlist" element={<Wishlist />} />
         <Route path="size-guide" element={<SizeGuide />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="profile" element={<Profile />} />
         <Route path="shipping" element={<ShippingInfo />} />
         <Route path="returns" element={<ReturnsExchange />} />
         <Route path="faq" element={<FAQ />} />
       </Route>
 
+      {/* Admin login — public, no guard */}
+      <Route path="admin/login" element={<AdminLogin />} />
 
-
+      {/* Admin panel — protected */}
       <Route
         path="admin"
         element={
@@ -76,6 +88,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
