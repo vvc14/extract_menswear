@@ -56,10 +56,8 @@ export default function FilterSidebar({ category, onFilterChange }) {
         );
     };
 
-    const handlePriceChange = (value) => {
-        const updated = [0, Math.max(0, Number(value))];
-        setPriceRange(updated);
-        emitFilters(selectedFabrics, selectedStyles, selectedSizes, updated);
+    const handlePriceChange = (_value) => {
+        // No longer used — price is now selected via fixed quarter buttons
     };
 
     const emitFilters = (fabrics, styles, sizes, price) => {
@@ -81,8 +79,8 @@ export default function FilterSidebar({ category, onFilterChange }) {
     };
 
     const styleLabel = category === "shirt" ? "Style" : "Type";
-    const hasActiveFilters = selectedFabrics.length > 0 || selectedStyles.length > 0 || selectedSizes.length > 0 || priceRange[1] < 10000;
-    const activeCount = selectedFabrics.length + selectedStyles.length + selectedSizes.length + (priceRange[1] < 10000 ? 1 : 0);
+    const hasActiveFilters = selectedFabrics.length > 0 || selectedStyles.length > 0 || selectedSizes.length > 0 || priceRange[0] !== 0 || priceRange[1] !== 10000;
+    const activeCount = selectedFabrics.length + selectedStyles.length + selectedSizes.length + (priceRange[0] !== 0 || priceRange[1] !== 10000 ? 1 : 0);
 
     return (
         <aside className="w-full lg:w-[250px] shrink-0" aria-label="Product filters">
@@ -174,26 +172,36 @@ export default function FilterSidebar({ category, onFilterChange }) {
                     )}
 
                     <FilterSection title="Price" defaultOpen={false}>
-                        <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <span className="text-[15px] font-semibold text-slate-900 dark:text-white">
-                                    Up to ₹{priceRange[1].toLocaleString("en-IN")}
-                                </span>
-                            </div>
-                            <input
-                                type="range"
-                                min={0}
-                                max={10000}
-                                step={100}
-                                value={priceRange[1]}
-                                onChange={(e) => handlePriceChange(e.target.value)}
-                                className="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full appearance-none cursor-pointer"
-                                aria-label="Maximum price filter"
-                            />
-                            <div className="flex justify-between mt-2 text-[13px] text-slate-400 font-medium">
-                                <span>₹0</span>
-                                <span>₹10,000</span>
-                            </div>
+                        <div className="flex flex-col gap-2">
+                            {[
+                                { label: "Under ₹250", min: 0, max: 250 },
+                                { label: "₹250 – ₹500", min: 250, max: 500 },
+                                { label: "₹500 – ₹750", min: 500, max: 750 },
+                                { label: "₹750 – ₹1000", min: 750, max: 1000 },
+                            ].map((range) => {
+                                const isActive = priceRange[0] === range.min && priceRange[1] === range.max;
+                                return (
+                                    <button
+                                        key={range.label}
+                                        onClick={() => {
+                                            if (isActive) {
+                                                setPriceRange([0, 10000]);
+                                                emitFilters(selectedFabrics, selectedStyles, selectedSizes, [0, 10000]);
+                                            } else {
+                                                setPriceRange([range.min, range.max]);
+                                                emitFilters(selectedFabrics, selectedStyles, selectedSizes, [range.min, range.max]);
+                                            }
+                                        }}
+                                        className={`w-full text-left px-4 py-2.5 rounded-xl text-[14px] font-semibold border-2 transition-all duration-200 cursor-pointer ${
+                                            isActive
+                                                ? "bg-primary dark:bg-gold text-white border-primary dark:border-gold shadow-sm shadow-primary/20 dark:shadow-gold/20"
+                                                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-primary/40 dark:hover:border-gold/40 hover:text-slate-900 dark:hover:text-white"
+                                        }`}
+                                    >
+                                        {range.label}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </FilterSection>
                 </div>
