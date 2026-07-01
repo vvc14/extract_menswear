@@ -71,6 +71,19 @@ const cartSlice = createSlice({
             state.items = [];
             state.synced = false;
         },
+        updateCartStocks: (state, action) => {
+            // action.payload is an array of { id, stock }
+            action.payload.forEach(({ id, stock }) => {
+                state.items.forEach((item) => {
+                    if (item._id === id) {
+                        item.stock = stock;
+                        if (item.quantity > stock) {
+                            item.quantity = Math.max(0, stock);
+                        }
+                    }
+                });
+            });
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(fetchCart.fulfilled, (state, action) => {
@@ -94,5 +107,5 @@ const cartSlice = createSlice({
     },
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart, resetCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateQuantity, clearCart, resetCart, updateCartStocks } = cartSlice.actions;
 export default cartSlice.reducer;

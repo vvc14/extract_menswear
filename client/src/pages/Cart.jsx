@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { removeFromCart, updateQuantity, clearCart } from "../redux/cartSlice";
+import { removeFromCart, updateQuantity, clearCart, updateCartStocks } from "../redux/cartSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { initiateRazorpayPayment } from "../services/razorpay";
 import API from "../services/api";
@@ -20,6 +20,33 @@ export default function Cart() {
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
     const shipping = items.reduce((sum, i) => sum + (Number(i.shippingCost) || 0) * i.quantity, 0);
+
+    // Fetch and sync the latest product stock dynamically from the database on load
+    useEffect(() => {
+        if (items.length === 0) return;
+        
+        const syncStock = async () => {
+            try {
+                const stockUpdates = [];
+                for (const item of items) {
+                    try {
+                        const { data } = await API.get(`/products/${item._id}`);
+                        stockUpdates.push({ id: item._id, stock: data.stock });
+                    } catch (err) {
+                        console.error(`Failed to sync stock for product ${item._id}:`, err);
+                    }
+                }
+                
+                if (stockUpdates.length > 0) {
+                    dispatch(updateCartStocks(stockUpdates));
+                }
+            } catch (err) {
+                console.error("Failed to sync cart stocks:", err);
+            }
+        };
+        
+        syncStock();
+    }, []);
 
     // Check if any item has stock issues
     const hasStockIssues = items.some((item) => {
