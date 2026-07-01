@@ -31,6 +31,7 @@ import Orders from "./pages/Orders";
 import ShippingInfo from "./pages/ShippingInfo";
 import ReturnsExchange from "./pages/ReturnsExchange";
 import FAQ from "./pages/FAQ";
+import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "./context/ThemeContext";
 import { preloadRazorpay } from "./services/razorpay";
 
@@ -74,6 +75,7 @@ function AppRoutes() {
         <Route path="shipping" element={<ShippingInfo />} />
         <Route path="returns" element={<ReturnsExchange />} />
         <Route path="faq" element={<FAQ />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       {/* Admin login — public, no guard */}
@@ -93,6 +95,11 @@ function AppRoutes() {
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
+      </Route>
+
+      {/* Top-level catch-all for non-Layout routes */}
+      <Route path="*" element={<Layout />}>
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
     </>
