@@ -1,11 +1,15 @@
 import { Router } from "express";
-import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin } from "../controllers/authController.js";
+import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp } from "../controllers/authController.js";
 import { userAuth } from "../middleware/auth.js";
 
 const router = Router();
 
 // Email check (unified flow)
 router.post("/check-email", checkEmail);
+
+// OTP email verification
+router.post("/send-otp", sendOtp);
+router.post("/verify-otp", verifyOtp);
 
 // Google sign-in
 router.post("/google", googleLogin);

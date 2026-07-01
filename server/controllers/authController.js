@@ -3,6 +3,9 @@ import { OAuth2Client } from "google-auth-library";
 import Admin from "../models/Admin.js";
 import User from "../models/User.js";
 import crypto from "crypto";
+import { generateOtp, saveOtp, verifyOtp as verifyStoredOtp } from "../utils/otpStore.js";
+import { sendOtpEmail } from "../utils/emailSender.js";
+import { validateEmailDomain } from "../utils/emailValidator.js";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -60,6 +63,71 @@ export const checkEmail = async (req, res) => {
     }
 };
 
+// ─── Send OTP to email for verification ───
+export const sendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: "Email is required" });
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        // Validate domain: block disposable emails & verify MX records
+        const domainCheck = await validateEmailDomain(normalizedEmail);
+        if (!domainCheck.valid) {
+            return res.status(400).json({ message: domainCheck.message });
+        }
+
+        // Check if account already exists
+        const existingUser = await User.findOne({ email: normalizedEmail });
+        if (existingUser) {
+            return res.status(409).json({ message: "An account with this email already exists" });
+        }
+
+        const otp = generateOtp();
+        const result = saveOtp(normalizedEmail, otp);
+
+        if (result.error) {
+            return res.status(429).json({ message: result.error });
+        }
+
+        await sendOtpEmail(normalizedEmail, otp);
+        res.json({ message: "Verification code sent to your email" });
+    } catch (error) {
+        console.error("Send OTP error:", error.message);
+        // Check for common email delivery failures
+        if (error.responseCode === 550 || error.code === "EENVELOPE") {
+            return res.status(400).json({ message: "This email address does not exist. Please check and try again." });
+        }
+        res.status(500).json({ message: "Failed to send verification code. Please try again." });
+    }
+};
+
+// ─── Verify OTP and return email verification token ───
+export const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) return res.status(400).json({ message: "Email and verification code are required" });
+
+        const normalizedEmail = email.toLowerCase().trim();
+        const result = verifyStoredOtp(normalizedEmail, otp);
+
+        if (!result.valid) {
+            return res.status(400).json({ message: result.message });
+        }
+
+        // Generate a short-lived token proving this email was verified
+        const emailVerificationToken = jwt.sign(
+            { email: normalizedEmail, purpose: "email-verification" },
+            process.env.JWT_SECRET,
+            { expiresIn: "15m" }
+        );
+
+        res.json({ verified: true, emailVerificationToken });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // ─── Admin Login (existing) ───
 export const adminLogin = async (req, res) => {
     try {
@@ -85,15 +153,28 @@ export const adminLogin = async (req, res) => {
     }
 };
 
-// ─── User Register ───
+// ─── User Register (requires email verification token) ───
 export const userRegister = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, emailVerificationToken } = req.body;
         if (!name || !email || !password) {
             return res.status(400).json({ message: "Name, email, and password are required" });
         }
+        if (!emailVerificationToken) {
+            return res.status(400).json({ message: "Email verification is required" });
+        }
         if (password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
+        }
+
+        // Verify the email verification token
+        try {
+            const decoded = jwt.verify(emailVerificationToken, process.env.JWT_SECRET);
+            if (decoded.purpose !== "email-verification" || decoded.email !== email.toLowerCase().trim()) {
+                return res.status(400).json({ message: "Invalid email verification. Please verify your email again." });
+            }
+        } catch (err) {
+            return res.status(400).json({ message: "Email verification expired. Please verify your email again." });
         }
 
         const exists = await User.findOne({ email });
