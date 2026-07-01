@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import API from "../services/api";
 import { Link } from "react-router-dom";
+import { ADMIN_PATH } from "../config/adminPath";
 import { motion } from "framer-motion";
 import { HiOutlineCollection, HiOutlineClock, HiOutlineUsers, HiOutlineTrendingUp, HiOutlineArrowRight } from "react-icons/hi";
 
@@ -31,10 +32,10 @@ export default function AdminDashboard() {
     }, []);
 
     const cards = [
-        { label: "Total Products", value: stats.total, icon: HiOutlineCollection, grad: "from-primary to-blue-600", link: "/admin/products" },
-        { label: "Shirts", value: stats.shirts, icon: HiOutlineTrendingUp, grad: "from-amber-500 to-orange-500", link: "/admin/products" },
-        { label: "Trousers", value: stats.trousers, icon: HiOutlineCollection, grad: "from-emerald-500 to-teal-500", link: "/admin/products" },
-        { label: "Registered Users", value: userCount, icon: HiOutlineUsers, grad: "from-violet-500 to-purple-600", link: "/admin/users" },
+        { label: "Total Products", value: stats.total, icon: HiOutlineCollection, grad: "from-primary to-blue-600", link: `/${ADMIN_PATH}/products` },
+        { label: "Shirts", value: stats.shirts, icon: HiOutlineTrendingUp, grad: "from-amber-500 to-orange-500", link: `/${ADMIN_PATH}/products` },
+        { label: "Trousers", value: stats.trousers, icon: HiOutlineCollection, grad: "from-emerald-500 to-teal-500", link: `/${ADMIN_PATH}/products` },
+        { label: "Registered Users", value: userCount, icon: HiOutlineUsers, grad: "from-violet-500 to-purple-600", link: `/${ADMIN_PATH}/users` },
     ];
 
     return (
@@ -70,7 +71,7 @@ export default function AdminDashboard() {
                 <div style={{ marginBottom: "24px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
                         <h2 className="text-[22px] font-bold text-slate-900">Recently Added</h2>
-                        <Link to="/admin/products" className="text-[15px] font-semibold text-primary hover:text-primary-dark transition-colors flex items-center gap-1.5">
+                        <Link to={`/${ADMIN_PATH}/products`} className="text-[15px] font-semibold text-primary hover:text-primary-dark transition-colors flex items-center gap-1.5">
                             View all <HiOutlineArrowRight className="w-4 h-4" />
                         </Link>
                     </div>

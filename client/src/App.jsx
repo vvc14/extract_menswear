@@ -4,6 +4,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import { Provider, useSelector } from "react-redux";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import store from "./redux/store";
+import { ADMIN_PATH } from "./config/adminPath";
 import useCartSync from "./hooks/useCartSync";
 import useWishlistSync from "./hooks/useWishlistSync";
 import Layout from "./components/Layout";
@@ -41,7 +42,7 @@ function ProtectedRoute({ children }) {
   const user = useSelector((s) => s.auth.user);
 
   if (!token) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to={`/${ADMIN_PATH}/login`} replace />;
   }
   if (!admin && user?.role !== "admin") {
     return <Navigate to="/" replace />;
@@ -78,12 +79,12 @@ function AppRoutes() {
         <Route path="*" element={<NotFound />} />
       </Route>
 
-      {/* Admin login — public, no guard */}
-      <Route path="admin/login" element={<AdminLogin />} />
+      {/* Admin login — public, secret path */}
+      <Route path={`${ADMIN_PATH}/login`} element={<AdminLogin />} />
 
-      {/* Admin panel — protected */}
+      {/* Admin panel — protected, secret path */}
       <Route
-        path="admin"
+        path={ADMIN_PATH}
         element={
           <ProtectedRoute>
             <AdminLayout />

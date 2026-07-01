@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
+import { ADMIN_PATH } from "../config/adminPath";
 import {
     HiOutlineViewGrid, HiOutlineCollection, HiOutlineUsers,
     HiOutlineLogout, HiOutlineExternalLink, HiOutlineMenu, HiOutlineX,
@@ -11,10 +12,10 @@ import {
 const SIDEBAR_W = 230;
 
 const NAV = [
-    { to: "/admin/dashboard", label: "Dashboard", icon: HiOutlineViewGrid },
-    { to: "/admin/products", label: "Products", icon: HiOutlineCollection },
-    { to: "/admin/orders", label: "Orders", icon: HiOutlineClipboardList },
-    { to: "/admin/users", label: "Users", icon: HiOutlineUsers },
+    { to: `/${ADMIN_PATH}/dashboard`, label: "Dashboard", icon: HiOutlineViewGrid },
+    { to: `/${ADMIN_PATH}/products`, label: "Products", icon: HiOutlineCollection },
+    { to: `/${ADMIN_PATH}/orders`, label: "Orders", icon: HiOutlineClipboardList },
+    { to: `/${ADMIN_PATH}/users`, label: "Users", icon: HiOutlineUsers },
 ];
 
 export default function AdminLayout() {

@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { loginSuccess } from "../redux/authSlice";
 import API from "../services/api";
+import { ADMIN_PATH } from "../config/adminPath";
 import { motion } from "framer-motion";
 import { HiOutlineEye, HiOutlineEyeOff, HiOutlineLockClosed, HiOutlineUser, HiOutlineShieldCheck } from "react-icons/hi";
 
@@ -22,7 +23,7 @@ export default function AdminLogin() {
         try {
             const { data } = await API.post("/auth/admin-login", { username, password });
             dispatch(loginSuccess(data));
-            navigate("/admin/dashboard");
+            navigate(`/${ADMIN_PATH}/dashboard`);
         } catch (err) {
             setError(err.response?.data?.message || "Invalid admin credentials");
         } finally {
