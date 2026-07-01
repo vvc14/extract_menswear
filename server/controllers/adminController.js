@@ -147,6 +147,29 @@ export const updateUserRole = async (req, res) => {
     }
 };
 
+export const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Prevent admin from deleting themselves
+        if (user._id.toString() === req.admin.id) {
+            return res.status(400).json({ message: "You cannot delete your own account" });
+        }
+
+        // Clean up related data
+        const { default: Cart } = await import("../models/Cart.js");
+        const { default: Wishlist } = await import("../models/Wishlist.js");
+        await Cart.deleteMany({ userId: user._id });
+        await Wishlist.deleteMany({ userId: user._id });
+
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // ─── Category Options Management ───
 
 const DEFAULTS = {

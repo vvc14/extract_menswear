@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import API from "../services/api";
-import { motion } from "framer-motion";
-import { HiOutlineShieldCheck, HiOutlineUser, HiOutlineSearch, HiOutlineUsers } from "react-icons/hi";
+import { motion, AnimatePresence } from "framer-motion";
+import { HiOutlineShieldCheck, HiOutlineUser, HiOutlineSearch, HiOutlineUsers, HiOutlineTrash, HiOutlineExclamation } from "react-icons/hi";
 
 export default function AdminUsers() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filterRole, setFilterRole] = useState("all");
+    const [deleteModal, setDeleteModal] = useState(null); // user object or null
+    const [deleting, setDeleting] = useState(false);
 
     const fetchUsers = async (isMounted = true) => {
         try {
@@ -33,6 +35,20 @@ export default function AdminUsers() {
             setUsers((prev) => prev.map((u) => (u._id === data._id ? data : u)));
         } catch (err) {
             console.error("Failed to toggle role:", err);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!deleteModal) return;
+        setDeleting(true);
+        try {
+            await API.delete(`/admin/users/${deleteModal._id}`);
+            setUsers((prev) => prev.filter((u) => u._id !== deleteModal._id));
+            setDeleteModal(null);
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to delete user");
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -127,13 +143,22 @@ export default function AdminUsers() {
                                         {new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button onClick={() => toggleRole(u._id, u.role)}
-                                            className={`text-[13px] font-bold px-4 py-2 rounded-lg transition-all ${u.role === "admin"
-                                                    ? "text-rose-600 bg-rose-50 hover:bg-rose-100"
-                                                    : "text-primary bg-primary/10 hover:bg-primary/20"
-                                                }`}>
-                                            {u.role === "admin" ? "Revoke Admin" : "Make Admin"}
-                                        </button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button onClick={() => toggleRole(u._id, u.role)}
+                                                className={`text-[13px] font-bold px-4 py-2 rounded-lg transition-all ${u.role === "admin"
+                                                        ? "text-rose-600 bg-rose-50 hover:bg-rose-100"
+                                                        : "text-primary bg-primary/10 hover:bg-primary/20"
+                                                    }`}>
+                                                {u.role === "admin" ? "Revoke Admin" : "Make Admin"}
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteModal(u)}
+                                                className="text-[13px] font-bold px-3 py-2 rounded-lg transition-all text-rose-500 bg-rose-50 hover:bg-rose-100 hover:text-rose-700"
+                                                title="Delete user"
+                                            >
+                                                <HiOutlineTrash className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -150,6 +175,84 @@ export default function AdminUsers() {
                     </table>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {deleteModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                        style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+                        onClick={() => !deleting && setDeleteModal(null)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Warning icon */}
+                            <div className="flex justify-center mb-5">
+                                <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+                                    <HiOutlineExclamation className="w-8 h-8 text-rose-500" />
+                                </div>
+                            </div>
+
+                            <h2 className="text-[22px] font-extrabold text-slate-900 text-center mb-2">Delete User</h2>
+                            <p className="text-[15px] text-slate-500 text-center mb-2">
+                                Are you sure you want to delete this user?
+                            </p>
+
+                            {/* User info card */}
+                            <div className="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center shrink-0">
+                                        <span className="text-[14px] font-extrabold text-slate-600">
+                                            {deleteModal.name?.charAt(0).toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-slate-900 text-[15px] truncate">{deleteModal.name}</p>
+                                        <p className="text-[13px] text-slate-400 truncate">{deleteModal.email}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-[13px] text-rose-500 font-semibold text-center mb-6 bg-rose-50 rounded-lg px-4 py-2.5 border border-rose-100">
+                                ⚠️ This action is permanent. The user's cart and wishlist data will also be removed.
+                            </p>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setDeleteModal(null)}
+                                    disabled={deleting}
+                                    className="flex-1 py-3 text-[15px] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDeleteUser}
+                                    disabled={deleting}
+                                    className="flex-1 py-3 text-[15px] font-bold text-white bg-rose-500 hover:bg-rose-600 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {deleting ? (
+                                        "Deleting..."
+                                    ) : (
+                                        <>
+                                            <HiOutlineTrash className="w-4 h-4" />
+                                            Delete User
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 }

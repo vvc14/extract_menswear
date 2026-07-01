@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addProduct, updateProduct, deleteProduct, getUsers, updateUserRole, updateBulkShipping, getCategoryOptions, updateCategoryOptions } from "../controllers/adminController.js";
+import { addProduct, updateProduct, deleteProduct, getUsers, updateUserRole, deleteUser, updateBulkShipping, getCategoryOptions, updateCategoryOptions } from "../controllers/adminController.js";
 import authMiddleware, { requireRole } from "../middleware/auth.js";
 import { upload, uploadToCloudinary } from "../middleware/upload.js";
 
@@ -17,6 +17,7 @@ router.delete("/products/:id", deleteProduct);
 // User management
 router.get("/users", getUsers);
 router.put("/users/:id/role", updateUserRole);
+router.delete("/users/:id", deleteUser);
 
 // Category options (fabrics/styles)
 router.get("/category-options", getCategoryOptions);
