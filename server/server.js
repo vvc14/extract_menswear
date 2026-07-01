@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import mongoSanitize from "express-mongo-sanitize";
 import connectDB from "./config/db.js";
 import productRoutes from "./routes/productRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
@@ -47,6 +48,9 @@ const authLimiter = rateLimit({
 
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+// ─── Prevent NoSQL Injection ───
+app.use(mongoSanitize());
 
 // ─── Routes ───
 app.use("/api/products", productRoutes);

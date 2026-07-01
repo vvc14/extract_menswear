@@ -149,12 +149,18 @@ export default function Wishlist() {
                                             {/* Rating */}
                                             <div className="flex items-center gap-2 mb-4">
                                                 <div className="flex items-center gap-0.5">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <HiStar key={i} className={`w-3.5 h-3.5 ${i < 4 ? "" : "text-slate-200 dark:text-slate-600"}`}
-                                                            style={i < 4 ? { color: "var(--gold)" } : {}} />
-                                                    ))}
+                                                    {[...Array(5)].map((_, i) => {
+                                                        const ratingVal = item.ratings || 0;
+                                                        return (
+                                                            <HiStar 
+                                                                key={i} 
+                                                                className={`w-3.5 h-3.5 ${i < Math.floor(ratingVal) ? "" : "text-slate-200 dark:text-slate-600"}`}
+                                                                style={i < Math.floor(ratingVal) ? { color: "var(--gold)" } : {}} 
+                                                            />
+                                                        );
+                                                    })}
                                                 </div>
-                                                <span className="text-[12px] font-semibold text-slate-400">(4.0)</span>
+                                                <span className="text-[12px] font-semibold text-slate-400">({item.ratings ? item.ratings.toFixed(1) : "0.0"})</span>
                                             </div>
 
                                             {/* Price */}

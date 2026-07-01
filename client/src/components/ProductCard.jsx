@@ -46,7 +46,7 @@ export default function ProductCard({ product, compact = false }) {
 
     const discount = product.discount || 0;
     const originalPrice = product.originalPrice || 0;
-    const rating = 4.0;
+    const rating = product.ratings || 0;
 
     return (
         <motion.article

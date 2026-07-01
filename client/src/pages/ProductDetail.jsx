@@ -5,7 +5,7 @@ import { addToCart } from "../redux/cartSlice";
 import { toggleWishlist } from "../redux/wishlistSlice";
 import API from "../services/api";
 import { motion } from "framer-motion";
-import { HiOutlineShoppingCart, HiStar, HiOutlineStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart, HiOutlineArrowLeft, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExclamation, HiOutlineChatAlt2 } from "react-icons/hi";
+import { HiOutlineShoppingCart, HiStar, HiOutlineStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart, HiOutlineArrowLeft, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExclamation, HiOutlineChatAlt2, HiOutlinePhotograph, HiOutlineX, HiOutlineTrash } from "react-icons/hi";
 import ProductCard from "../components/ProductCard";
 
 export default function ProductDetail() {
@@ -23,10 +23,13 @@ export default function ProductDetail() {
     const [similarProducts, setSimilarProducts] = useState([]);
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewComment, setReviewComment] = useState("");
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState("");
+    const [lightboxImg, setLightboxImg] = useState("");
     const [submittingReview, setSubmittingReview] = useState(false);
     const [reviewSuccess, setReviewSuccess] = useState(false);
     const [showReviewForm, setShowReviewForm] = useState(false);
-    const showReviews = false;
+    const showReviews = true;
     const isWishlisted = wishlistItems.some((i) => i._id === product?._id);
 
     useEffect(() => {
@@ -106,6 +109,16 @@ export default function ProductDetail() {
         setTimeout(() => setAdded(false), 2000);
     };
 
+    const handleBuyNow = () => {
+        if (!product || product.stock <= 0) return;
+        if (product?.sizes?.length > 0 && !selectedSize) {
+            alert("Please select a size first");
+            return;
+        }
+        dispatch(addToCart({ ...product, size: selectedSize, qtyToAdd: qty }));
+        navigate("/cart");
+    };
+
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
         if (!user) {
@@ -115,12 +128,22 @@ export default function ProductDetail() {
         if (!reviewComment.trim()) return;
         setSubmittingReview(true);
         try {
-            const { data } = await API.post(`/products/${id}/reviews`, {
-                rating: reviewRating,
-                comment: reviewComment
+            const formData = new FormData();
+            formData.append("rating", reviewRating);
+            formData.append("comment", reviewComment);
+            if (imageFile) {
+                formData.append("image", imageFile);
+            }
+
+            const { data } = await API.post(`/products/${id}/reviews`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
             });
             setProduct(data);
             setReviewComment("");
+            setImageFile(null);
+            setImagePreview("");
             setReviewRating(5);
             setReviewSuccess(true);
             setTimeout(() => setReviewSuccess(false), 3000);
@@ -129,6 +152,23 @@ export default function ProductDetail() {
         } finally {
             setSubmittingReview(false);
         }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeSelectedImage = () => {
+        setImageFile(null);
+        setImagePreview("");
     };
 
     if (loading) {
@@ -254,12 +294,37 @@ export default function ProductDetail() {
 
                         {/* Ratings */}
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="flex items-center gap-1 bg-emerald text-white text-[15px] font-bold px-3 py-1.5 rounded-xl">
-                                {product.ratings ? product.ratings.toFixed(1) : "4.0"} <HiStar className="w-3.5 h-3.5" />
-                            </div>
-                            <span className="text-[15px] font-semibold text-slate-500 dark:text-slate-400">
-                                {product.reviews?.length || 0} customer review{(product.reviews?.length || 0) !== 1 ? "s" : ""}
-                            </span>
+                            <button 
+                                onClick={() => {
+                                    const element = document.getElementById("reviews-section");
+                                    if (element) element.scrollIntoView({ behavior: "smooth" });
+                                }}
+                                className="flex items-center gap-1 bg-emerald text-white text-[15px] font-bold px-3 py-1.5 rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                            >
+                                {product.ratings ? product.ratings.toFixed(1) : "0.0"} <HiStar className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const element = document.getElementById("reviews-section");
+                                    if (element) element.scrollIntoView({ behavior: "smooth" });
+                                }}
+                                className="flex items-center gap-1 hover:underline cursor-pointer"
+                            >
+                                <div className="flex gap-0.5">
+                                    {[...Array(5)].map((_, i) => {
+                                        const ratingVal = product.ratings || 0;
+                                        return (
+                                            <HiStar
+                                                key={i}
+                                                className={`w-4 h-4 ${i < Math.round(ratingVal) ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                                <span className="text-[15px] font-semibold text-slate-500 dark:text-slate-400 ml-1">
+                                    ({product.reviews?.length || 0} customer review{(product.reviews?.length || 0) !== 1 ? "s" : ""})
+                                </span>
+                            </button>
                         </div>
 
                         {/* Price */}
@@ -355,6 +420,14 @@ export default function ProductDetail() {
                                 )}
                             </button>
                             <button
+                                onClick={handleBuyNow}
+                                disabled={product.stock === 0}
+                                className="flex-1 flex items-center justify-center gap-2.5 text-[15px] font-bold py-4 rounded-xl transition-all duration-300 cursor-pointer bg-amber-600 hover:bg-amber-700 text-white active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+                                aria-label={`Buy ${product.name} now`}
+                            >
+                                Buy Now
+                            </button>
+                            <button
                                 onClick={() => {
                                     if (!user) {
                                         navigate("/login?redirect=/product/" + id);
@@ -415,7 +488,7 @@ export default function ProductDetail() {
 
                 {/* ════════════════════ RATINGS & REVIEWS ════════════════════ */}
                 {showReviews && (
-                    <div className="mt-16 border-t border-slate-200 dark:border-slate-700 pt-12">
+                    <div id="reviews-section" className="mt-16 border-t border-slate-200 dark:border-slate-700 pt-12">
                         <h2 className="text-[24px] sm:text-[30px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">
                             Customer Ratings & Reviews
                         </h2>
@@ -468,12 +541,12 @@ export default function ProductDetail() {
                                         className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 py-3.5 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 transition-all"
                                     >
                                         <HiOutlineChatAlt2 className="w-5 h-5" />
-                                        {showReviewForm ? "Close Form" : "Write a Review"}
+                                        {showReviewForm ? "Close Rating Form" : "Rate this Product"}
                                     </button>
                                 ) : (
                                     <div className="text-center pt-4 border-t border-slate-200 dark:border-slate-700">
                                         <Link to={`/login?redirect=/product/${id}`} className="text-[14px] font-bold text-[#8a6616] hover:underline">
-                                            Sign in to write a review
+                                            Sign in to rate this product
                                         </Link>
                                     </div>
                                 )}
@@ -487,10 +560,10 @@ export default function ProductDetail() {
                                         animate={{ opacity: 1, y: 0 }}
                                         className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 p-6 rounded-2xl shadow-sm"
                                     >
-                                        <h3 className="text-[18px] font-bold text-slate-900 dark:text-white mb-4">Write a Review</h3>
-                                        <form onSubmit={handleReviewSubmit} className="space-y-4">
+                                        <h3 className="text-[18px] font-bold text-slate-900 dark:text-white mb-4">Rate this Product</h3>
+                                        <form onSubmit={handleReviewSubmit} className="space-y-5">
                                             <div>
-                                                <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Rating</label>
+                                                <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Select Stars</label>
                                                 <div className="flex gap-2">
                                                     {[1, 2, 3, 4, 5].map((star) => (
                                                         <button
@@ -500,7 +573,7 @@ export default function ProductDetail() {
                                                             className="p-1 cursor-pointer focus:outline-none transition-transform hover:scale-110"
                                                         >
                                                             <HiStar
-                                                                className={`w-8 h-8 ${star <= reviewRating ? "text-[#8a6616]" : "text-slate-200 dark:text-slate-700"}`}
+                                                                className={`w-8 h-8 ${star <= reviewRating ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
                                                             />
                                                         </button>
                                                     ))}
@@ -517,21 +590,54 @@ export default function ProductDetail() {
                                                     className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-[15px] text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#8a6616]/20"
                                                 />
                                             </div>
+                                            
+                                            {/* Review image uploader */}
+                                            <div>
+                                                <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Attach Photo (Optional)</label>
+                                                {imagePreview ? (
+                                                    <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group mt-1">
+                                                        <img src={imagePreview} alt="Review upload preview" className="w-full h-full object-cover" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={removeSelectedImage}
+                                                            className="absolute top-1.5 right-1.5 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full transition-all opacity-0 group-hover:opacity-100 cursor-pointer shadow-md"
+                                                            aria-label="Remove image"
+                                                        >
+                                                            <HiOutlineTrash className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl cursor-pointer bg-slate-50 dark:bg-slate-900 transition-colors py-4 mt-1">
+                                                        <div className="flex flex-col items-center justify-center pt-2">
+                                                            <HiOutlinePhotograph className="w-8 h-8 text-slate-400 mb-2" />
+                                                            <p className="text-[13px] font-semibold text-slate-500 dark:text-slate-400">Click to upload photo</p>
+                                                            <p className="text-[11px] text-slate-400 mt-1">PNG, JPG or JPEG (Max 5MB)</p>
+                                                        </div>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleImageChange}
+                                                            className="hidden"
+                                                        />
+                                                    </label>
+                                                )}
+                                            </div>
+
                                             {reviewSuccess && (
-                                                <p className="text-[14px] font-semibold text-emerald">✓ Review submitted successfully!</p>
+                                                <p className="text-[14px] font-semibold text-emerald">✓ Rating submitted successfully!</p>
                                             )}
                                             <button
                                                 type="submit"
                                                 disabled={submittingReview}
                                                 className="bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[14px] font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all cursor-pointer"
                                             >
-                                                {submittingReview ? "Submitting..." : "Submit Review"}
+                                                {submittingReview ? "Submitting..." : "Submit Rating"}
                                             </button>
                                         </form>
                                     </motion.div>
                                 )}
 
-                                {/* List */}
+                                {/* Custom Reviews List */}
                                 <div className="space-y-4">
                                     {product.reviews && product.reviews.length > 0 ? (
                                         product.reviews.map((review) => (
@@ -550,7 +656,7 @@ export default function ProductDetail() {
                                                         {[...Array(5)].map((_, i) => (
                                                             <HiStar
                                                                 key={i}
-                                                                className={`w-4 h-4 ${i < review.rating ? "text-[#8a6616]" : "text-slate-200 dark:text-slate-700"}`}
+                                                                className={`w-4 h-4 ${i < review.rating ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
                                                             />
                                                         ))}
                                                     </div>
@@ -558,6 +664,16 @@ export default function ProductDetail() {
                                                 <p className="text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed">
                                                     {review.comment}
                                                 </p>
+                                                {review.imageUrl && (
+                                                    <div className="mt-3">
+                                                        <img 
+                                                            src={review.imageUrl} 
+                                                            alt="Review attachment" 
+                                                            onClick={() => setLightboxImg(review.imageUrl)}
+                                                            className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl border border-slate-200 dark:border-slate-700 hover:opacity-90 transition-opacity cursor-pointer"
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
                                         ))
                                     ) : (
@@ -577,6 +693,28 @@ export default function ProductDetail() {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                )}
+                {/* Image Lightbox Modal */}
+                {lightboxImg && (
+                    <div 
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center p-4 cursor-zoom-out"
+                        onClick={() => setLightboxImg("")}
+                    >
+                        <div className="relative max-w-4xl max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                            <img 
+                                src={lightboxImg} 
+                                alt="Review Attachment Full Size" 
+                                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                            />
+                            <button 
+                                onClick={() => setLightboxImg("")}
+                                className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-colors cursor-pointer shadow-md"
+                                aria-label="Close image"
+                            >
+                                <HiOutlineX className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 )}

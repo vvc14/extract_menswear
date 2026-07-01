@@ -148,7 +148,13 @@ export const verifyPayment = async (req, res) => {
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest("hex");
 
-        if (expectedSignature !== razorpay_signature) {
+        const expectedBuffer = Buffer.from(expectedSignature, "hex");
+        const signatureBuffer = Buffer.from(razorpay_signature, "hex");
+
+        if (
+            expectedBuffer.length !== signatureBuffer.length ||
+            !crypto.timingSafeEqual(expectedBuffer, signatureBuffer)
+        ) {
             return res.status(400).json({ message: "Payment verification failed" });
         }
 

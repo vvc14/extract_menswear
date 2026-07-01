@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 
 export const getProducts = async (req, res) => {
     try {
@@ -59,8 +60,11 @@ export const addReview = async (req, res) => {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ message: "Product not found" });
 
-        const userName = req.user.name || "Customer";
         const userId = req.user.id;
+        const userObj = await User.findById(userId);
+        const userName = userObj ? userObj.name : "Customer";
+
+        const imageUrl = req.imageUrl || "";
 
         const alreadyReviewed = product.reviews.find(
             (r) => r.userId.toString() === userId.toString()
@@ -68,9 +72,12 @@ export const addReview = async (req, res) => {
         if (alreadyReviewed) {
             alreadyReviewed.rating = Number(rating);
             alreadyReviewed.comment = comment;
+            if (imageUrl) {
+                alreadyReviewed.imageUrl = imageUrl;
+            }
             alreadyReviewed.createdAt = Date.now();
         } else {
-            product.reviews.push({ userId, userName, rating: Number(rating), comment });
+            product.reviews.push({ userId, userName, rating: Number(rating), comment, imageUrl });
         }
 
         product.numOfReviews = product.reviews.length;
