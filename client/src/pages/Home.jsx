@@ -60,7 +60,7 @@ export default function Home() {
         <main id="main-content">
 
             {/* ════════════════════════════════ HERO ════════════════════════════════ */}
-            <section className="relative min-h-[100svh] flex items-center overflow-hidden">
+            <section className="relative min-h-[calc(100svh-108px)] flex items-center overflow-hidden">
 
                 {/* Background image + overlays */}
                 <div className="absolute inset-0">
@@ -73,7 +73,7 @@ export default function Home() {
                 </div>
 
                 {/* Centered wrapper using page-wrap */}
-                <div className="relative w-full page-wrap flex items-center justify-between py-20 sm:py-24 md:py-28 z-10">
+                <div className="relative w-full page-wrap flex items-center justify-between py-8 sm:py-12 md:py-16 z-10">
                     
                     {/* Left content */}
                     <motion.div
@@ -84,12 +84,12 @@ export default function Home() {
                     >
                         {/* Label pill */}
                         <span className="inline-flex items-center gap-2 text-[13px] font-bold px-4 py-1.5 rounded-full border"
-                            style={{ background: "rgba(201,168,76,0.12)", borderColor: "rgba(201,168,76,0.3)", color: "var(--gold)", marginBottom: "32px" }}>
+                            style={{ background: "rgba(201,168,76,0.12)", borderColor: "rgba(201,168,76,0.3)", color: "var(--gold)", marginBottom: "16px" }}>
                             <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: "var(--gold)" }} />
                             New Collection 2026
                         </span>
 
-                        <h1 className="text-[38px] sm:text-[50px] lg:text-[60px] font-extrabold text-white leading-[1.08] tracking-tight" style={{ marginBottom: "24px" }}>
+                        <h1 className="text-[38px] sm:text-[50px] lg:text-[60px] font-extrabold text-white leading-[1.08] tracking-tight" style={{ marginBottom: "16px" }}>
                             Premium Menswear<br />
                             <span className="text-slate-300 font-semibold">for the </span>
                             <span className="italic font-extrabold" style={{ fontFamily: "Playfair Display, Georgia, serif", color: "var(--gold)" }}>
@@ -97,7 +97,7 @@ export default function Home() {
                             </span>
                         </h1>
 
-                        <p className="text-[16px] sm:text-[18px] leading-[1.8] max-w-md" style={{ color: "rgba(255,255,255,0.7)", marginBottom: "40px" }}>
+                        <p className="text-[16px] sm:text-[18px] leading-[1.8] max-w-md" style={{ color: "rgba(255,255,255,0.7)", marginBottom: "24px" }}>
                             Curated shirts and trousers made from the finest Linen, Oxford, Twill & Satin fabrics. Free delivery across India.
                         </p>
 
