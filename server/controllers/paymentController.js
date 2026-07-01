@@ -5,6 +5,7 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Cart from "../models/Cart.js";
 import { generateInvoicePDFBuffer } from "../utils/pdfGenerator.js";
+import { orderQueue } from "../utils/requestQueue.js";
 
 const generateInvoiceNumber = () => {
     const date = new Date();
@@ -72,155 +73,179 @@ const buildEmailHtml = (order) => {
 
 export const createOrder = async (req, res) => {
     try {
-        const { items, userId, userEmail, userName, shippingAddress } = req.body;
+        const result = await orderQueue.enqueue(async () => {
+            const { items, userId, userEmail, userName, shippingAddress } = req.body;
 
-        if (!Array.isArray(items) || items.length === 0) {
-            return res.status(400).json({ message: "No items in order" });
-        }
-
-        let computedSubtotal = 0;
-        let computedShipping = 0;
-        const verifiedItems = [];
-
-        for (const item of items) {
-            const dbProduct = await Product.findById(item.productId);
-            if (!dbProduct) {
-                return res.status(404).json({ message: `Product ${item.name || item.productId} not found` });
+            if (!Array.isArray(items) || items.length === 0) {
+                const err = new Error("No items in order");
+                err.statusCode = 400;
+                throw err;
             }
 
-            // Check actual stock availability
-            if (dbProduct.stock < item.quantity) {
-                return res.status(400).json({ message: `Insufficient stock for ${dbProduct.name}. Available: ${dbProduct.stock}` });
+            let computedSubtotal = 0;
+            let computedShipping = 0;
+            const verifiedItems = [];
+
+            for (const item of items) {
+                const dbProduct = await Product.findById(item.productId);
+                if (!dbProduct) {
+                    const err = new Error(`Product ${item.name || item.productId} not found`);
+                    err.statusCode = 404;
+                    throw err;
+                }
+
+                // Check actual stock availability
+                if (dbProduct.stock < item.quantity) {
+                    const err = new Error(`Insufficient stock for ${dbProduct.name}. Available: ${dbProduct.stock}`);
+                    err.statusCode = 400;
+                    throw err;
+                }
+
+                computedSubtotal += dbProduct.price * item.quantity;
+                computedShipping += (dbProduct.shippingCost || 0) * item.quantity;
+
+                verifiedItems.push({
+                    productId: dbProduct._id,
+                    name: dbProduct.name,
+                    price: dbProduct.price,
+                    quantity: item.quantity,
+                    size: item.size || "",
+                    imageUrl: dbProduct.imageUrl,
+                    images: dbProduct.images || [],
+                });
             }
 
-            computedSubtotal += dbProduct.price * item.quantity;
-            computedShipping += (dbProduct.shippingCost || 0) * item.quantity;
+            const totalAmount = computedSubtotal + computedShipping;
+            if (totalAmount <= 0) {
+                const err = new Error("Order total must be greater than zero");
+                err.statusCode = 400;
+                throw err;
+            }
 
-            verifiedItems.push({
-                productId: dbProduct._id,
-                name: dbProduct.name,
-                price: dbProduct.price,
-                quantity: item.quantity,
-                size: item.size || "",
-                imageUrl: dbProduct.imageUrl,
-                images: dbProduct.images || [],
+            const options = {
+                amount: Math.round(totalAmount * 100),
+                currency: "INR",
+                receipt: `receipt_${Date.now()}`,
+            };
+
+            const razorpayOrder = await razorpayInstance.orders.create(options);
+
+            await Order.create({
+                razorpayOrderId: razorpayOrder.id,
+                userId: userId || null,
+                userEmail: userEmail || "",
+                userName: userName || "",
+                items: verifiedItems,
+                totalAmount: computedSubtotal,
+                shipping: computedShipping,
+                shippingAddress: shippingAddress || {},
+                status: "created",
             });
-        }
 
-        const totalAmount = computedSubtotal + computedShipping;
-        if (totalAmount <= 0) {
-            return res.status(400).json({ message: "Order total must be greater than zero" });
-        }
-
-        const options = {
-            amount: Math.round(totalAmount * 100),
-            currency: "INR",
-            receipt: `receipt_${Date.now()}`,
-        };
-
-        const razorpayOrder = await razorpayInstance.orders.create(options);
-
-        await Order.create({
-            razorpayOrderId: razorpayOrder.id,
-            userId: userId || null,
-            userEmail: userEmail || "",
-            userName: userName || "",
-            items: verifiedItems,
-            totalAmount: computedSubtotal,
-            shipping: computedShipping,
-            shippingAddress: shippingAddress || {},
-            status: "created",
+            return { orderId: razorpayOrder.id, amount: razorpayOrder.amount, currency: razorpayOrder.currency };
         });
 
-        res.json({ orderId: razorpayOrder.id, amount: razorpayOrder.amount, currency: razorpayOrder.currency });
+        res.json(result);
     } catch (error) {
         console.error("Create order error:", error);
-        res.status(500).json({ message: error.message });
+        res.status(error.statusCode || 500).json({ message: error.message });
     }
 };
 
 export const verifyPayment = async (req, res) => {
     try {
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const result = await orderQueue.enqueue(async () => {
+            const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-        const expectedSignature = crypto
-            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-            .digest("hex");
+            const expectedSignature = crypto
+                .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+                .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+                .digest("hex");
 
-        const expectedBuffer = Buffer.from(expectedSignature, "hex");
-        const signatureBuffer = Buffer.from(razorpay_signature, "hex");
+            const expectedBuffer = Buffer.from(expectedSignature, "hex");
+            const signatureBuffer = Buffer.from(razorpay_signature, "hex");
 
-        if (
-            expectedBuffer.length !== signatureBuffer.length ||
-            !crypto.timingSafeEqual(expectedBuffer, signatureBuffer)
-        ) {
-            return res.status(400).json({ message: "Payment verification failed" });
-        }
-
-        const invoiceNumber = generateInvoiceNumber();
-        const now = new Date();
-
-        const order = await Order.findOneAndUpdate(
-            { razorpayOrderId: razorpay_order_id },
-            { razorpayPaymentId: razorpay_payment_id, status: "paid", invoiceNumber, paidAt: now },
-            { new: true }
-        );
-
-        // Deduct stock for each purchased item now that payment is confirmed
-        if (order && order.items) {
-            for (const item of order.items) {
-                await Product.findByIdAndUpdate(
-                    item.productId,
-                    { $inc: { stock: -item.quantity } }
-                );
+            if (
+                expectedBuffer.length !== signatureBuffer.length ||
+                !crypto.timingSafeEqual(expectedBuffer, signatureBuffer)
+            ) {
+                const err = new Error("Payment verification failed");
+                err.statusCode = 400;
+                throw err;
             }
-        }
 
-        // Clear user's cart after successful payment
-        if (order && order.userId) {
-            await Cart.updateOne({ userId: order.userId }, { $set: { items: [] } });
-        }
+            const invoiceNumber = generateInvoiceNumber();
+            const now = new Date();
 
-        // Send confirmation email with invoice PDF asynchronously
-        if (order?.userEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            (async () => {
-                try {
-                    const transporter = nodemailer.createTransport({
-                        service: "gmail",
-                        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-                    });
+            const order = await Order.findOneAndUpdate(
+                { razorpayOrderId: razorpay_order_id },
+                { razorpayPaymentId: razorpay_payment_id, status: "paid", invoiceNumber, paidAt: now },
+                { new: true }
+            );
 
-                    const pdfBuffer = await generateInvoicePDFBuffer(order);
-                    console.log(`✅ Invoice PDF generated for ${invoiceNumber} (${pdfBuffer.length} bytes)`);
+            if (!order) {
+                const err = new Error("Order not found");
+                err.statusCode = 404;
+                throw err;
+            }
 
-                    await transporter.sendMail({
-                        from: `"Extract Menswear" <${process.env.EMAIL_USER}>`,
-                        to: order.userEmail,
-                        subject: `Order Confirmed — ${invoiceNumber}`,
-                        html: buildEmailHtml(order),
-                        attachments: [
-                            {
-                                filename: `Invoice_${invoiceNumber}.pdf`,
-                                content: pdfBuffer,
-                                contentType: "application/pdf",
-                            },
-                        ],
-                    });
-                    console.log(`📧 Confirmation email sent to ${order.userEmail}`);
-                } catch (err) {
-                    console.error("❌ Email/PDF error:", err.message);
+            // Deduct stock for each purchased item now that payment is confirmed
+            if (order.items) {
+                for (const item of order.items) {
+                    await Product.findByIdAndUpdate(
+                        item.productId,
+                        { $inc: { stock: -item.quantity } }
+                    );
                 }
-            })();
-        }
+            }
 
-        res.json({
-            message: "Payment verified successfully",
-            orderId: order._id,
-            invoiceNumber,
+            // Clear user's cart after successful payment
+            if (order.userId) {
+                await Cart.updateOne({ userId: order.userId }, { $set: { items: [] } });
+            }
+
+            // Send confirmation email with invoice PDF asynchronously
+            if (order.userEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+                (async () => {
+                    try {
+                        const transporter = nodemailer.createTransport({
+                            service: "gmail",
+                            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+                        });
+
+                        const pdfBuffer = await generateInvoicePDFBuffer(order);
+                        console.log(`✅ Invoice PDF generated for ${invoiceNumber} (${pdfBuffer.length} bytes)`);
+
+                        await transporter.sendMail({
+                            from: `"Extract Menswear" <${process.env.EMAIL_USER}>`,
+                            to: order.userEmail,
+                            subject: `Order Confirmed — ${invoiceNumber}`,
+                            html: buildEmailHtml(order),
+                            attachments: [
+                                {
+                                    filename: `Invoice_${invoiceNumber}.pdf`,
+                                    content: pdfBuffer,
+                                    contentType: "application/pdf",
+                                },
+                            ],
+                        });
+                        console.log(`📧 Confirmation email sent to ${order.userEmail}`);
+                    } catch (err) {
+                        console.error("❌ Email/PDF error:", err.message);
+                    }
+                })();
+            }
+
+            return {
+                message: "Payment verified successfully",
+                orderId: order._id,
+                invoiceNumber,
+            };
         });
+
+        res.json(result);
     } catch (error) {
         console.error("Verify payment error:", error);
-        res.status(500).json({ message: error.message });
+        res.status(error.statusCode || 500).json({ message: error.message });
     }
 };
