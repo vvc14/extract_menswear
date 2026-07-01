@@ -188,8 +188,23 @@ export const getCategoryOptions = async (req, res) => {
             ]);
             options = docs.map((d) => d.toObject());
         }
+        
+        // Fetch max prices for dynamic price partitioning
+        const maxPrices = await Product.aggregate([
+            { $group: { _id: "$category", maxPrice: { $max: "$price" } } }
+        ]);
+        const priceMap = {};
+        maxPrices.forEach(p => { priceMap[p._id] = p.maxPrice; });
+
         const result = {};
-        options.forEach((o) => { result[o.category] = { fabrics: o.fabrics, styles: o.styles, sizes: o.sizes || [] }; });
+        options.forEach((o) => { 
+            result[o.category] = { 
+                fabrics: o.fabrics, 
+                styles: o.styles, 
+                sizes: o.sizes || [],
+                maxPrice: priceMap[o.category] || 1000 // default to 1000 if no products found
+            }; 
+        });
         res.json(result);
     } catch (error) {
         res.status(500).json({ message: error.message });

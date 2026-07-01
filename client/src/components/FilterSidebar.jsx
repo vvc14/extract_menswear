@@ -32,8 +32,8 @@ export default function FilterSidebar({ category, onFilterChange }) {
     const [selectedFabrics, setSelectedFabrics] = useState([]);
     const [selectedStyles, setSelectedStyles] = useState([]);
     const [selectedSizes, setSelectedSizes] = useState([]);
-    const [priceRange, setPriceRange] = useState([0, 10000]);
-    const [catOptions, setCatOptions] = useState({ fabrics: [], styles: [], sizes: [] });
+    const [priceRange, setPriceRange] = useState([0, 100000]); // Use a safe large default initially
+    const [catOptions, setCatOptions] = useState({ fabrics: [], styles: [], sizes: [], maxPrice: 1000 });
 
     useEffect(() => {
         API.get("/products/category-options").then(({ data }) => {
@@ -74,13 +74,26 @@ export default function FilterSidebar({ category, onFilterChange }) {
         setSelectedFabrics([]);
         setSelectedStyles([]);
         setSelectedSizes([]);
-        setPriceRange([0, 10000]);
-        onFilterChange({ fabric: [], style: [], size: [], minPrice: 0, maxPrice: 10000 });
+        setPriceRange([0, 100000]);
+        onFilterChange({ fabric: [], style: [], size: [], minPrice: 0, maxPrice: 100000 });
     };
 
     const styleLabel = category === "shirt" ? "Style" : "Type";
-    const hasActiveFilters = selectedFabrics.length > 0 || selectedStyles.length > 0 || selectedSizes.length > 0 || priceRange[0] !== 0 || priceRange[1] !== 10000;
-    const activeCount = selectedFabrics.length + selectedStyles.length + selectedSizes.length + (priceRange[0] !== 0 || priceRange[1] !== 10000 ? 1 : 0);
+    const hasActiveFilters = selectedFabrics.length > 0 || selectedStyles.length > 0 || selectedSizes.length > 0 || priceRange[0] !== 0 || priceRange[1] !== 100000;
+    const activeCount = selectedFabrics.length + selectedStyles.length + selectedSizes.length + (priceRange[0] !== 0 || priceRange[1] !== 100000 ? 1 : 0);
+    
+    // Dynamic price partitions
+    const max = catOptions.maxPrice || 1000;
+    const q1 = Math.round(max * 0.25);
+    const q2 = Math.round(max * 0.50);
+    const q3 = Math.round(max * 0.75);
+    
+    const pricePartitions = [
+        { label: `Under ₹${q1}`, min: 0, max: q1 },
+        { label: `₹${q1} – ₹${q2}`, min: q1, max: q2 },
+        { label: `₹${q2} – ₹${q3}`, min: q2, max: q3 },
+        { label: `₹${q3} – ₹${max}`, min: q3, max: max },
+    ];
 
     return (
         <aside className="w-full lg:w-[250px] shrink-0" aria-label="Product filters">
@@ -173,20 +186,15 @@ export default function FilterSidebar({ category, onFilterChange }) {
 
                     <FilterSection title="Price" defaultOpen={false}>
                         <div className="flex flex-col gap-2">
-                            {[
-                                { label: "Under ₹250", min: 0, max: 250 },
-                                { label: "₹250 – ₹500", min: 250, max: 500 },
-                                { label: "₹500 – ₹750", min: 500, max: 750 },
-                                { label: "₹750 – ₹1000", min: 750, max: 1000 },
-                            ].map((range) => {
+                            {pricePartitions.map((range) => {
                                 const isActive = priceRange[0] === range.min && priceRange[1] === range.max;
                                 return (
                                     <button
                                         key={range.label}
                                         onClick={() => {
                                             if (isActive) {
-                                                setPriceRange([0, 10000]);
-                                                emitFilters(selectedFabrics, selectedStyles, selectedSizes, [0, 10000]);
+                                                setPriceRange([0, 100000]);
+                                                emitFilters(selectedFabrics, selectedStyles, selectedSizes, [0, 100000]);
                                             } else {
                                                 setPriceRange([range.min, range.max]);
                                                 emitFilters(selectedFabrics, selectedStyles, selectedSizes, [range.min, range.max]);
