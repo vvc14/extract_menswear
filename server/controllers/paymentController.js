@@ -82,27 +82,15 @@ export const createOrder = async (req, res) => {
         let computedShipping = 0;
         const verifiedItems = [];
 
-        // Look up the user's cart to find reserved stock
-        const cart = await Cart.findOne({ userId });
-        const cartQtys = {};
-        if (cart && cart.items) {
-            cart.items.forEach(item => {
-                cartQtys[item.productId.toString()] = (cartQtys[item.productId.toString()] || 0) + item.quantity;
-            });
-        }
-
         for (const item of items) {
             const dbProduct = await Product.findById(item.productId);
             if (!dbProduct) {
                 return res.status(404).json({ message: `Product ${item.name || item.productId} not found` });
             }
 
-            // Check stock availability (adding back reserved items in user's own cart)
-            const reservedInCart = cartQtys[dbProduct._id.toString()] || 0;
-            const totalAvailableStock = dbProduct.stock + reservedInCart;
-
-            if (totalAvailableStock < item.quantity) {
-                return res.status(400).json({ message: `Insufficient stock for ${dbProduct.name}. Available: ${totalAvailableStock}` });
+            // Check actual stock availability
+            if (dbProduct.stock < item.quantity) {
+                return res.status(400).json({ message: `Insufficient stock for ${dbProduct.name}. Available: ${dbProduct.stock}` });
             }
 
             computedSubtotal += dbProduct.price * item.quantity;
@@ -173,7 +161,17 @@ export const verifyPayment = async (req, res) => {
             { new: true }
         );
 
-        // Clear user's cart immediately on payment verification success (does not release/restore stock)
+        // Deduct stock for each purchased item now that payment is confirmed
+        if (order && order.items) {
+            for (const item of order.items) {
+                await Product.findByIdAndUpdate(
+                    item.productId,
+                    { $inc: { stock: -item.quantity } }
+                );
+            }
+        }
+
+        // Clear user's cart after successful payment
         if (order && order.userId) {
             await Cart.updateOne({ userId: order.userId }, { $set: { items: [] } });
         }

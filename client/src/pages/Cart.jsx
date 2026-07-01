@@ -21,6 +21,12 @@ export default function Cart() {
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
     const shipping = items.reduce((sum, i) => sum + (Number(i.shippingCost) || 0) * i.quantity, 0);
 
+    // Check if any item has stock issues
+    const hasStockIssues = items.some((item) => {
+        const stock = item.stock !== undefined ? item.stock : 99999;
+        return stock === 0 || item.quantity > stock;
+    });
+
     const [addresses, setAddresses] = useState([]);
     const [selectedIdx, setSelectedIdx] = useState(null);
     
@@ -112,6 +118,12 @@ export default function Cart() {
         if (selectedIdx === null || !addresses[selectedIdx]) {
             alert("Please provide and select a delivery address before proceeding to payment.");
             setShowForm(true);
+            return;
+        }
+
+        // Block checkout if any item has stock issues
+        if (hasStockIssues) {
+            alert("Some items in your cart are out of stock or exceed available stock. Please update your cart before proceeding.");
             return;
         }
 
@@ -228,12 +240,21 @@ export default function Cart() {
                                             <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1">
                                                 {item.fabric && item.fabric}{item.style && ` · ${item.style}`}{item.size && ` · Size: ${item.size}`}
                                             </p>
-                                            {item.stock !== undefined && item.stock <= 5 && (
-                                                <p className="text-[12px] font-bold text-rose-500 mt-1 flex items-center gap-1.5">
+                                            {item.stock !== undefined && item.stock === 0 ? (
+                                                <p className="text-[13px] font-bold text-white mt-1.5 flex items-center gap-1.5 bg-rose-500 px-3 py-1.5 rounded-lg w-fit">
+                                                    ✕ Out of Stock
+                                                </p>
+                                            ) : item.stock !== undefined && item.quantity > item.stock ? (
+                                                <p className="text-[13px] font-bold text-rose-500 mt-1.5 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 rounded-lg w-fit">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                                    Only {item.stock} available — reduce quantity
+                                                </p>
+                                            ) : item.stock !== undefined && item.stock <= 5 ? (
+                                                <p className="text-[12px] font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                                                     Only {item.stock} left in stock
                                                 </p>
-                                            )}
+                                            ) : null}
                                         </div>
 
                                         <div className="flex items-center justify-between mt-4 gap-3">
@@ -256,7 +277,7 @@ export default function Cart() {
                                                     {item.quantity}
                                                 </span>
                                                 <button
-                                                    disabled={item.quantity >= (item.stock || 99999)}
+                                                    disabled={item.quantity >= (item.stock || 99999) || (item.stock !== undefined && item.stock === 0)}
                                                     onClick={() => dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity + 1 }))}
                                                     className="px-3 py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                                                     aria-label="Increase quantity"
@@ -498,10 +519,17 @@ export default function Cart() {
 
                             <button
                                 onClick={handleCheckout}
-                                className="btn-primary w-full py-[18px] text-[16px] mb-5 cursor-pointer"
+                                disabled={hasStockIssues}
+                                className={`w-full py-[18px] text-[16px] mb-5 cursor-pointer rounded-xl font-bold transition-all ${hasStockIssues ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed' : 'btn-primary'}`}
                             >
-                                Proceed to Pay
+                                {hasStockIssues ? 'Update Cart to Proceed' : 'Proceed to Pay'}
                             </button>
+
+                            {hasStockIssues && (
+                                <p className="text-[13px] text-rose-500 font-semibold text-center mb-4 bg-rose-50 dark:bg-rose-500/10 rounded-lg px-4 py-2.5">
+                                    ⚠️ Some items are out of stock or exceed available quantity. Please remove or adjust them.
+                                </p>
+                            )}
 
                             <div className="flex items-center justify-center gap-2 text-[14px] text-slate-400">
                                 <HiOutlineShieldCheck className="w-4 h-4" />
