@@ -123,14 +123,23 @@ export const generateInvoicePDFBuffer = (order) => {
             // ─── Summary Block ───
             y += 20;
             const shipping = order.shipping || 0;
+            const discount = order.discountAmount || 0;
+            const originalSubtotal = order.totalAmount + discount;
             const grandTotal = order.totalAmount + shipping;
             const sumLabelX = 370;
             const sumValueX = pw - 55;
 
             doc.fillColor("#64748b").font("Helvetica").fontSize(11).text("Subtotal", sumLabelX, y);
             doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(11)
-                .text(`Rs. ${order.totalAmount.toLocaleString("en-IN")}`, sumValueX, y, { align: "right", width: 100 });
+                .text(`Rs. ${originalSubtotal.toLocaleString("en-IN")}`, sumValueX, y, { align: "right", width: 100 });
             
+            if (discount > 0) {
+                y += 22;
+                doc.fillColor("#64748b").font("Helvetica").fontSize(11).text(`Discount (${order.couponCode || 'Coupon'})`, sumLabelX, y);
+                doc.fillColor("#10b981").font("Helvetica-Bold").fontSize(11)
+                    .text(`-Rs. ${discount.toLocaleString("en-IN")}`, sumValueX, y, { align: "right", width: 100 });
+            }
+
             y += 22;
             doc.fillColor("#64748b").font("Helvetica").fontSize(11).text("Shipping", sumLabelX, y);
             doc.fillColor("#10b981").font("Helvetica-Bold").fontSize(11)

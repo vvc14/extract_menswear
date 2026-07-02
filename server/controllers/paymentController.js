@@ -58,18 +58,20 @@ const buildEmailHtml = (order) => {
                         <th style="padding:10px 14px;text-align:right;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Amount</th>
                     </tr>
                 </thead>
-                <tbody>${itemRows}</tbody>
+                <tbody>
+                    ${itemRows}
+                </tbody>
             </table>
-            <div style="border-top:2px solid #0f172a;padding-top:14px;text-align:right">
-                <p style="margin:0 0 4px;font-size:13px;color:#64748b">Subtotal: ₹${(order.totalAmount + (order.discountAmount || 0)).toLocaleString("en-IN")}</p>
-                ${order.discountAmount > 0 ? `<p style="margin:0 0 4px;font-size:13px;color:#10b981">Discount (${order.couponCode}): -₹${order.discountAmount.toLocaleString("en-IN")}</p>` : ''}
-                <p style="margin:0 0 4px;font-size:13px;color:#64748b">Shipping: ${order.shipping > 0 ? "₹" + order.shipping : "FREE"}</p>
-                <p style="margin:0;font-size:20px;font-weight:800;color:#0f172a">Total: ₹${(order.totalAmount + (order.shipping || 0)).toLocaleString("en-IN")}</p>
+            <div style="text-align:right;border-top:2px solid #e2e8f0;padding-top:16px;margin-bottom:28px">
+                <p style="margin:0 0 6px;font-size:14px;color:#64748b">Subtotal: <span style="display:inline-block;width:90px;color:#0f172a;font-weight:600">₹${(order.totalAmount + (order.discountAmount || 0)).toLocaleString("en-IN")}</span></p>
+                ${order.discountAmount ? `<p style="margin:0 0 6px;font-size:14px;color:#64748b">Discount (${order.couponCode}): <span style="display:inline-block;width:90px;color:#10b981;font-weight:600">-₹${order.discountAmount.toLocaleString("en-IN")}</span></p>` : ''}
+                <p style="margin:0 0 12px;font-size:14px;color:#64748b">Shipping: <span style="display:inline-block;width:90px;color:${order.shipping === 0 ? "#10b981" : "#0f172a"};font-weight:600">${order.shipping === 0 ? "FREE" : "₹" + order.shipping.toLocaleString("en-IN")}</span></p>
+                <p style="margin:0;font-size:18px;font-weight:800;color:#0f172a">Grand Total: <span style="display:inline-block;width:90px">₹${(order.totalAmount + (order.shipping || 0)).toLocaleString("en-IN")}</span></p>
             </div>
-        </div>
-        <div style="background:#f8fafc;padding:20px 32px;text-align:center;border-top:1px solid #e2e8f0">
-            <p style="margin:0;font-size:13px;color:#94a3b8">Returns & exchanges available within 7 days of delivery.</p>
-            <p style="margin:6px 0 0;font-size:12px;color:#cbd5e1">Extract Menswear • Premium Men's Fashion</p>
+            <div style="background:#f1f5f9;border-radius:10px;padding:20px;text-align:center">
+                <p style="margin:0;font-size:13px;color:#94a3b8">Returns & exchanges available within 7 days of delivery.</p>
+                <p style="margin:6px 0 0;font-size:12px;color:#cbd5e1">Extract Menswear • Premium Men's Fashion</p>
+            </div>
         </div>
     </div>`;
 };

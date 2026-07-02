@@ -145,11 +145,13 @@ export const generateInvoicePDF = async (order) => {
     });
 
     // ─── Summary ───
-    const finalY = doc.lastAutoTable.finalY + 8;
+    let finalY = doc.lastAutoTable.finalY + 8;
     const sumLX = pw - 100;
     const sumRX = pw - 16;
 
     const shipping = order.shipping || 0;
+    const discount = order.discountAmount || 0;
+    const originalSubtotal = order.totalAmount + discount;
     const grandTotal = order.totalAmount + shipping;
 
     // Subtotal
@@ -159,34 +161,46 @@ export const generateInvoicePDF = async (order) => {
     doc.text("Subtotal", sumLX, finalY);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(15, 23, 42);
-    doc.text(`Rs. ${order.totalAmount.toLocaleString("en-IN")}`, sumRX, finalY, { align: "right" });
+    doc.text(`Rs. ${originalSubtotal.toLocaleString("en-IN")}`, sumRX, finalY, { align: "right" });
+
+    if (discount > 0) {
+        finalY += 8;
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Discount (${order.couponCode || 'Coupon'})`, sumLX, finalY);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(16, 185, 129);
+        doc.text(`-Rs. ${discount.toLocaleString("en-IN")}`, sumRX, finalY, { align: "right" });
+    }
 
     // Shipping
+    finalY += 8;
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 116, 139);
-    doc.text("Shipping", sumLX, finalY + 8);
+    doc.text("Shipping", sumLX, finalY);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(16, 185, 129);
-    doc.text(shipping > 0 ? `Rs. ${shipping.toLocaleString("en-IN")}` : "FREE", sumRX, finalY + 8, { align: "right" });
+    doc.text(shipping > 0 ? `Rs. ${shipping.toLocaleString("en-IN")}` : "FREE", sumRX, finalY, { align: "right" });
 
     // Dash separator
+    finalY += 6;
     doc.setDrawColor(203, 213, 225);
     doc.setLineDash([1, 1], 0);
-    doc.line(sumLX, finalY + 14, sumRX, finalY + 14);
+    doc.line(sumLX, finalY, sumRX, finalY);
     doc.setLineDash([], 0);
 
     // Grand Total Box
     const boxX = sumLX - 5;
     const boxW = sumRX - sumLX + 10;
     doc.setFillColor(15, 23, 42);
-    doc.roundedRect(boxX, finalY + 18, boxW, 16, 3, 3, "F");
+    doc.roundedRect(boxX, finalY + 4, boxW, 16, 3, 3, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(212, 175, 55);
-    doc.text("GRAND TOTAL", boxX + 8, finalY + 28);
+    doc.text("GRAND TOTAL", boxX + 8, finalY + 14);
     doc.setFontSize(13);
     doc.setTextColor(255, 255, 255);
-    doc.text(`Rs. ${grandTotal.toLocaleString("en-IN")}`, boxX + boxW - 6, finalY + 28.5, { align: "right" });
+    doc.text(`Rs. ${grandTotal.toLocaleString("en-IN")}`, boxX + boxW - 6, finalY + 14.5, { align: "right" });
 
     // ─── Thank You ───
     const tyY = finalY + 50;
