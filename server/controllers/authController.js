@@ -21,6 +21,10 @@ export const googleLogin = async (req, res) => {
         });
         const payload = ticket.getPayload();
         const { email, name, sub: googleId } = payload;
+        
+        if (!email) {
+            return res.status(400).json({ message: "Google account must have an email associated." });
+        }
 
         // Find or create user
         let user = await User.findOne({ email: email.toLowerCase() });

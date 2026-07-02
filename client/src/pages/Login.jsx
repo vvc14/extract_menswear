@@ -47,7 +47,7 @@ export default function Login() {
             dispatch(loginSuccess(data));
             goTo(redirect);
         } catch (err) {
-            setError(err.response?.data?.message || "Google sign-in failed");
+            setError(err.response?.data?.message || (err.message === "Network Error" ? "Network Error: Could not connect to server" : "Google sign-in failed. Please try again."));
         } finally {
             setLoading(false);
         }
