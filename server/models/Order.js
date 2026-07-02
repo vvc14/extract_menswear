@@ -29,6 +29,8 @@ const orderSchema = new mongoose.Schema({
         country: { type: String, default: "India" },
     },
     shipping: { type: Number, default: 0 },
+    couponCode: { type: String },
+    discountAmount: { type: Number, default: 0 },
     status: {
         type: String,
         default: "created",

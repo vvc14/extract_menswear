@@ -35,6 +35,7 @@ const AdminProducts = lazy(() => import("./pages/AdminProducts"));
 const AdminOrders = lazy(() => import("./pages/AdminOrders"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const AdminSettings = lazy(() => import("./pages/AdminSettings"));
+const AdminCoupons = lazy(() => import("./pages/AdminCoupons"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 import { ThemeProvider } from "./context/ThemeContext";
 import { preloadRazorpay } from "./services/razorpay";
@@ -104,6 +105,7 @@ function AppRoutes() {
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="coupons" element={<AdminCoupons />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
 

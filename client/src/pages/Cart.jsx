@@ -70,6 +70,13 @@ export default function Cart() {
         country: "India",
     });
 
+    // Coupon state
+    const [couponInput, setCouponInput] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
+    const [couponError, setCouponError] = useState("");
+    const [couponSuccess, setCouponSuccess] = useState("");
+    const [applyingCoupon, setApplyingCoupon] = useState(false);
+
     useEffect(() => {
         if (user) {
             const fetchProfile = async () => {
@@ -136,6 +143,30 @@ export default function Cart() {
         }
     };
 
+    const handleApplyCoupon = async () => {
+        if (!couponInput.trim()) return;
+        setApplyingCoupon(true);
+        setCouponError("");
+        setCouponSuccess("");
+        try {
+            const { data } = await API.post("/coupons/validate", { code: couponInput, subtotal });
+            setAppliedCoupon(data);
+            setCouponSuccess(`Coupon applied! You saved ₹${data.discountAmount.toLocaleString("en-IN")}`);
+            setCouponInput("");
+        } catch (err) {
+            setCouponError(err.response?.data?.message || "Invalid coupon code");
+            setAppliedCoupon(null);
+        } finally {
+            setApplyingCoupon(false);
+        }
+    };
+    
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null);
+        setCouponSuccess("");
+        setCouponError("");
+    };
+
     const handleCheckout = async () => {
         if (!user) {
             navigate("/login?redirect=cart");
@@ -168,12 +199,13 @@ export default function Cart() {
 
         try {
             const { data } = await API.post("/payment/razorpay/order", {
-                amount: subtotal,
+                amount: appliedCoupon ? subtotal - appliedCoupon.discountAmount : subtotal,
                 shipping,
                 userId: user._id || user.id,
                 userEmail: user.email,
                 userName: user.name,
                 shippingAddress: selectedAddress,
+                couponCode: appliedCoupon ? appliedCoupon.code : undefined,
                 items: items.map((i) => ({
                     productId: i._id,
                     name: i.name,
@@ -529,6 +561,12 @@ export default function Cart() {
                                     <span className="text-slate-500 dark:text-slate-400">Subtotal ({totalItems} items)</span>
                                     <span className="font-semibold text-slate-900 dark:text-white">₹{subtotal.toLocaleString("en-IN")}</span>
                                 </div>
+                                {appliedCoupon && (
+                                    <div className="flex justify-between text-[16px] text-emerald">
+                                        <span className="font-semibold text-emerald text-[14px]">Discount ({appliedCoupon.code})</span>
+                                        <span className="font-bold">-₹{appliedCoupon.discountAmount.toLocaleString("en-IN")}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-[16px]">
                                     <span className="text-slate-500 dark:text-slate-400">Shipping</span>
                                     <span className={`font-semibold ${shipping === 0 ? "text-emerald" : "text-slate-900 dark:text-white"}`}>
@@ -537,10 +575,32 @@ export default function Cart() {
                                 </div>
                             </div>
 
+                            <div className="mb-6 border-b border-slate-200 dark:border-slate-700 pb-6">
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Coupon code" 
+                                        value={couponInput}
+                                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                                        disabled={appliedCoupon || applyingCoupon}
+                                        className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-[14px] rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    />
+                                    {appliedCoupon ? (
+                                        <button onClick={handleRemoveCoupon} className="px-4 font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all cursor-pointer">Remove</button>
+                                    ) : (
+                                        <button onClick={handleApplyCoupon} disabled={applyingCoupon || !couponInput.trim()} className="btn-primary px-5 rounded-xl disabled:opacity-50 cursor-pointer">
+                                            {applyingCoupon ? "..." : "Apply"}
+                                        </button>
+                                    )}
+                                </div>
+                                {couponError && <p className="text-rose-500 text-[13px] font-bold mt-2">{couponError}</p>}
+                                {couponSuccess && <p className="text-emerald text-[13px] font-bold mt-2">{couponSuccess}</p>}
+                            </div>
+
                             <div className="border-t border-slate-200 dark:border-slate-700 pt-5 mb-8">
                                 <div className="flex justify-between">
                                     <span className="text-[18px] font-extrabold text-slate-900 dark:text-white">Total</span>
-                                    <span className="text-[26px] font-extrabold text-slate-900 dark:text-white">₹{(subtotal + shipping).toLocaleString("en-IN")}</span>
+                                    <span className="text-[26px] font-extrabold text-slate-900 dark:text-white">₹{((appliedCoupon ? subtotal - appliedCoupon.discountAmount : subtotal) + shipping).toLocaleString("en-IN")}</span>
                                 </div>
                             </div>
 

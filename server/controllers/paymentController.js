@@ -4,6 +4,7 @@ import razorpayInstance from "../config/razorpay.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Cart from "../models/Cart.js";
+import Coupon from "../models/Coupon.js";
 import { generateInvoicePDFBuffer } from "../utils/pdfGenerator.js";
 import { orderQueue } from "../utils/requestQueue.js";
 
@@ -60,6 +61,8 @@ const buildEmailHtml = (order) => {
                 <tbody>${itemRows}</tbody>
             </table>
             <div style="border-top:2px solid #0f172a;padding-top:14px;text-align:right">
+                <p style="margin:0 0 4px;font-size:13px;color:#64748b">Subtotal: ₹${(order.totalAmount + (order.discountAmount || 0)).toLocaleString("en-IN")}</p>
+                ${order.discountAmount > 0 ? `<p style="margin:0 0 4px;font-size:13px;color:#10b981">Discount (${order.couponCode}): -₹${order.discountAmount.toLocaleString("en-IN")}</p>` : ''}
                 <p style="margin:0 0 4px;font-size:13px;color:#64748b">Shipping: ${order.shipping > 0 ? "₹" + order.shipping : "FREE"}</p>
                 <p style="margin:0;font-size:20px;font-weight:800;color:#0f172a">Total: ₹${(order.totalAmount + (order.shipping || 0)).toLocaleString("en-IN")}</p>
             </div>
@@ -74,7 +77,7 @@ const buildEmailHtml = (order) => {
 export const createOrder = async (req, res) => {
     try {
         const result = await orderQueue.enqueue(async () => {
-            const { items, userId, userEmail, userName, shippingAddress } = req.body;
+            const { items, userId, userEmail, userName, shippingAddress, couponCode } = req.body;
 
             if (!Array.isArray(items) || items.length === 0) {
                 const err = new Error("No items in order");
@@ -115,6 +118,37 @@ export const createOrder = async (req, res) => {
                 });
             }
 
+            let discountAmount = 0;
+            if (couponCode) {
+                const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+                if (!coupon) {
+                    throw Object.assign(new Error("Invalid coupon code"), { statusCode: 400 });
+                }
+                if (!coupon.isActive) {
+                    throw Object.assign(new Error("This coupon is no longer active"), { statusCode: 400 });
+                }
+                if (coupon.expiryDate && new Date(coupon.expiryDate) < new Date()) {
+                    throw Object.assign(new Error("This coupon has expired"), { statusCode: 400 });
+                }
+                if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+                    throw Object.assign(new Error("This coupon has reached its usage limit"), { statusCode: 400 });
+                }
+                if (coupon.minOrderValue && computedSubtotal < coupon.minOrderValue) {
+                    throw Object.assign(new Error(`Minimum order value of ₹${coupon.minOrderValue} required`), { statusCode: 400 });
+                }
+                
+                if (coupon.discountType === "percentage") {
+                    discountAmount = (computedSubtotal * coupon.discountValue) / 100;
+                } else if (coupon.discountType === "fixed") {
+                    discountAmount = coupon.discountValue;
+                }
+                if (discountAmount > computedSubtotal) {
+                    discountAmount = computedSubtotal;
+                }
+            }
+
+            computedSubtotal -= Math.round(discountAmount);
+
             const totalAmount = computedSubtotal + computedShipping;
             if (totalAmount <= 0) {
                 const err = new Error("Order total must be greater than zero");
@@ -140,6 +174,8 @@ export const createOrder = async (req, res) => {
                 shipping: computedShipping,
                 shippingAddress: shippingAddress || {},
                 status: "created",
+                couponCode: couponCode ? couponCode.toUpperCase() : null,
+                discountAmount: Math.round(discountAmount),
             });
 
             return { orderId: razorpayOrder.id, amount: razorpayOrder.amount, currency: razorpayOrder.currency };
@@ -202,6 +238,14 @@ export const verifyPayment = async (req, res) => {
             // Clear user's cart after successful payment
             if (order.userId) {
                 await Cart.updateOne({ userId: order.userId }, { $set: { items: [] } });
+            }
+
+            // Increment coupon usage count if a coupon was used
+            if (order.couponCode) {
+                await Coupon.findOneAndUpdate(
+                    { code: order.couponCode },
+                    { $inc: { usedCount: 1 } }
+                );
             }
 
             // Send confirmation email with invoice PDF asynchronously

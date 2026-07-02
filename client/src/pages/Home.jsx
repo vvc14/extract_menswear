@@ -60,14 +60,14 @@ export default function Home() {
         <main id="main-content">
 
             {/* ════════════════════════════════ HERO ════════════════════════════════ */}
-            <section className="relative flex items-center overflow-hidden" style={{ minHeight: "max(calc(100svh - 108px), 640px)" }}>
+            <section className="relative flex items-center justify-center overflow-hidden min-h-[100svh] md:min-h-screen">
 
                 {/* Background image + overlays */}
                 <div className="absolute inset-0">
                     <img
                         src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80&w=1920"
                         alt=""
-                        className="w-full h-full object-cover object-[25%_center] lg:object-center"
+                        className="w-full h-full object-cover object-center"
                     />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(100deg,rgba(15,23,42,0.93) 0%,rgba(15,23,42,0.65) 55%,rgba(15,23,42,0.25) 100%)" }} />
                 </div>
