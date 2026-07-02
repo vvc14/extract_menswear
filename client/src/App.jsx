@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import { Provider, useSelector } from "react-redux";
@@ -9,31 +9,33 @@ import useCartSync from "./hooks/useCartSync";
 import useWishlistSync from "./hooks/useWishlistSync";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
-import Home from "./pages/Home";
-import Shirts from "./pages/Shirts";
-import Trousers from "./pages/Trousers";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Profile from "./pages/Profile";
 
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminProducts from "./pages/AdminProducts";
-import AdminOrders from "./pages/AdminOrders";
-import AdminUsers from "./pages/AdminUsers";
-import AdminSettings from "./pages/AdminSettings";
-import AdminLogin from "./pages/AdminLogin";
-import Wishlist from "./pages/Wishlist";
-import SizeGuide from "./pages/SizeGuide";
-import Orders from "./pages/Orders";
-import ShippingInfo from "./pages/ShippingInfo";
-import ReturnsExchange from "./pages/ReturnsExchange";
-import FAQ from "./pages/FAQ";
-import NotFound from "./pages/NotFound";
+// Lazy-loaded pages for code splitting
+const Home = lazy(() => import("./pages/Home"));
+const Shirts = lazy(() => import("./pages/Shirts"));
+const Trousers = lazy(() => import("./pages/Trousers"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Cart = lazy(() => import("./pages/Cart"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const SizeGuide = lazy(() => import("./pages/SizeGuide"));
+const Orders = lazy(() => import("./pages/Orders"));
+const ShippingInfo = lazy(() => import("./pages/ShippingInfo"));
+const ReturnsExchange = lazy(() => import("./pages/ReturnsExchange"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminProducts = lazy(() => import("./pages/AdminProducts"));
+const AdminOrders = lazy(() => import("./pages/AdminOrders"));
+const AdminUsers = lazy(() => import("./pages/AdminUsers"));
+const AdminSettings = lazy(() => import("./pages/AdminSettings"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 import { ThemeProvider } from "./context/ThemeContext";
 import { preloadRazorpay } from "./services/razorpay";
 
@@ -58,7 +60,12 @@ function AppRoutes() {
   return (
     <>
     <ScrollToTop />
-    <Routes>
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[60vh] bg-transparent">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-primary rounded-full animate-spin" />
+      </div>
+    }>
+      <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="shirts" element={<Shirts />} />
@@ -105,6 +112,7 @@ function AppRoutes() {
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
+    </Suspense>
     </>
   );
 }

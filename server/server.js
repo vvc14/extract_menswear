@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import mongoSanitize from "express-mongo-sanitize";
@@ -15,6 +16,9 @@ import wishlistRoutes from "./routes/wishlistRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
 const app = express();
+
+// ─── Gzip Compression ───
+app.use(compression());
 
 // ─── Security Headers ───
 app.use(helmet());
