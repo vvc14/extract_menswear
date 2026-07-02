@@ -60,14 +60,14 @@ export default function Home() {
         <main id="main-content">
 
             {/* ════════════════════════════════ HERO ════════════════════════════════ */}
-            <section className="relative min-h-[calc(100svh-108px)] flex items-center overflow-hidden">
+            <section className="relative flex items-center overflow-hidden" style={{ minHeight: "max(calc(100svh - 108px), 640px)" }}>
 
                 {/* Background image + overlays */}
                 <div className="absolute inset-0">
                     <img
                         src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80&w=1920"
                         alt=""
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-[25%_center] lg:object-center"
                     />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(100deg,rgba(15,23,42,0.93) 0%,rgba(15,23,42,0.65) 55%,rgba(15,23,42,0.25) 100%)" }} />
                 </div>
@@ -80,7 +80,7 @@ export default function Home() {
                         initial={{ opacity: 0, y: 32 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7 }}
-                        className="max-w-xl relative z-10"
+                        className="max-w-xl relative z-10 text-center lg:text-left mx-auto lg:mx-0"
                     >
                         {/* Label pill */}
                         <span className="inline-flex items-center gap-2 text-[13px] font-bold px-4 py-1.5 rounded-full border"
@@ -101,7 +101,7 @@ export default function Home() {
                             Curated shirts and trousers made from the finest Linen, Oxford, Twill & Satin fabrics. Free delivery across India.
                         </p>
 
-                        <div className="flex flex-row gap-4">
+                        <div className="flex flex-row justify-center lg:justify-start gap-4">
                             <Link
                                 to="/shirts"
                                 className="btn-gold group inline-flex items-center justify-center gap-2.5 px-8 py-4 text-[15px] rounded-xl"
