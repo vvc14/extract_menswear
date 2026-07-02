@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp } from "../controllers/authController.js";
+import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp, adminGoogleLogin } from "../controllers/authController.js";
 import { userAuth } from "../middleware/auth.js";
 
 const router = Router();
@@ -16,6 +16,7 @@ router.post("/google", googleLogin);
 
 // Admin
 router.post("/admin-login", adminLogin);
+router.post("/admin-google", adminGoogleLogin);
 
 // User
 router.post("/register", userRegister);

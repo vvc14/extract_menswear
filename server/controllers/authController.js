@@ -51,6 +51,44 @@ export const googleLogin = async (req, res) => {
     }
 };
 
+// ─── Google Admin Sign-In ───
+export const adminGoogleLogin = async (req, res) => {
+    try {
+        const { credential } = req.body;
+        if (!credential) return res.status(400).json({ message: "Google token is required" });
+
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { email } = payload;
+
+        // Find user in User collection
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user || user.role !== "admin") {
+            return res.status(403).json({ 
+                message: "Access denied. Only registered administrators can access the admin panel." 
+            });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: "admin", type: "admin" },
+            process.env.JWT_SECRET,
+            { expiresIn: "24h" }
+        );
+
+        res.json({
+            token,
+            admin: { id: user._id, username: user.name || user.email, role: "admin" },
+        });
+    } catch (error) {
+        console.error("Admin Google login error:", error.message);
+        res.status(401).json({ message: "Google authentication failed" });
+    }
+};
+
+
 // ─── Check if email exists (for unified flow) ───
 export const checkEmail = async (req, res) => {
     try {

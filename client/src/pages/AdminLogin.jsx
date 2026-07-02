@@ -5,33 +5,28 @@ import { loginSuccess } from "../redux/authSlice";
 import API from "../services/api";
 import { ADMIN_PATH } from "../config/adminPath";
 import { motion } from "framer-motion";
-import { HiOutlineEye, HiOutlineEyeOff, HiOutlineLockClosed, HiOutlineUser, HiOutlineShieldCheck } from "react-icons/hi";
+import { HiOutlineShieldCheck } from "react-icons/hi";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function AdminLogin() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleGoogleSuccess = async (credentialResponse) => {
         setError("");
         setLoading(true);
         try {
-            const { data } = await API.post("/auth/admin-login", { username, password });
+            const { data } = await API.post("/auth/admin-google", { credential: credentialResponse.credential });
             dispatch(loginSuccess(data));
             navigate(`/${ADMIN_PATH}/dashboard`);
         } catch (err) {
-            setError(err.response?.data?.message || "Invalid admin credentials");
+            setError(err.response?.data?.message || "Google sign-in failed");
         } finally {
             setLoading(false);
         }
     };
-
-    const inputClass = "w-full bg-white/[0.07] border border-white/[0.12] text-white text-[16px] rounded-xl px-5 py-4 pl-12 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/50 transition-all placeholder:text-white/30";
 
     return (
         <main className="min-h-screen relative flex items-center justify-center overflow-hidden" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1c1917 50%, #0f172a 100%)" }}>
@@ -61,59 +56,22 @@ export default function AdminLogin() {
                     <div className="flex flex-col gap-6">
                         <div className="text-center">
                             <h1 className="text-[28px] sm:text-[32px] font-extrabold text-white tracking-tight mb-2">Admin Panel</h1>
-                            <p className="text-[16px] text-white/50">Sign in with your admin credentials</p>
+                            <p className="text-[16px] text-white/50">Only Google accounts affiliated as administrators can log in here.</p>
                         </div>
 
                         {error && (
                             <div className="bg-rose-500/15 border border-rose-500/25 text-rose-400 text-[14px] font-semibold px-4 py-3 rounded-xl">{error}</div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                            <div>
-                                <label htmlFor="admin-username" className="block text-[14px] font-bold text-white/60 mb-2.5">Username</label>
-                                <div className="relative">
-                                    <HiOutlineUser className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                                    <input
-                                        id="admin-username"
-                                        type="text"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        required
-                                        autoComplete="username"
-                                        autoFocus
-                                        placeholder="Admin username"
-                                        className={inputClass}
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label htmlFor="admin-password" className="block text-[14px] font-bold text-white/60 mb-2.5">Password</label>
-                                <div className="relative">
-                                    <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                                    <input
-                                        id="admin-password"
-                                        type={showPassword ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        autoComplete="current-password"
-                                        placeholder="Enter your password"
-                                        className={inputClass + " pr-12"}
-                                    />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1 cursor-pointer">
-                                        {showPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
-                                    </button>
-                                </div>
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full text-white text-[16px] font-bold py-4.5 rounded-xl transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.98] cursor-pointer mt-1"
-                                style={{ background: "linear-gradient(135deg, #d97706, #b45309)" }}
-                            >
-                                {loading ? "Signing in..." : "Sign In to Admin"}
-                            </button>
-                        </form>
+                        <div className="flex justify-center py-2 bg-white/5 rounded-xl border border-white/[0.06] hover:border-white/[0.12] transition-colors p-4">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => setError("Google login failed")}
+                                theme="filled_blue"
+                                size="large"
+                                width="320"
+                            />
+                        </div>
 
                         {/* Divider */}
                         <div className="flex items-center gap-4">
@@ -136,3 +94,4 @@ export default function AdminLogin() {
         </main>
     );
 }
+
