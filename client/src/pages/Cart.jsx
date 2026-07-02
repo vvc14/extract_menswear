@@ -273,8 +273,22 @@ export default function Cart() {
                     </ol>
                 </nav>
 
-                <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight" style={{ marginBottom: "8px" }}>Shopping Cart</h1>
-                <p className="text-[16px] text-slate-500 dark:text-slate-400" style={{ marginBottom: "40px" }}>{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{ marginBottom: "40px" }}>
+                    <div>
+                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight">Shopping Cart</h1>
+                        <p className="text-[16px] text-slate-500 dark:text-slate-400 mt-1">{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            if (window.confirm("Are you sure you want to clear all items from your cart?")) {
+                                dispatch(clearCart());
+                            }
+                        }}
+                        className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-rose-500/20 text-rose-500 hover:bg-rose-500/25 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
+                    >
+                        <HiOutlineTrash className="w-4.5 h-4.5" /> Clear Cart
+                    </button>
+                </div>
 
                 <div className="flex flex-col lg:flex-row gap-10 md:gap-14">
                     {/* Left Column: Cart items & Address Details */}

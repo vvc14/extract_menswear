@@ -18,6 +18,13 @@ export default function ProductCard({ product, compact = false }) {
         e.preventDefault();
         e.stopPropagation();
         if (product.stock <= 0) return;
+
+        if (product.category === "shirt") {
+            // Shirts require size selection, so redirect directly without adding to cart
+            navigate(`/product/${product._id}`);
+            return;
+        }
+
         // Immediately add 1 piece to cart
         dispatch(addToCart(product));
         setAdded(true);
@@ -143,35 +150,35 @@ export default function ProductCard({ product, compact = false }) {
                 </div>
 
                 {/* ── Body ── */}
-                <div className={`${compact ? "p-3.5 sm:p-4" : "p-5 sm:p-6"} flex-1 flex flex-col`}>
-                    <p className={`${compact ? "text-[10px]" : "text-[11px]"} font-bold uppercase tracking-[0.12em] mb-1.5`} style={{ color: "var(--gold)" }}>
+                <div className={`${compact ? "p-3 sm:p-4" : "p-3.5 sm:p-6"} flex-1 flex flex-col`}>
+                    <p className={`${compact ? "text-[9px]" : "text-[10px] sm:text-[11px]"} font-bold uppercase tracking-[0.12em] mb-1 sm:mb-1.5`} style={{ color: "var(--gold)" }}>
                         {product.category === "shirt" ? "Shirt" : "Trouser"}
                     </p>
-                    <h3 className={`${compact ? "text-[13px] sm:text-[14px]" : "text-[15px] sm:text-[16px]"} font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-2 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300`}>
+                    <h3 className={`${compact ? "text-[12px] sm:text-[14px]" : "text-[13px] sm:text-[16px]"} font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-1.5 sm:mb-2 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300`}>
                         {product.name}
                     </h3>
 
                     <div className="mt-auto">
                         {/* Rating */}
                         {!compact && (
-                            <div className="flex items-center gap-2 mb-4">
+                            <div className="flex items-center gap-1.5 mb-2 sm:mb-4">
                                 <div className="flex items-center gap-0.5">
                                     {[...Array(5)].map((_, i) => (
-                                        <HiStar key={i} className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? "" : "text-slate-200 dark:text-slate-600"}`}
+                                        <HiStar key={i} className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${i < Math.floor(rating) ? "" : "text-slate-200 dark:text-slate-600"}`}
                                             style={i < Math.floor(rating) ? { color: "var(--gold)" } : {}} />
                                     ))}
                                 </div>
-                                <span className="text-[12px] font-semibold text-slate-400">({rating})</span>
+                                <span className="text-[10px] sm:text-[12px] font-semibold text-slate-400">({rating})</span>
                             </div>
                         )}
 
                         {/* Price */}
-                        <div className="flex items-baseline gap-2">
-                            <span className={`${compact ? "text-[17px] sm:text-[18px]" : "text-[20px] sm:text-[22px]"} font-extrabold text-slate-900 dark:text-white`}>
+                        <div className="flex items-baseline gap-1.5">
+                            <span className={`${compact ? "text-[15px] sm:text-[18px]" : "text-[16px] sm:text-[22px]"} font-extrabold text-slate-900 dark:text-white`}>
                                 ₹{product.price.toLocaleString("en-IN")}
                             </span>
                             {originalPrice > 0 && (
-                                <span className={`${compact ? "text-[11px]" : "text-[13px]"} text-slate-400 line-through`}>
+                                <span className={`${compact ? "text-[10px]" : "text-[11px] sm:text-[13px]"} text-slate-400 line-through`}>
                                     ₹{originalPrice.toLocaleString("en-IN")}
                                 </span>
                             )}
@@ -181,11 +188,11 @@ export default function ProductCard({ product, compact = false }) {
             </Link>
 
             {/* ── Add to Cart ── */}
-            <div className={`${compact ? "px-3.5 sm:px-4 pb-3.5 sm:pb-4" : "px-5 sm:px-6 pb-5 sm:pb-6"}`}>
+            <div className={`${compact ? "px-3 sm:px-4 pb-3 sm:pb-4" : "px-3.5 sm:px-6 pb-3.5 sm:pb-6"}`}>
                 {product.stock <= 0 ? (
                     <div
-                        className={`w-full flex items-center justify-center gap-2.5 font-bold rounded-xl text-slate-400 dark:text-slate-500 cursor-not-allowed ${
-                            compact ? "text-[13px] py-2.5" : "text-[14px] py-3.5"
+                        className={`w-full flex items-center justify-center gap-2 font-bold rounded-xl text-slate-400 dark:text-slate-500 cursor-not-allowed ${
+                            compact ? "text-[12px] py-2" : "text-[13px] sm:text-[14px] py-2.5 sm:py-3.5"
                         }`}
                         style={{ background: "#f1f5f9" }}
                     >
@@ -195,8 +202,8 @@ export default function ProductCard({ product, compact = false }) {
                     <button
                         onClick={handleAddClick}
                         aria-label={`Add ${product.name} to cart`}
-                        className={`w-full flex items-center justify-center gap-2.5 font-bold rounded-xl transition-all duration-300 cursor-pointer ${
-                            compact ? "text-[13px] py-2.5" : "text-[14px] py-3.5"
+                        className={`w-full flex items-center justify-center gap-1.5 sm:gap-2.5 font-bold rounded-xl transition-all duration-300 cursor-pointer ${
+                            compact ? "text-[12px] py-2" : "text-[13px] sm:text-[14px] py-2.5 sm:py-3.5"
                         } ${added
                             ? "text-white scale-[0.99]"
                             : "text-white hover:opacity-90 active:scale-[0.98]"
@@ -208,11 +215,11 @@ export default function ProductCard({ product, compact = false }) {
                         }}
                     >
                         {added ? (
-                            <>{compact ? "✓ Added" : "✓ Added — Opening Product..."}</>
+                            <>{compact ? "✓ Added" : "✓ Added — Opening..."}</>
                         ) : (
                             <>
                                 <HiOutlineShoppingCart className={compact ? "w-3.5 h-3.5" : "w-4 h-4"} />
-                                Add to Cart
+                                Buy Now
                             </>
                         )}
                     </button>

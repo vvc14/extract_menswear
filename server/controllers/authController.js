@@ -289,6 +289,13 @@ export const updateProfile = async (req, res) => {
 
         if (name) user.name = name;
         
+        if (password) {
+            if (password.length < 6) {
+                return res.status(400).json({ message: "Password must be at least 6 characters" });
+            }
+            user.password = password;
+        }
+        
         if (addresses !== undefined) {
             if (!Array.isArray(addresses)) {
                 return res.status(400).json({ message: "Addresses must be an array" });

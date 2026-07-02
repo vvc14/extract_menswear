@@ -8,5 +8,8 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:5000',
     },
+    allowedHosts: [
+      'chastise-green-hesitancy.ngrok-free.dev',
+    ],
   },
 })

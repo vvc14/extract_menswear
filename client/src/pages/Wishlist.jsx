@@ -196,7 +196,7 @@ export default function Wishlist() {
                                             ) : (
                                                 <>
                                                     <HiOutlineShoppingCart className="w-4 h-4" />
-                                                    Add to Cart
+                                                    Buy Now
                                                 </>
                                             )}
                                         </button>

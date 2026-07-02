@@ -43,7 +43,22 @@ export const getProducts = async (req, res) => {
         };
         const sortOrder = sortMap[sort] || { createdAt: -1 };
 
+        const page = parseInt(req.query.page) || 0;
         const limit = parseInt(req.query.limit) || 0;
+
+        // Paginated mode: when page >= 1
+        if (page >= 1) {
+            const perPage = limit > 0 ? limit : 12;
+            const skip = (page - 1) * perPage;
+            const [products, total] = await Promise.all([
+                Product.find(filter).sort(sortOrder).skip(skip).limit(perPage),
+                Product.countDocuments(filter),
+            ]);
+            const pages = Math.ceil(total / perPage);
+            return res.json({ products, total, page, pages, hasMore: page < pages });
+        }
+
+        // Legacy mode: return flat array (for Home page, admin, etc.)
         let query = Product.find(filter).sort(sortOrder);
         if (limit > 0) query = query.limit(limit);
         const products = await query;

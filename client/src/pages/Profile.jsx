@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
     HiOutlineUser, HiOutlineMail, HiOutlinePhone, HiOutlineHome, 
     HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlinePlus, 
-    HiOutlineTrash, HiOutlineCheck, HiOutlinePencil 
+    HiOutlineTrash, HiOutlineCheck, HiOutlinePencil, HiOutlineLockClosed
 } from "react-icons/hi";
 
 export default function Profile() {
@@ -17,6 +17,7 @@ export default function Profile() {
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
+    const [password, setPassword] = useState("");
     const [addresses, setAddresses] = useState([]);
     
     // Address form state
@@ -131,21 +132,32 @@ export default function Profile() {
 
     const handleProfileSubmit = (e) => {
         e.preventDefault();
-        saveProfileChanges(name, addresses);
+        saveProfileChanges(name, password, addresses);
     };
 
-    const saveProfileChanges = async (updatedName, updatedAddresses) => {
+    const saveProfileChanges = async (updatedName, updatedPassword, updatedAddresses) => {
         setMessage({ type: "", text: "" });
         setSaving(true);
         try {
-            const { data } = await API.put("/auth/profile", {
+            const payload = {
                 name: updatedName,
                 addresses: updatedAddresses,
-            });
+            };
+            if (updatedPassword) {
+                if (updatedPassword.length < 6) {
+                    setMessage({ type: "error", text: "Password must be at least 6 characters." });
+                    setSaving(false);
+                    return;
+                }
+                payload.password = updatedPassword;
+            }
+
+            const { data } = await API.put("/auth/profile", payload);
 
             // Update Redux state and local storage
             dispatch(loginSuccess({ token, user: { id: data._id, name: data.name, email: data.email, role: data.role } }));
             setMessage({ type: "success", text: "Profile updated successfully!" });
+            setPassword(""); // Clear password field after successful update
         } catch (err) {
             console.error("Profile update failed:", err);
             setMessage({ type: "error", text: err.response?.data?.message || "Failed to update profile." });
@@ -234,6 +246,20 @@ export default function Profile() {
                                             />
                                         </div>
                                     </div>
+
+                                    <div>
+                                        <label className={labelClass}>Password (leave blank to keep unchanged)</label>
+                                        <div className="relative">
+                                            <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                                            <input
+                                                type="password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                placeholder="Set or change password"
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <button
@@ -241,7 +267,7 @@ export default function Profile() {
                                     disabled={saving}
                                     className="btn-primary w-full mt-6 py-3 rounded-xl text-[14px] font-bold cursor-pointer"
                                 >
-                                    {saving ? "Saving..." : "Update Name"}
+                                    {saving ? "Saving..." : "Update Profile"}
                                 </button>
                             </form>
                         </div>

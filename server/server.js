@@ -25,7 +25,7 @@ app.use(compression());
 app.use(helmet());
 
 // ─── CORS — strict origin only ───
-const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000"].filter(Boolean);
+const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000", "https://chastise-green-hesitancy.ngrok-free.dev"].filter(Boolean);
 app.use(cors({
     origin: (origin, cb) => {
         if (!origin || allowedOrigins.includes(origin)) cb(null, true);

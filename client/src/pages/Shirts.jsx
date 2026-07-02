@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import API from "../services/api";
 import { buildQueryString } from "../utils/filterLogic";
 import ProductCard from "../components/ProductCard";
@@ -6,30 +6,89 @@ import FilterSidebar from "../components/FilterSidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineAdjustments, HiOutlineArrowRight, HiOutlineSortDescending, HiOutlineArrowLeft } from "react-icons/hi";
 
+const PER_PAGE = 12;
+
 export default function Shirts() {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [total, setTotal] = useState(0);
     const [filters, setFilters] = useState({ fabric: [], style: [], size: [], minPrice: 0, maxPrice: 10000 });
     const [sortBy, setSortBy] = useState("newest");
     const [showMobileFilter, setShowMobileFilter] = useState(false);
+    const loadMoreRef = useRef(null);
 
-    const fetchProducts = useCallback(async (f) => {
-        setLoading(true);
+    // Fetch a specific page of products
+    const fetchPage = useCallback(async (f, pageNum, append = false) => {
+        if (pageNum === 1) setLoading(true);
+        else setLoadingMore(true);
         try {
             const qs = buildQueryString({ ...f, category: "shirt", sort: sortBy });
-            const { data } = await API.get(`/products?${qs}`);
-            setProducts(data);
+            const { data } = await API.get(`/products?${qs}&page=${pageNum}&limit=${PER_PAGE}`);
+            if (data.products) {
+                setProducts(prev => append ? [...prev, ...data.products] : data.products);
+                setHasMore(data.hasMore);
+                setTotal(data.total);
+                setPage(data.page);
+            } else {
+                // Legacy fallback (shouldn't happen with page param)
+                setProducts(Array.isArray(data) ? data : []);
+                setHasMore(false);
+                setTotal(Array.isArray(data) ? data.length : 0);
+            }
         } catch {
-            setProducts([]);
+            if (!append) setProducts([]);
+            setHasMore(false);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     }, [sortBy]);
 
+    // Reset to page 1 when filters or sort change
     useEffect(() => {
-        fetchProducts(filters);
-    }, [filters, sortBy, fetchProducts]);
+        setProducts([]);
+        setPage(1);
+        setHasMore(false);
+        fetchPage(filters, 1, false);
+    }, [filters, sortBy, fetchPage]);
+
+    // Load more handler
+    const loadMore = useCallback(() => {
+        if (loadingMore || !hasMore) return;
+        fetchPage(filters, page + 1, true);
+    }, [filters, page, hasMore, loadingMore, fetchPage]);
+
+    // Intersection Observer for infinite scroll
+    useEffect(() => {
+        if (!loadMoreRef.current) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && hasMore && !loadingMore) {
+                    loadMore();
+                }
+            },
+            { rootMargin: "300px" }
+        );
+        observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [hasMore, loadingMore, loadMore]);
+
+    const SkeletonCard = () => (
+        <div className="animate-pulse bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="aspect-[3/4] bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900" />
+            <div className="p-4 sm:p-6 space-y-3">
+                <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full w-1/3" />
+                <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded-full w-3/4" />
+                <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full w-1/2" />
+                <div className="h-5 bg-slate-100 dark:bg-slate-700 rounded-full w-1/3" />
+                <div className="h-10 bg-slate-100 dark:bg-slate-700 rounded-xl w-full mt-2" />
+            </div>
+        </div>
+    );
 
     return (
         <main id="main-content">
@@ -64,7 +123,7 @@ export default function Shirts() {
                 {/* Toolbar */}
                 <div className="flex items-center justify-between">
                     <p className="text-[15px] text-slate-500 dark:text-slate-400">
-                        {loading ? "Loading..." : <><span className="font-bold text-slate-900 dark:text-white">{products.length}</span> product{products.length !== 1 ? "s" : ""} found</>}
+                        {loading ? "Loading..." : <><span className="font-bold text-slate-900 dark:text-white">{total}</span> product{total !== 1 ? "s" : ""} found</>}
                     </p>
                     <div className="flex items-center gap-3">
                         {/* Sort dropdown */}
@@ -104,18 +163,9 @@ export default function Shirts() {
                     {/* Product grid */}
                     <div className="flex-1">
                         {loading ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {[...Array(6)].map((_, i) => (
-                                    <div key={i} className="animate-pulse bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                                        <div className="aspect-[3/4] bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900" />
-                                        <div className="p-6 space-y-3">
-                                            <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full w-1/3" />
-                                            <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded-full w-3/4" />
-                                            <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full w-1/2" />
-                                            <div className="h-5 bg-slate-100 dark:bg-slate-700 rounded-full w-1/3" />
-                                            <div className="h-10 bg-slate-100 dark:bg-slate-700 rounded-xl w-full mt-2" />
-                                        </div>
-                                    </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                                {[...Array(PER_PAGE)].map((_, i) => (
+                                    <SkeletonCard key={i} />
                                 ))}
                             </div>
                         ) : products.length === 0 ? (
@@ -132,11 +182,28 @@ export default function Shirts() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {products.map((p) => (
-                                    <ProductCard key={p._id} product={p} />
-                                ))}
-                            </div>
+                            <>
+                                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                                    {products.map((p) => (
+                                        <ProductCard key={p._id} product={p} />
+                                    ))}
+                                </div>
+
+                                {/* Infinite scroll sentinel + loading indicator */}
+                                <div ref={loadMoreRef} className="flex justify-center py-10">
+                                    {loadingMore && (
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-5 h-5 border-3 border-slate-200 dark:border-slate-600 border-t-primary dark:border-t-gold rounded-full animate-spin" />
+                                            <span className="text-[14px] font-semibold text-slate-400 dark:text-slate-500">Loading more...</span>
+                                        </div>
+                                    )}
+                                    {!hasMore && products.length > 0 && !loadingMore && (
+                                        <p className="text-[14px] font-semibold text-slate-400 dark:text-slate-500">
+                                            You've seen all {total} product{total !== 1 ? "s" : ""} ✓
+                                        </p>
+                                    )}
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>
