@@ -41,9 +41,6 @@ export default function ProductDetail() {
             try {
                 const { data } = await API.get(`/products/${id}`);
                 setProduct(data);
-                if (data?.sizes?.length > 0) {
-                    setSelectedSize(data.sizes[0]);
-                }
                 // Fetch similar products
                 if (data) {
                     try {

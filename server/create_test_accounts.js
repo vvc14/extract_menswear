@@ -1,46 +1,64 @@
-import fetch from 'node-fetch';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import User from './models/User.js';
+import Admin from './models/Admin.js';
 
 dotenv.config();
-const BASE = 'http://localhost:5000/api';
-
-async function createUser() {
-  const res = await fetch(`${BASE}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'qa_test_user', email: 'qa_user@example.com', password: 'Password123' })
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error('User register failed: ' + JSON.stringify(data));
-  return data.token;
-}
-
-async function createAdmin() {
-  // Direct DB insert for admin (no public endpoint)
-  const mongoose = (await import('mongoose')).default;
-  const Admin = (await import('./models/Admin.js')).default;
-  await mongoose.connect(process.env.MONGO_URI);
-  let admin = await Admin.findOne({ username: 'qa_admin' });
-  if (!admin) {
-    admin = new Admin({ username: 'qa_admin', password: 'AdminPass123' });
-    await admin.save();
-  }
-  const jwt = (await import('jsonwebtoken')).default;
-  const token = jwt.sign({ id: admin._id, username: admin.username, role: admin.role, type: 'admin' }, process.env.JWT_SECRET, { expiresIn: '24h' });
-  await mongoose.disconnect();
-  return token;
-}
 
 async function main() {
   try {
-    const userToken = await createUser();
-    const adminToken = await createAdmin();
+    await mongoose.connect(process.env.MONGO_URI);
+
+    // 1. Create or Find User
+    let user = await User.findOne({ email: 'qa_user@example.com' });
+    if (!user) {
+      user = new User({
+        name: 'qa_test_user',
+        email: 'qa_user@example.com',
+        password: 'Password123' // Will be hashed by pre-save middleware
+      });
+      await user.save();
+      console.log('Test user created in DB');
+    } else {
+      console.log('Test user already exists in DB');
+    }
+
+    const userToken = jwt.sign(
+      { id: user._id, email: user.email, role: user.role, type: 'user' },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // 2. Create or Find Admin
+    let admin = await Admin.findOne({ username: 'qa_admin' });
+    if (!admin) {
+      admin = new Admin({
+        username: 'qa_admin',
+        password: 'AdminPass123'
+      });
+      await admin.save();
+      console.log('Test admin created in DB');
+    } else {
+      console.log('Test admin already exists in DB');
+    }
+
+    const adminToken = jwt.sign(
+      { id: admin._id, username: admin.username, role: admin.role, type: 'admin' },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
     const tokens = { userToken, adminToken };
     fs.writeFileSync('test_tokens.json', JSON.stringify(tokens, null, 2));
-    console.log('Test accounts created; tokens saved to test_tokens.json');
+    console.log('Tokens generated and saved to test_tokens.json');
+
+    await mongoose.disconnect();
+    process.exit(0);
   } catch (err) {
     console.error('Error creating test accounts:', err);
+    try { await mongoose.disconnect(); } catch {}
     process.exit(1);
   }
 }

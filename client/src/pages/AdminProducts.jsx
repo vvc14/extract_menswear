@@ -20,6 +20,7 @@ export default function AdminProducts() {
     const [newFabric, setNewFabric] = useState("");
     const [newStyle, setNewStyle] = useState("");
     const [newSize, setNewSize] = useState("");
+    const [customSizeInput, setCustomSizeInput] = useState("");
     const [showManage, setShowManage] = useState(false);
     const [objectUrls, setObjectUrls] = useState([]);
     const objectUrlsRef = useRef([]);
@@ -96,8 +97,29 @@ export default function AdminProducts() {
         setForm(updated);
     };
 
+    const handleAddCustomSize = () => {
+        const val = customSizeInput.trim();
+        if (!val) return;
+        const current = form.selectedSizes || [];
+        if (current.includes(val)) {
+            alert("This size is already added");
+            return;
+        }
+        setForm({ ...form, selectedSizes: [...current, val] });
+        setCustomSizeInput("");
+    };
+
+    const handleRemoveCustomSize = (sz) => {
+        const current = form.selectedSizes || [];
+        setForm({ ...form, selectedSizes: current.filter((x) => x !== sz) });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!form.selectedSizes || form.selectedSizes.length === 0) {
+            alert("At least one size is required");
+            return;
+        }
         if (Number(form.price) < 0) {
             alert("Price cannot be negative");
             return;
@@ -284,30 +306,84 @@ export default function AdminProducts() {
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Shipping Cost (₹)</label>
                                     <input type="number" min="0" value={form.shippingCost} onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) handleFormChange("shippingCost", v); }} placeholder="0 or 99" className={inputClass} />
                                 </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Sizes</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {(catOptions[form.category]?.sizes || []).map((s) => (
-                                            <button
-                                                key={s}
-                                                type="button"
-                                                onClick={() => {
-                                                    const current = form.selectedSizes || [];
-                                                    const updated = current.includes(s) ? current.filter((x) => x !== s) : [...current, s];
-                                                    setForm({ ...form, selectedSizes: updated });
-                                                }}
-                                                className={`min-w-[44px] h-[38px] px-3 rounded-xl text-[14px] font-bold border-2 transition-all duration-200 cursor-pointer ${
-                                                    (form.selectedSizes || []).includes(s)
-                                                        ? "bg-primary text-white border-primary shadow-sm shadow-primary/20 scale-105"
-                                                        : "bg-white text-slate-600 border-slate-200 hover:border-primary/40 hover:text-slate-900"
-                                                }`}
-                                            >
-                                                {s}
-                                            </button>
-                                        ))}
-                                        {(catOptions[form.category]?.sizes || []).length === 0 && (
-                                            <p className="text-[14px] text-slate-400 italic">No sizes configured. Add them in Manage Options below.</p>
+                                <div className="md:col-span-2 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 bg-slate-50/50 dark:bg-slate-900/30">
+                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-3">Sizes</label>
+                                    
+                                    {/* Added sizes list */}
+                                    <div className="mb-4">
+                                        <span className="block text-[12px] font-bold text-slate-400 mb-2">Added Sizes:</span>
+                                        {form.selectedSizes && form.selectedSizes.length > 0 ? (
+                                            <div className="flex flex-wrap gap-2">
+                                                {form.selectedSizes.map((s) => (
+                                                    <span
+                                                        key={s}
+                                                        className="inline-flex items-center gap-1.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[14px] font-bold px-3 py-1.5 rounded-xl shadow-sm border border-slate-800 dark:border-slate-200"
+                                                    >
+                                                        {s}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveCustomSize(s)}
+                                                            className="w-4 h-4 rounded-full bg-white/20 dark:bg-slate-900/10 flex items-center justify-center text-[12px] hover:bg-white/40 dark:hover:bg-slate-900/20 font-extrabold focus:outline-none cursor-pointer"
+                                                            aria-label={`Remove size ${s}`}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-[14px] text-slate-400 italic">No sizes added yet. At least one size is required.</p>
                                         )}
+                                    </div>
+
+                                    {/* Custom size input */}
+                                    <div className="flex gap-2 mb-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Type a size (e.g. S, M, XL, 30, 32...)"
+                                            value={customSizeInput}
+                                            onChange={(e) => setCustomSizeInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    handleAddCustomSize();
+                                                }
+                                            }}
+                                            className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-[15px] text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-slate-500"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleAddCustomSize}
+                                            className="bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-[14px] font-bold px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
+                                        >
+                                            Add Size
+                                        </button>
+                                    </div>
+
+                                    {/* Size suggestions */}
+                                    <div className="flex flex-wrap gap-1.5 items-center">
+                                        <span className="text-[12px] font-bold text-slate-400 uppercase mr-1">Suggestions:</span>
+                                        {(catOptions[form.category]?.sizes || []).map((s) => {
+                                            const isAdded = (form.selectedSizes || []).includes(s);
+                                            return (
+                                                <button
+                                                    key={s}
+                                                    type="button"
+                                                    disabled={isAdded}
+                                                    onClick={() => {
+                                                        const current = form.selectedSizes || [];
+                                                        setForm({ ...form, selectedSizes: [...current, s] });
+                                                    }}
+                                                    className={`text-[12px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                                                        isAdded
+                                                            ? "bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-slate-200 dark:border-slate-700 cursor-not-allowed"
+                                                            : "bg-white text-slate-600 border-slate-200 hover:border-primary/45 hover:text-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-450 dark:hover:text-blue-400"
+                                                    }`}
+                                                >
+                                                    {s}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                                 <div className="md:col-span-2">

@@ -38,6 +38,16 @@ export const addToCart = async (req, res) => {
 
         const qtyToAdd = quantity || 1;
 
+        if (product.sizes && product.sizes.length > 0) {
+            if (!size || !product.sizes.includes(size)) {
+                return res.status(400).json({ message: "Invalid size selected" });
+            }
+        } else {
+            if (size && size !== "") {
+                return res.status(400).json({ message: "Invalid size selected" });
+            }
+        }
+
         let cart = await Cart.findOne({ userId: req.user.id });
 
         if (!cart) {

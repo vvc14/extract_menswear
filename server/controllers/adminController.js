@@ -30,9 +30,26 @@ export const addProduct = async (req, res) => {
         try {
             parsedSizes = typeof sizes === "string" ? JSON.parse(sizes || "[]") : (sizes || []);
         } catch {
-            parsedSizes = [];
+            return res.status(400).json({ message: "Invalid format for sizes" });
         }
-        const product = await Product.create({ name, category, fabric, style, price: numPrice, originalPrice: numOriginalPrice, discount: numDiscount, shippingCost: numShippingCost, imageUrl, images, videoUrl: videoUrl || "", stock: numStock, sizes: parsedSizes });
+
+        if (!Array.isArray(parsedSizes) || parsedSizes.length === 0) {
+            return res.status(400).json({ message: "Sizes must be a non-empty array" });
+        }
+
+        for (const s of parsedSizes) {
+            if (typeof s !== "string" || s.trim() === "") {
+                return res.status(400).json({ message: "Each size must be a non-empty string" });
+            }
+        }
+
+        const trimmedSizes = parsedSizes.map((s) => s.trim());
+        const uniqueSizes = [...new Set(trimmedSizes)];
+        if (uniqueSizes.length !== trimmedSizes.length) {
+            return res.status(400).json({ message: "Duplicate sizes are not allowed" });
+        }
+
+        const product = await Product.create({ name, category, fabric, style, price: numPrice, originalPrice: numOriginalPrice, discount: numDiscount, shippingCost: numShippingCost, imageUrl, images, videoUrl: videoUrl || "", stock: numStock, sizes: trimmedSizes });
         res.status(201).json(product);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -44,9 +61,29 @@ export const updateProduct = async (req, res) => {
         const updates = { ...req.body };
         if (req.imageUrl) updates.imageUrl = req.imageUrl;
 
-        // Parse sizes if sent as JSON string
-        if (updates.sizes && typeof updates.sizes === "string") {
-            try { updates.sizes = JSON.parse(updates.sizes); } catch { updates.sizes = []; }
+        // Parse and validate sizes if sent
+        if (updates.sizes !== undefined) {
+            if (typeof updates.sizes === "string") {
+                try {
+                    updates.sizes = JSON.parse(updates.sizes);
+                } catch {
+                    return res.status(400).json({ message: "Invalid format for sizes" });
+                }
+            }
+            if (!Array.isArray(updates.sizes) || updates.sizes.length === 0) {
+                return res.status(400).json({ message: "Sizes must be a non-empty array" });
+            }
+            for (const s of updates.sizes) {
+                if (typeof s !== "string" || s.trim() === "") {
+                    return res.status(400).json({ message: "Each size must be a non-empty string" });
+                }
+            }
+            const trimmedSizes = updates.sizes.map((s) => s.trim());
+            const uniqueSizes = [...new Set(trimmedSizes)];
+            if (uniqueSizes.length !== trimmedSizes.length) {
+                return res.status(400).json({ message: "Duplicate sizes are not allowed" });
+            }
+            updates.sizes = trimmedSizes;
         }
 
         // Handle videoUrl
