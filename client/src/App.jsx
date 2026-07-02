@@ -25,6 +25,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrders from "./pages/AdminOrders";
 import AdminUsers from "./pages/AdminUsers";
+import AdminSettings from "./pages/AdminSettings";
 import AdminLogin from "./pages/AdminLogin";
 import Wishlist from "./pages/Wishlist";
 import SizeGuide from "./pages/SizeGuide";
@@ -96,6 +97,7 @@ function AppRoutes() {
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="settings" element={<AdminSettings />} />
       </Route>
 
       {/* Top-level catch-all for non-Layout routes */}

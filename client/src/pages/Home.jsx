@@ -45,7 +45,7 @@ export default function Home() {
     useEffect(() => {
         const fetchNewArrivals = async () => {
             try {
-                const { data } = await API.get("/products?limit=8&sort=newest");
+                const { data } = await API.get("/products?limit=8&sort=newest&newArrivals=true");
                 setNewArrivals(Array.isArray(data) ? data.slice(0, 8) : []);
             } catch {
                 setNewArrivals([]);

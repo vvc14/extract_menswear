@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
 import User from "../models/User.js";
+import Setting from "../models/Setting.js";
 
 export const getProducts = async (req, res) => {
     try {
@@ -22,6 +23,14 @@ export const getProducts = async (req, res) => {
                 { style: { $regex: search, $options: "i" } },
                 { category: { $regex: search, $options: "i" } }
             ];
+        }
+
+        if (req.query.newArrivals === "true") {
+            const setting = await Setting.findOne({ key: "newArrivalsDays" });
+            const days = setting ? Number(setting.value) : 14;
+            const cutOffDate = new Date();
+            cutOffDate.setDate(cutOffDate.getDate() - days);
+            filter.createdAt = { $gte: cutOffDate };
         }
 
         const sortMap = {

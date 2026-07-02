@@ -6,7 +6,7 @@ import { ADMIN_PATH } from "../config/adminPath";
 import {
     HiOutlineViewGrid, HiOutlineCollection, HiOutlineUsers,
     HiOutlineLogout, HiOutlineExternalLink, HiOutlineMenu, HiOutlineX,
-    HiOutlineChevronRight, HiOutlineClipboardList
+    HiOutlineChevronRight, HiOutlineClipboardList, HiOutlineAdjustments
 } from "react-icons/hi";
 
 const SIDEBAR_W = 230;
@@ -16,6 +16,7 @@ const NAV = [
     { to: `/${ADMIN_PATH}/products`, label: "Products", icon: HiOutlineCollection },
     { to: `/${ADMIN_PATH}/orders`, label: "Orders", icon: HiOutlineClipboardList },
     { to: `/${ADMIN_PATH}/users`, label: "Users", icon: HiOutlineUsers },
+    { to: `/${ADMIN_PATH}/settings`, label: "Settings", icon: HiOutlineAdjustments },
 ];
 
 export default function AdminLayout() {

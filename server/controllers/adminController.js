@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
 import User from "../models/User.js";
 import CategoryOption from "../models/CategoryOption.js";
+import Setting from "../models/Setting.js";
 
 export const addProduct = async (req, res) => {
     try {
@@ -228,6 +229,51 @@ export const updateCategoryOptions = async (req, res) => {
             { new: true, upsert: true }
         );
         res.json(option);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// GET /api/admin/settings — get all settings
+export const getSettings = async (req, res) => {
+    try {
+        const settings = await Setting.find().lean();
+        
+        // Auto-seed defaults if empty
+        let newArrivalsDaysSetting = settings.find(s => s.key === "newArrivalsDays");
+        if (!newArrivalsDaysSetting) {
+            newArrivalsDaysSetting = await Setting.create({
+                key: "newArrivalsDays",
+                value: 14, // Default 14 days
+                description: "Number of days a product is considered a new arrival after being added/updated"
+            });
+            settings.push(newArrivalsDaysSetting.toObject());
+        }
+        
+        // Map settings to key-value format for easier client consumption
+        const mapped = {};
+        settings.forEach(s => {
+            mapped[s.key] = s.value;
+        });
+        res.json(mapped);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// PUT /api/admin/settings — update setting value
+export const updateSetting = async (req, res) => {
+    try {
+        const { key, value } = req.body;
+        if (!key) {
+            return res.status(400).json({ message: "Setting key is required" });
+        }
+        const setting = await Setting.findOneAndUpdate(
+            { key },
+            { $set: { value, updatedAt: Date.now() } },
+            { new: true, upsert: true }
+        );
+        res.json(setting);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
