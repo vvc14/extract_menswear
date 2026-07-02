@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toggleWishlist } from "../redux/wishlistSlice";
+import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion } from "framer-motion";
 import { HiOutlineShoppingCart, HiStar, HiOutlineStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart, HiOutlineArrowLeft, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExclamation, HiOutlineChatAlt2, HiOutlinePhotograph, HiOutlineX, HiOutlineTrash } from "react-icons/hi";
@@ -90,7 +91,7 @@ export default function ProductDetail() {
     const handleAdd = () => {
         if (!product || product.stock <= 0) return;
         if (product?.sizes?.length > 0 && !selectedSize) {
-            alert("Please select a size first");
+            dispatch(showAlert({ title: "Select Size", message: "Please select a size first" }));
             return;
         }
         dispatch(addToCart({ ...product, size: selectedSize, qtyToAdd: qty }));
@@ -109,7 +110,7 @@ export default function ProductDetail() {
     const handleBuyNow = () => {
         if (!product || product.stock <= 0) return;
         if (product?.sizes?.length > 0 && !selectedSize) {
-            alert("Please select a size first");
+            dispatch(showAlert({ title: "Select Size", message: "Please select a size first" }));
             return;
         }
         dispatch(addToCart({ ...product, size: selectedSize, qtyToAdd: qty }));

@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineTag, HiOutlineSearch, HiOutlineTrash, HiOutlineExclamation, HiOutlinePlus, HiOutlinePencilAlt, HiOutlineX } from "react-icons/hi";
 
 export default function AdminCoupons() {
+    const dispatch = useDispatch();
     const [coupons, setCoupons] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -85,7 +88,7 @@ export default function AdminCoupons() {
             await fetchCoupons();
             setShowForm(false);
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to save coupon");
+            dispatch(showAlert({ title: "Coupon Error", message: err.response?.data?.message || "Failed to save coupon" }));
         } finally {
             setSaving(false);
         }
@@ -99,7 +102,7 @@ export default function AdminCoupons() {
             setCoupons(prev => prev.filter(c => c._id !== deleteModal._id));
             setDeleteModal(null);
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to delete coupon");
+            dispatch(showAlert({ title: "Coupon Error", message: err.response?.data?.message || "Failed to delete coupon" }));
         } finally {
             setDeleting(false);
         }
@@ -110,7 +113,7 @@ export default function AdminCoupons() {
             const { data } = await API.put(`/admin/coupons/${coupon._id}`, { isActive: !coupon.isActive });
             setCoupons(prev => prev.map(c => c._id === data._id ? data : c));
         } catch (err) {
-            alert("Failed to update status");
+            dispatch(showAlert({ title: "Coupon Error", message: "Failed to update status. Please try again." }));
         }
     };
 

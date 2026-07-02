@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity, clearCart, updateCartStocks } from "../redux/cartSlice";
+import { showAlert } from "../redux/alertSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { initiateRazorpayPayment } from "../services/razorpay";
 import API from "../services/api";
@@ -105,11 +106,11 @@ export default function Cart() {
         
         // Strict Validation
         if (!/^\d{10}$/.test(addressForm.phone)) {
-            alert("Phone number must be exactly 10 digits.");
+            dispatch(showAlert({ title: "Validation Error", message: "Phone number must be exactly 10 digits." }));
             return;
         }
         if (!/^\d{6}$/.test(addressForm.pincode)) {
-            alert("Pincode must be exactly 6 digits and numeric only.");
+            dispatch(showAlert({ title: "Validation Error", message: "Pincode must be exactly 6 digits and numeric only." }));
             return;
         }
 
@@ -137,7 +138,7 @@ export default function Cart() {
             });
         } catch (err) {
             console.error("Failed to save shipping address:", err);
-            alert(err.response?.data?.message || "Failed to save address. Please try again.");
+            dispatch(showAlert({ title: "Error Saving Address", message: err.response?.data?.message || "Failed to save address. Please try again." }));
         } finally {
             setSavingAddress(false);
         }
@@ -174,14 +175,14 @@ export default function Cart() {
         }
 
         if (selectedIdx === null || !addresses[selectedIdx]) {
-            alert("Please provide and select a delivery address before proceeding to payment.");
+            dispatch(showAlert({ title: "Address Required", message: "Please provide and select a delivery address before proceeding to payment." }));
             setShowForm(true);
             return;
         }
 
         // Block checkout if any item has stock issues
         if (hasStockIssues) {
-            alert("Some items in your cart are out of stock or exceed available stock. Please update your cart before proceeding.");
+            dispatch(showAlert({ title: "Stock Issue", message: "Some items in your cart are out of stock or exceed available stock. Please update your cart before proceeding." }));
             return;
         }
 
@@ -189,11 +190,11 @@ export default function Cart() {
 
         // Format checks on checkout to ensure data compliance
         if (!/^\d{10}$/.test(selectedAddress.phone)) {
-            alert("The selected address contains an invalid phone number. It must be exactly 10 digits.");
+            dispatch(showAlert({ title: "Invalid Address Data", message: "The selected address contains an invalid phone number. It must be exactly 10 digits." }));
             return;
         }
         if (!/^\d{6}$/.test(selectedAddress.pincode)) {
-            alert("The selected address contains an invalid pincode. It must be exactly 6 digits and numeric only.");
+            dispatch(showAlert({ title: "Invalid Address Data", message: "The selected address contains an invalid pincode. It must be exactly 6 digits and numeric only." }));
             return;
         }
 

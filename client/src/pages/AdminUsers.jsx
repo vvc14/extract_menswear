@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineShieldCheck, HiOutlineUser, HiOutlineSearch, HiOutlineUsers, HiOutlineTrash, HiOutlineExclamation } from "react-icons/hi";
 
 export default function AdminUsers() {
+    const dispatch = useDispatch();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -46,7 +49,7 @@ export default function AdminUsers() {
             setUsers((prev) => prev.filter((u) => u._id !== deleteModal._id));
             setDeleteModal(null);
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to delete user");
+            dispatch(showAlert({ title: "Delete Error", message: err.response?.data?.message || "Failed to delete user" }));
         } finally {
             setDeleting(false);
         }

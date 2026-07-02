@@ -1,184 +1,245 @@
-import PDFDocument from "pdfkit";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-export const generateInvoicePDFBuffer = (order) => {
-    return new Promise((resolve, reject) => {
-        try {
-            const doc = new PDFDocument({ margin: 0, size: "A4" });
-            const buffers = [];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-            doc.on("data", buffers.push.bind(buffers));
-            doc.on("end", () => {
-                resolve(Buffer.concat(buffers));
-            });
+export const generateInvoicePDFBuffer = async (order) => {
+    const doc = new jsPDF();
+    const pw = doc.internal.pageSize.getWidth();   // 210
+    const ph = doc.internal.pageSize.getHeight();   // 297
 
-            const pw = doc.page.width;   // 595.28
-            const ph = doc.page.height;  // 841.89
+    // ─── Full page background ───
+    doc.setFillColor(250, 251, 252);
+    doc.rect(0, 0, pw, ph, "F");
 
-            // ─── Full page background ───
-            doc.rect(0, 0, pw, ph).fill("#fafbfc");
+    // ─── Left gold accent strip ───
+    doc.setFillColor(212, 175, 55);
+    doc.rect(0, 0, 2, ph, "F");
 
-            // ─── Left accent strip ───
-            doc.rect(0, 0, 6, ph).fill("#d4af37");
+    // ─── Header band ───
+    doc.setFillColor(15, 23, 42);
+    doc.rect(2, 0, pw - 2, 50, "F");
 
-            // ─── Header Band ───
-            doc.rect(6, 0, pw - 6, 140).fill("#0f172a");
+    // ─── Gold underline ───
+    doc.setFillColor(212, 175, 55);
+    doc.rect(2, 50, pw - 2, 1.2, "F");
 
-            // ─── Gold underline accent ───
-            doc.rect(6, 140, pw - 6, 3).fill("#d4af37");
-
-            // ─── Logo / Brand ───
-            const logoPath = path.resolve(process.cwd(), "../client/public/images/logo.png");
-            if (fs.existsSync(logoPath)) {
-                doc.image(logoPath, 40, 25, { height: 50 });
-                doc.fillColor("#d4af37").font("Helvetica").fontSize(9)
-                    .text("P R E M I U M   M E N S W E A R", 42, 85, { characterSpacing: 0.8 });
-            } else {
-                doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(38)
-                    .text("EXTRACT", 40, 35, { characterSpacing: 3 });
-                doc.fillColor("#d4af37").font("Helvetica").fontSize(9)
-                    .text("P R E M I U M   M E N S W E A R", 42, 85, { characterSpacing: 0.8 });
-            }
-
-            // ─── Invoice Title Block ───
-            doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(28)
-                .text("INVOICE", pw - 220, 40, { width: 180, align: "right", characterSpacing: 2 });
-            doc.fillColor("#94a3b8").font("Helvetica").fontSize(10)
-                .text(`No. ${order.invoiceNumber || "N/A"}`, pw - 220, 78, { width: 180, align: "right" });
-
-            // ─── Paid Badge ───
-            const badgeW = 60, badgeH = 22;
-            doc.roundedRect(pw - 100, 105, badgeW, badgeH, 4).fill("#10b981");
-            doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(10)
-                .text((order.status || "PAID").toUpperCase(), pw - 100, 111, { width: badgeW, align: "center" });
-
-            // ─── Date line below header ───
-            const orderDate = new Date(order.paidAt || order.createdAt).toLocaleDateString("en-IN", {
-                day: "numeric", month: "long", year: "numeric",
-            });
-            doc.fillColor("#64748b").font("Helvetica").fontSize(9)
-                .text(`Issue Date: ${orderDate}`, pw - 220, 118, { width: 180, align: "right" });
-
-            // ─── Customer Details Card ───
-            let y = 165;
-            doc.roundedRect(40, y, pw - 80, 85, 6).fillAndStroke("#ffffff", "#e2e8f0");
-
-            y += 16;
-            doc.fillColor("#94a3b8").font("Helvetica-Bold").fontSize(8).text("BILLED TO", 60, y);
-            doc.fillColor("#94a3b8").font("Helvetica-Bold").fontSize(8).text("PAYMENT DETAILS", pw / 2 + 20, y);
-            
-            y += 18;
-            doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(14)
-                .text(order.userName || "Customer", 60, y);
-            doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(10)
-                .text(orderDate, pw / 2 + 20, y);
-
-            y += 18;
-            doc.fillColor("#475569").font("Helvetica").fontSize(10)
-                .text(order.userEmail || "N/A", 60, y);
-            doc.fillColor("#475569").font("Helvetica").fontSize(9)
-                .text(`Payment ID: ${order.razorpayPaymentId || "N/A"}`, pw / 2 + 20, y);
-
-            // ─── Table ───
-            y = 275;
-
-            // Table Header
-            doc.roundedRect(40, y, pw - 80, 32, 4).fill("#0f172a");
-            doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(9);
-            doc.text("No.", 55, y + 11, { width: 25 });
-            doc.text("DESCRIPTION", 85, y + 11, { width: 200 });
-            doc.text("QTY", 310, y + 11, { width: 40, align: "center" });
-            doc.text("UNIT PRICE", 360, y + 11, { width: 80, align: "right" });
-            doc.text("AMOUNT", 450, y + 11, { width: 90, align: "right" });
-
-            y += 40;
-
-            // Table Rows
-            order.items.forEach((item, idx) => {
-                const totalItemPrice = item.price * item.quantity;
-                const isEven = idx % 2 === 0;
-
-                if (isEven) {
-                    doc.rect(40, y - 6, pw - 80, 28).fill("#f8fafc");
-                }
-
-                doc.fillColor("#94a3b8").font("Helvetica").fontSize(9)
-                    .text(String(idx + 1).padStart(2, "0"), 55, y + 3, { width: 25 });
-                doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(10)
-                    .text(item.name, 85, y + 2, { width: 200 });
-                doc.fillColor("#475569").font("Helvetica").fontSize(10)
-                    .text(item.quantity.toString(), 310, y + 2, { width: 40, align: "center" });
-                doc.fillColor("#475569").font("Helvetica").fontSize(10)
-                    .text(`Rs. ${item.price.toLocaleString("en-IN")}`, 360, y + 2, { width: 80, align: "right" });
-                doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(10)
-                    .text(`Rs. ${totalItemPrice.toLocaleString("en-IN")}`, 450, y + 2, { width: 90, align: "right" });
-                
-                y += 28;
-            });
-
-            // ─── Table bottom line ───
-            doc.moveTo(40, y + 2).lineTo(pw - 40, y + 2).lineWidth(0.5).stroke("#e2e8f0");
-
-            // ─── Summary Block ───
-            y += 20;
-            const shipping = order.shipping || 0;
-            const discount = order.discountAmount || 0;
-            const originalSubtotal = order.totalAmount + discount;
-            const grandTotal = order.totalAmount + shipping;
-            const sumLabelX = 370;
-            const sumValueX = pw - 55;
-
-            doc.fillColor("#64748b").font("Helvetica").fontSize(11).text("Subtotal", sumLabelX, y);
-            doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(11)
-                .text(`Rs. ${originalSubtotal.toLocaleString("en-IN")}`, sumValueX, y, { align: "right", width: 100 });
-            
-            if (discount > 0) {
-                y += 22;
-                doc.fillColor("#64748b").font("Helvetica").fontSize(11).text(`Discount (${order.couponCode || 'Coupon'})`, sumLabelX, y);
-                doc.fillColor("#10b981").font("Helvetica-Bold").fontSize(11)
-                    .text(`-Rs. ${discount.toLocaleString("en-IN")}`, sumValueX, y, { align: "right", width: 100 });
-            }
-
-            y += 22;
-            doc.fillColor("#64748b").font("Helvetica").fontSize(11).text("Shipping", sumLabelX, y);
-            doc.fillColor("#10b981").font("Helvetica-Bold").fontSize(11)
-                .text(shipping > 0 ? `Rs. ${shipping.toLocaleString("en-IN")}` : "FREE", sumValueX, y, { align: "right", width: 100 });
-
-            // ─── Divider ───
-            y += 22;
-            doc.moveTo(sumLabelX, y).lineTo(pw - 40, y).dash(2, { space: 2 }).stroke("#cbd5e1").undash();
-
-            // ─── Grand Total Row ───
-            y += 12;
-            doc.roundedRect(sumLabelX - 15, y - 8, pw - sumLabelX + 15 - 25, 40, 5).fill("#0f172a");
-            doc.fillColor("#d4af37").font("Helvetica-Bold").fontSize(12)
-                .text("GRAND TOTAL", sumLabelX + 5, y + 5);
-            doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(20)
-                .text(`Rs. ${grandTotal.toLocaleString("en-IN")}`, sumValueX - 10, y + 1, { align: "right", width: 120 });
-
-            // ─── Decorative line across middle ───
-            const midDecY = y + 55;
-            doc.moveTo(40, midDecY).lineTo(pw - 40, midDecY).lineWidth(0.5).stroke("#e2e8f0");
-
-            // ─── Thank You Block ───
-            doc.fillColor("#0f172a").font("Helvetica-Bold").fontSize(16)
-                .text("Thank You for Your Business!", 0, midDecY + 18, { align: "center", width: pw });
-            doc.fillColor("#64748b").font("Helvetica").fontSize(10)
-                .text("We truly appreciate your trust in Extract Premium Menswear.", 0, midDecY + 40, { align: "center", width: pw });
-
-            // ─── Footer band ───
-            const footH = 50;
-            const footY = ph - footH;
-            doc.rect(6, footY, pw - 6, footH).fill("#0f172a");
-            doc.rect(6, footY, pw - 6, 2).fill("#d4af37");
-
-            doc.fillColor("#94a3b8").font("Helvetica").fontSize(8)
-                .text("Returns & exchanges within 7 days  •  Quality guaranteed  •  www.extractmenswear.com", 0, footY + 20, { align: "center", width: pw });
-
-            doc.end();
-        } catch (error) {
-            reject(error);
+    // ─── Logo / Brand ───
+    let logoBase64 = "";
+    try {
+        const logoPath = path.resolve(__dirname, "../../client/public/images/logo.png");
+        if (fs.existsSync(logoPath)) {
+            const fileBuffer = fs.readFileSync(logoPath);
+            logoBase64 = `data:image/png;base64,${fileBuffer.toString("base64")}`;
         }
+    } catch (err) {
+        console.error("Failed to load logo on backend pdfGenerator:", err);
+    }
+
+    const drawLogoText = () => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(26);
+        doc.setTextColor(255, 255, 255);
+        doc.text("EXTRACT", 12, 26);
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(212, 175, 55);
+        doc.text("P R E M I U M   M E N S W E A R", 12, 34);
+    };
+
+    if (logoBase64) {
+        try {
+            doc.addImage(logoBase64, "PNG", 12, 8, 18, 18);
+            doc.setFontSize(7);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(212, 175, 55);
+            doc.text("P R E M I U M   M E N S W E A R", 12, 34);
+        } catch {
+            drawLogoText();
+        }
+    } else {
+        drawLogoText();
+    }
+
+    // ─── Invoice Title ───
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(255, 255, 255);
+    doc.text("INVOICE", pw - 12, 22, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`No. ${order.invoiceNumber || "N/A"}`, pw - 12, 32, { align: "right" });
+
+    // ─── PAID badge ───
+    doc.setFillColor(16, 185, 129);
+    doc.roundedRect(pw - 35, 38, 23, 8, 2, 2, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6);
+    doc.setTextColor(255, 255, 255);
+    doc.text("PAID", pw - 23.5, 43.5, { align: "center" });
+
+    // ─── Customer Details Card ───
+    let y = 58;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(12, y, pw - 24, 30, 2, 2, "FD");
+
+    y += 8;
+    // Left side
+    doc.setFontSize(6.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(148, 163, 184);
+    doc.text("BILLED TO", 16, y);
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text(order.userName || "Customer", 16, y + 6);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105);
+    doc.text(order.userEmail || "N/A", 16, y + 12);
+
+    // Right side
+    const orderDate = new Date(order.paidAt || order.createdAt).toLocaleDateString("en-IN", {
+        day: "numeric", month: "short", year: "numeric",
     });
+    doc.setFontSize(6.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(148, 163, 184);
+    doc.text("DATE", pw / 2 + 10, y);
+    doc.text("PAYMENT ID", pw / 2 + 10, y + 10);
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+    doc.text(orderDate, pw / 2 + 40, y);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105);
+    doc.text(order.razorpayPaymentId || "N/A", pw / 2 + 40, y + 10);
+
+    // ─── Items Table ───
+    const tableBody = order.items.map((item, idx) => [
+        String(idx + 1).padStart(2, "0"),
+        item.name,
+        item.quantity,
+        `Rs. ${item.price.toLocaleString("en-IN")}`,
+        `Rs. ${(item.price * item.quantity).toLocaleString("en-IN")}`,
+    ]);
+
+    autoTable(doc, {
+        startY: 95,
+        head: [["No.", "Description", "Qty", "Unit Price", "Amount"]],
+        body: tableBody,
+        margin: { left: 12, right: 12 },
+        styles: {
+            fontSize: 9,
+            cellPadding: { top: 5, bottom: 5, left: 4, right: 4 },
+            textColor: [15, 23, 42],
+            lineColor: [241, 245, 249],
+            lineWidth: 0.3,
+        },
+        headStyles: {
+            fillColor: [15, 23, 42],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 8,
+            cellPadding: { top: 5, bottom: 5, left: 4, right: 4 },
+        },
+        alternateRowStyles: {
+            fillColor: [248, 250, 252],
+        },
+        columnStyles: {
+            0: { cellWidth: 14, halign: "center", textColor: [148, 163, 184], fontStyle: "normal" },
+            1: { fontStyle: "bold" },
+            2: { cellWidth: 14, halign: "center" },
+            3: { cellWidth: 30, halign: "right" },
+            4: { cellWidth: 34, halign: "right", fontStyle: "bold" },
+        },
+    });
+
+    // ─── Summary ───
+    let finalY = doc.lastAutoTable.finalY + 8;
+    const sumLX = pw - 100;
+    const sumRX = pw - 16;
+
+    const shipping = order.shipping || 0;
+    const discount = order.discountAmount || 0;
+    const originalSubtotal = order.totalAmount + discount;
+    const grandTotal = order.totalAmount + shipping;
+
+    // Subtotal
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text("Subtotal", sumLX, finalY);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42);
+    doc.text(`Rs. ${originalSubtotal.toLocaleString("en-IN")}`, sumRX, finalY, { align: "right" });
+
+    if (discount > 0) {
+        finalY += 8;
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Discount (${order.couponCode || 'Coupon'})`, sumLX, finalY);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(16, 185, 129);
+        doc.text(`-Rs. ${discount.toLocaleString("en-IN")}`, sumRX, finalY, { align: "right" });
+    }
+
+    // Shipping
+    finalY += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text("Shipping", sumLX, finalY);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(16, 185, 129);
+    doc.text(shipping > 0 ? `Rs. ${shipping.toLocaleString("en-IN")}` : "FREE", sumRX, finalY, { align: "right" });
+
+    // Dash separator
+    finalY += 6;
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineDash([1, 1], 0);
+    doc.line(sumLX, finalY, sumRX, finalY);
+    doc.setLineDash([], 0);
+
+    // Grand Total Box
+    const boxX = sumLX - 5;
+    const boxW = sumRX - sumLX + 10;
+    doc.setFillColor(15, 23, 42);
+    doc.roundedRect(boxX, finalY + 4, boxW, 16, 3, 3, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(212, 175, 55);
+    doc.text("GRAND TOTAL", boxX + 8, finalY + 14);
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Rs. ${grandTotal.toLocaleString("en-IN")}`, boxX + boxW - 6, finalY + 14.5, { align: "right" });
+
+    // ─── Thank You ───
+    const tyY = finalY + 50;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Thank You for Your Business!", pw / 2, tyY, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text("We truly appreciate your trust in Extract Premium Menswear.", pw / 2, tyY + 8, { align: "center" });
+
+    // ─── Footer band ───
+    const footH = 16;
+    const footY = ph - footH;
+    doc.setFillColor(15, 23, 42);
+    doc.rect(2, footY, pw - 2, footH, "F");
+    doc.setFillColor(212, 175, 55);
+    doc.rect(2, footY, pw - 2, 0.8, "F");
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(148, 163, 184);
+    doc.text("Returns & exchanges within 7 days  •  Quality guaranteed  •  www.extractmenswear.com", pw / 2, footY + 10, { align: "center" });
+
+    return Buffer.from(doc.output("arraybuffer"));
 };

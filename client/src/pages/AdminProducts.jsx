@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSearch, HiOutlinePhotograph, HiOutlineCollection, HiOutlineTruck, HiOutlineCog } from "react-icons/hi";
@@ -6,6 +8,7 @@ import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSe
 const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", videoUrl: "", selectedSizes: [], existingImages: [] };
 
 export default function AdminProducts() {
+    const dispatch = useDispatch();
     const [products, setProducts] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -102,7 +105,7 @@ export default function AdminProducts() {
         if (!val) return;
         const current = form.selectedSizes || [];
         if (current.includes(val)) {
-            alert("This size is already added");
+            dispatch(showAlert({ title: "Duplicate Size", message: "This size is already added" }));
             return;
         }
         setForm({ ...form, selectedSizes: [...current, val] });
@@ -117,23 +120,23 @@ export default function AdminProducts() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.selectedSizes || form.selectedSizes.length === 0) {
-            alert("At least one size is required");
+            dispatch(showAlert({ title: "Validation Error", message: "At least one size is required" }));
             return;
         }
         if (Number(form.price) < 0) {
-            alert("Price cannot be negative");
+            dispatch(showAlert({ title: "Validation Error", message: "Price cannot be negative" }));
             return;
         }
         if (form.originalPrice && Number(form.originalPrice) < 0) {
-            alert("Original price cannot be negative");
+            dispatch(showAlert({ title: "Validation Error", message: "Original price cannot be negative" }));
             return;
         }
         if (form.shippingCost && Number(form.shippingCost) < 0) {
-            alert("Shipping cost cannot be negative");
+            dispatch(showAlert({ title: "Validation Error", message: "Shipping cost cannot be negative" }));
             return;
         }
         if (Number(form.stock) < 0) {
-            alert("Stock cannot be negative");
+            dispatch(showAlert({ title: "Validation Error", message: "Stock cannot be negative" }));
             return;
         }
         setSubmitting(true);

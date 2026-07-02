@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion } from "framer-motion";
 import { HiOutlineAdjustments, HiOutlineCheckCircle, HiOutlineClock } from "react-icons/hi";
 
 export default function AdminSettings() {
+    const dispatch = useDispatch();
     const [newArrivalsDays, setNewArrivalsDays] = useState(14);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -38,7 +41,7 @@ export default function AdminSettings() {
             setTimeout(() => setMessage(""), 3000);
         } catch (err) {
             console.error("Failed to save settings:", err);
-            alert("Failed to save settings");
+            dispatch(showAlert({ title: "Settings Error", message: "Failed to save settings. Please try again." }));
         } finally {
             setSaving(false);
         }

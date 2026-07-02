@@ -283,7 +283,7 @@ export const getProfile = async (req, res) => {
 // ─── Update Profile ───
 export const updateProfile = async (req, res) => {
     try {
-        const { name, addresses } = req.body;
+        const { name, password, addresses } = req.body;
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 

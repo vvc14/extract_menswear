@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginSuccess } from "../redux/authSlice";
+import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -84,11 +85,11 @@ export default function Profile() {
         
         // Strict Client Side Validations
         if (!/^\d{10}$/.test(addressForm.phone)) {
-            alert("Phone number must be exactly 10 digits.");
+            dispatch(showAlert({ title: "Validation Error", message: "Phone number must be exactly 10 digits." }));
             return;
         }
         if (!/^\d{6}$/.test(addressForm.pincode)) {
-            alert("Pincode must be exactly 6 digits and numeric only.");
+            dispatch(showAlert({ title: "Validation Error", message: "Pincode must be exactly 6 digits and numeric only." }));
             return;
         }
 
@@ -139,17 +140,24 @@ export default function Profile() {
         setMessage({ type: "", text: "" });
         setSaving(true);
         try {
+            let finalPassword = updatedPassword;
+            let finalAddresses = updatedAddresses;
+            if (Array.isArray(updatedPassword)) {
+                finalAddresses = updatedPassword;
+                finalPassword = "";
+            }
+
             const payload = {
                 name: updatedName,
-                addresses: updatedAddresses,
+                addresses: finalAddresses,
             };
-            if (updatedPassword) {
-                if (updatedPassword.length < 6) {
+            if (finalPassword) {
+                if (finalPassword.length < 6) {
                     setMessage({ type: "error", text: "Password must be at least 6 characters." });
                     setSaving(false);
                     return;
                 }
-                payload.password = updatedPassword;
+                payload.password = finalPassword;
             }
 
             const { data } = await API.put("/auth/profile", payload);

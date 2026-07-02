@@ -39,6 +39,7 @@ const AdminCoupons = lazy(() => import("./pages/AdminCoupons"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 import { ThemeProvider } from "./context/ThemeContext";
 import { preloadRazorpay } from "./services/razorpay";
+import ModalAlert from "./components/ModalAlert";
 
 function ProtectedRoute({ children }) {
   const token = useSelector((s) => s.auth.token);
@@ -128,6 +129,7 @@ export default function App() {
         <ThemeProvider>
           <BrowserRouter>
             <AppRoutes />
+            <ModalAlert />
           </BrowserRouter>
         </ThemeProvider>
       </Provider>
