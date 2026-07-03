@@ -5,6 +5,7 @@ import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import mongoSanitize from "express-mongo-sanitize";
+import hpp from "hpp";
 import connectDB from "./config/db.js";
 import productRoutes from "./routes/productRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
@@ -57,6 +58,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // ─── Prevent NoSQL Injection ───
 app.use(mongoSanitize());
+
+// ─── Prevent HTTP Parameter Pollution ───
+app.use(hpp());
 
 // ─── Routes ───
 app.use("/api/products", productRoutes);

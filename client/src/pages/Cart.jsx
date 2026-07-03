@@ -21,7 +21,6 @@ export default function Cart() {
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
     const shipping = items.reduce((sum, i) => sum + (Number(i.shippingCost) || 0) * i.quantity, 0);
-    const actualDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
 
     // Fetch and sync the latest product stock dynamically from the database on load
     useEffect(() => {
@@ -79,6 +78,8 @@ export default function Cart() {
     const [couponError, setCouponError] = useState("");
     const [couponSuccess, setCouponSuccess] = useState("");
     const [applyingCoupon, setApplyingCoupon] = useState(false);
+
+    const actualDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
 
     useEffect(() => {
         if (user) {
