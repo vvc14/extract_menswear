@@ -19,8 +19,8 @@ export default function ProductCard({ product, compact = false }) {
         e.stopPropagation();
         if (product.stock <= 0) return;
 
-        if (product.category === "shirt") {
-            // Shirts require size selection, so redirect directly without adding to cart
+        if (product.sizes && product.sizes.length > 0) {
+            // Sized products require size selection, so redirect directly without adding to cart
             navigate(`/product/${product._id}`);
             return;
         }

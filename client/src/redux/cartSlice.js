@@ -100,6 +100,7 @@ const cartSlice = createSlice({
                 shippingCost: i.shippingCost || 0,
                 quantity: i.quantity,
                 size: i.size || "",
+                sizes: i.productId?.sizes || [],
                 stock: i.productId?.stock !== undefined ? i.productId.stock : (i.stock !== undefined ? i.stock : 99999),
             }));
             state.synced = true;

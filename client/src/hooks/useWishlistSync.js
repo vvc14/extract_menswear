@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchWishlist, syncWishlistToDB } from "../redux/wishlistSlice";
+import { fetchWishlist, syncWishlistToDB, removeFromWishlist } from "../redux/wishlistSlice";
 
 // Hook: fetch wishlist on login, sync to DB on every wishlist change
 export default function useWishlistSync() {
@@ -8,6 +8,7 @@ export default function useWishlistSync() {
     const user = useSelector((s) => s.auth.user);
     const items = useSelector((s) => s.wishlist.items);
     const synced = useSelector((s) => s.wishlist.synced);
+    const cartItems = useSelector((s) => s.cart.items);
     const prevUser = useRef(null);
     const syncTimeout = useRef(null);
 
@@ -18,6 +19,17 @@ export default function useWishlistSync() {
         }
         prevUser.current = user?.id || null;
     }, [user, dispatch]);
+
+    // If a product is in cart, remove it from the wishlist automatically
+    useEffect(() => {
+        if (items.length === 0 || cartItems.length === 0) return;
+        items.forEach((item) => {
+            const inCart = cartItems.some((c) => c._id === item._id);
+            if (inCart) {
+                dispatch(removeFromWishlist(item._id));
+            }
+        });
+    }, [items, cartItems, dispatch]);
 
     // Debounced sync to DB on wishlist changes (after initial fetch)
     useEffect(() => {
