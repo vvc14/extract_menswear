@@ -21,6 +21,7 @@ export default function Cart() {
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
     const shipping = items.reduce((sum, i) => sum + (Number(i.shippingCost) || 0) * i.quantity, 0);
+    const actualDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
 
     // Fetch and sync the latest product stock dynamically from the database on load
     useEffect(() => {
@@ -200,7 +201,7 @@ export default function Cart() {
 
         try {
             const { data } = await API.post("/payment/razorpay/order", {
-                amount: appliedCoupon ? subtotal - appliedCoupon.discountAmount : subtotal,
+                amount: subtotal - actualDiscount,
                 shipping,
                 userId: user._id || user.id,
                 userEmail: user.email,
@@ -581,7 +582,7 @@ export default function Cart() {
                                 {appliedCoupon && (
                                     <div className="flex justify-between text-[16px] text-emerald">
                                         <span className="font-semibold text-emerald text-[14px]">Discount ({appliedCoupon.code})</span>
-                                        <span className="font-bold">-₹{appliedCoupon.discountAmount.toLocaleString("en-IN")}</span>
+                                        <span className="font-bold">-₹{actualDiscount.toLocaleString("en-IN")}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-[16px]">
@@ -617,7 +618,7 @@ export default function Cart() {
                             <div className="border-t border-slate-200 dark:border-slate-700 pt-5 mb-8">
                                 <div className="flex justify-between">
                                     <span className="text-[18px] font-extrabold text-slate-900 dark:text-white">Total</span>
-                                    <span className="text-[26px] font-extrabold text-slate-900 dark:text-white">₹{((appliedCoupon ? subtotal - appliedCoupon.discountAmount : subtotal) + shipping).toLocaleString("en-IN")}</span>
+                                    <span className="text-[26px] font-extrabold text-slate-900 dark:text-white">₹{(subtotal - actualDiscount + shipping).toLocaleString("en-IN")}</span>
                                 </div>
                             </div>
 
