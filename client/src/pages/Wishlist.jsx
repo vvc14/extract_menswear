@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromWishlist, clearWishlist } from "../redux/wishlistSlice";
 import { addToCart } from "../redux/cartSlice";
+import { showAlert } from "../redux/alertSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineHeart, HiOutlineTrash, HiOutlineShoppingCart, HiStar, HiOutlineArrowLeft } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +14,17 @@ export default function Wishlist() {
     const [addedIds, setAddedIds] = useState(new Set());
 
     const handleAddToCart = (item) => {
+        if (item.stock !== undefined && item.stock <= 0) {
+            dispatch(showAlert({
+                title: "Out of Stock",
+                message: `"${item.name}" is currently out of stock.`
+            }));
+            return;
+        }
+        if (item.sizes && item.sizes.length > 0) {
+            navigate(`/product/${item._id}`);
+            return;
+        }
         dispatch(addToCart(item));
         setAddedIds((prev) => new Set(prev).add(item._id));
         setTimeout(() => {
@@ -26,8 +38,29 @@ export default function Wishlist() {
     };
 
     const handleMoveAllToCart = () => {
-        items.forEach((item) => dispatch(addToCart(item)));
-        dispatch(clearWishlist());
+        const sizedItems = items.filter((item) => item.sizes && item.sizes.length > 0);
+        const nonSizedAvailable = items.filter((item) => (!item.sizes || item.sizes.length === 0) && (item.stock === undefined || item.stock > 0));
+        const nonSizedOutOfStock = items.filter((item) => (!item.sizes || item.sizes.length === 0) && item.stock !== undefined && item.stock <= 0);
+
+        nonSizedAvailable.forEach((item) => {
+            dispatch(addToCart(item));
+            dispatch(removeFromWishlist(item._id));
+        });
+
+        if (sizedItems.length > 0 || nonSizedOutOfStock.length > 0) {
+            let msg = "";
+            if (sizedItems.length > 0 && nonSizedOutOfStock.length > 0) {
+                msg = "Some items in your wishlist require a size and others are out of stock. They have been kept in your wishlist.";
+            } else if (sizedItems.length > 0) {
+                msg = "Some items in your wishlist require a size. Please select a size on their product pages to add them to your cart.";
+            } else {
+                msg = "Some items in your wishlist are out of stock and have been kept in your wishlist.";
+            }
+            dispatch(showAlert({
+                title: "Wishlist Move Details",
+                message: msg
+            }));
+        }
     };
 
     if (items.length === 0) {

@@ -68,6 +68,8 @@ const wishlistSlice = createSlice({
                 style: i.style,
                 discount: i.discount || 0,
                 originalPrice: i.originalPrice || 0,
+                sizes: i.productId?.sizes || [],
+                stock: i.productId?.stock !== undefined ? i.productId.stock : (i.stock !== undefined ? i.stock : 99999),
             }));
             state.synced = true;
         });

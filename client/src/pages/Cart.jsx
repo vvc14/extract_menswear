@@ -198,6 +198,16 @@ export default function Cart() {
             return;
         }
 
+        // Validate that all items requiring a size actually have a size selected
+        const missingSizeItem = items.find((item) => item.sizes && item.sizes.length > 0 && !item.size);
+        if (missingSizeItem) {
+            dispatch(showAlert({
+                title: "Size Selection Required",
+                message: `Please select a size for "${missingSizeItem.name}" before proceeding to checkout.`
+            }));
+            return;
+        }
+
         const selectedAddress = addresses[selectedIdx];
 
         // Format checks on checkout to ensure data compliance
@@ -309,7 +319,7 @@ export default function Cart() {
                         {/* Cart items */}
                         <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                             {items.map((item) => (
-                                <div key={item._id} className="flex gap-3 sm:gap-5 p-3 sm:p-7">
+                                <div key={`${item._id}-${item.size || ""}`} className="flex gap-3 sm:gap-5 p-3 sm:p-7">
                                     {/* Image */}
                                     <Link to={`/product/${item._id}`} className="shrink-0">
                                         <div className="w-[85px] h-[110px] sm:w-[110px] sm:h-[140px] bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">

@@ -106,6 +106,21 @@ export const createOrder = async (req, res) => {
                     throw err;
                 }
 
+                // Check if size is required and validate
+                if (dbProduct.sizes && dbProduct.sizes.length > 0) {
+                    if (!item.size || !dbProduct.sizes.includes(item.size)) {
+                        const err = new Error(`Size is required and must be valid for ${dbProduct.name}`);
+                        err.statusCode = 400;
+                        throw err;
+                    }
+                } else {
+                    if (item.size && item.size !== "") {
+                        const err = new Error(`Product ${dbProduct.name} does not accept size`);
+                        err.statusCode = 400;
+                        throw err;
+                    }
+                }
+
                 computedSubtotal += dbProduct.price * item.quantity;
                 computedShipping += (dbProduct.shippingCost || 0) * item.quantity;
 
