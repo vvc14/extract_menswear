@@ -153,9 +153,9 @@ export default function Trousers() {
                     </div>
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "row", gap: "40px" }}>
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
                     {/* Filter sidebar */}
-                    <div className={`${showMobileFilter ? "block" : "hidden"} lg:block`}>
+                    <div className={`${showMobileFilter ? "block" : "hidden"} lg:block w-full lg:w-[260px] shrink-0`}>
                         <FilterSidebar category="trouser" onFilterChange={setFilters} />
                     </div>
 
