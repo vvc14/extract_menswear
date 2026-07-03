@@ -231,29 +231,66 @@ export default function ProductDetail() {
                     <div className="relative group">
                         {(() => {
                             const allImages = product.images && product.images.length > 0 ? product.images : [product.imageUrl];
-                            const currentImg = allImages[activeImg] || allImages[0];
+                            const allMedia = [...allImages, ...(product.videoUrl ? [product.videoUrl] : [])];
+                            const currentMedia = allMedia[activeImg] || allMedia[0];
+                            const isCurrentVideo = product.videoUrl && currentMedia === product.videoUrl;
+
                             return (
                                 <>
-                                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 relative">
-                                        <img src={currentImg} alt={`${product.name} - Image ${activeImg + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                                        {allImages.length > 1 && (
+                                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 relative flex items-center justify-center bg-black">
+                                        {isCurrentVideo ? (
+                                            product.videoUrl.includes("youtube.com") || product.videoUrl.includes("youtu.be") ? (
+                                                <iframe 
+                                                    className="w-full h-full" 
+                                                    src={product.videoUrl.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")} 
+                                                    title="Product Video" 
+                                                    frameBorder="0" 
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                                    allowFullScreen 
+                                                />
+                                            ) : (
+                                                <video 
+                                                    className="w-full h-full object-contain" 
+                                                    src={product.videoUrl} 
+                                                    controls 
+                                                    muted 
+                                                    autoPlay
+                                                    playsInline 
+                                                    poster={allImages[0]}
+                                                />
+                                            )
+                                        ) : (
+                                            <img src={currentMedia} alt={`${product.name} - Image ${activeImg + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-white dark:bg-transparent" />
+                                        )}
+                                        
+                                        {allMedia.length > 1 && (
                                             <>
-                                                <button onClick={() => setActiveImg((prev) => (prev - 1 + allImages.length) % allImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Previous image">
+                                                <button onClick={() => setActiveImg((prev) => (prev - 1 + allMedia.length) % allMedia.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Previous item">
                                                     <HiOutlineChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                                                 </button>
-                                                <button onClick={() => setActiveImg((prev) => (prev + 1) % allImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Next image">
+                                                <button onClick={() => setActiveImg((prev) => (prev + 1) % allMedia.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Next item">
                                                     <HiOutlineChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                                                 </button>
                                             </>
                                         )}
                                     </div>
-                                    {allImages.length > 1 && (
-                                        <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
-                                            {allImages.map((img, idx) => (
-                                                <button key={idx} onClick={() => setActiveImg(idx)} className={`shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${activeImg === idx ? "border-primary shadow-md" : "border-slate-200 dark:border-slate-700 hover:border-slate-400"}`}>
-                                                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                                                </button>
-                                            ))}
+                                    {allMedia.length > 1 && (
+                                        <div className="flex gap-3 mt-4 overflow-x-auto pb-1 scrollbar-hide">
+                                            {allMedia.map((media, idx) => {
+                                                const isVideoThumb = product.videoUrl && media === product.videoUrl;
+                                                return (
+                                                    <button key={idx} onClick={() => setActiveImg(idx)} className={`relative shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${activeImg === idx ? "border-primary shadow-md" : "border-slate-200 dark:border-slate-700 hover:border-slate-400"}`}>
+                                                        <img src={isVideoThumb ? allImages[0] : media} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        {isVideoThumb && (
+                                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                                <svg className="w-8 h-8 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path d="M8 5v14l11-7z" />
+                                                                </svg>
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </>

@@ -23,7 +23,8 @@ const cleanUnsplashUrl = (url) => {
 
 export const addProduct = async (req, res) => {
     try {
-        const { name, category, fabric, style, price, originalPrice, discount, stock, shippingCost, sizes, videoUrl } = req.body;
+        const { name, category, fabric, style, price, originalPrice, discount, stock, shippingCost, sizes } = req.body;
+        let videoUrl = req.videoUrl || req.body.videoUrl || "";
         let imageUrl = req.imageUrl || req.body.imageUrl;
         imageUrl = cleanUnsplashUrl(imageUrl);
         const additionalImages = (req.additionalImages || []).map(cleanUnsplashUrl);
@@ -68,7 +69,7 @@ export const addProduct = async (req, res) => {
             return res.status(400).json({ message: "Duplicate sizes are not allowed" });
         }
 
-        const product = await Product.create({ name, category, fabric, style, price: numPrice, originalPrice: numOriginalPrice, discount: numDiscount, shippingCost: numShippingCost, imageUrl, images, videoUrl: videoUrl || "", stock: numStock, sizes: trimmedSizes });
+        const product = await Product.create({ name, category, fabric, style, price: numPrice, originalPrice: numOriginalPrice, discount: numDiscount, shippingCost: numShippingCost, imageUrl, images, videoUrl, stock: numStock, sizes: trimmedSizes });
         res.status(201).json(product);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -106,7 +107,9 @@ export const updateProduct = async (req, res) => {
         }
 
         // Handle videoUrl
-        if (updates.videoUrl !== undefined) {
+        if (req.videoUrl) {
+            updates.videoUrl = req.videoUrl;
+        } else if (updates.videoUrl !== undefined) {
             updates.videoUrl = updates.videoUrl || "";
         }
 

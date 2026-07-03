@@ -10,9 +10,9 @@ router.use(authMiddleware);
 router.use(requireRole("admin"));
 
 // Products
-router.post("/products", upload.array("images", 10), uploadToCloudinary, addProduct);
+router.post("/products", upload.fields([{ name: "images", maxCount: 10 }, { name: "video", maxCount: 1 }]), uploadToCloudinary, addProduct);
 router.put("/products/bulk-shipping", updateBulkShipping);
-router.put("/products/:id", upload.array("images", 10), uploadToCloudinary, updateProduct);
+router.put("/products/:id", upload.fields([{ name: "images", maxCount: 10 }, { name: "video", maxCount: 1 }]), uploadToCloudinary, updateProduct);
 router.delete("/products/:id", deleteProduct);
 
 // User management

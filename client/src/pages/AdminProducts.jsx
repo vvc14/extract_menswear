@@ -5,7 +5,7 @@ import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSearch, HiOutlinePhotograph, HiOutlineCollection, HiOutlineTruck, HiOutlineCog } from "react-icons/hi";
 
-const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", videoUrl: "", selectedSizes: [], existingImages: [] };
+const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", videoFile: null, videoUrl: "", selectedSizes: [], existingImages: [] };
 
 export default function AdminProducts() {
     const dispatch = useDispatch();
@@ -81,7 +81,7 @@ export default function AdminProducts() {
     };
     const openEdit = (p) => {
         setEditing(p._id);
-        setForm({ name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price, originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "", stock: p.stock || 0, images: [], imageUrl: p.imageUrl || "", videoUrl: p.videoUrl || "", selectedSizes: p.sizes || [], existingImages: p.images || [p.imageUrl].filter(Boolean) });
+        setForm({ name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price, originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "", stock: p.stock || 0, images: [], imageUrl: "", videoFile: null, videoUrl: p.videoUrl || "", selectedSizes: p.sizes || [], existingImages: p.images || [p.imageUrl].filter(Boolean) });
         setShowForm(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -157,6 +157,9 @@ export default function AdminProducts() {
             for (let i = 0; i < form.images.length; i++) {
                 formData.append("images", form.images[i]);
             }
+        }
+        if (form.videoFile) {
+            formData.append("video", form.videoFile);
         }
         // Send existing images as JSON so server can preserve/combine them
         if (form.existingImages && form.existingImages.length > 0) {
@@ -320,13 +323,13 @@ export default function AdminProducts() {
                                                 {form.selectedSizes.map((s) => (
                                                     <span
                                                         key={s}
-                                                        className="inline-flex items-center gap-1.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[14px] font-bold px-3 py-1.5 rounded-xl shadow-sm border border-slate-800 dark:border-slate-200"
+                                                        className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 text-[14px] font-bold px-3 py-1.5 rounded-xl shadow-sm border border-slate-200"
                                                     >
                                                         {s}
                                                         <button
                                                             type="button"
                                                             onClick={() => handleRemoveCustomSize(s)}
-                                                            className="w-4 h-4 rounded-full bg-white/20 dark:bg-slate-900/10 flex items-center justify-center text-[12px] hover:bg-white/40 dark:hover:bg-slate-900/20 font-extrabold focus:outline-none cursor-pointer"
+                                                            className="w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center text-[12px] hover:bg-slate-300 font-extrabold focus:outline-none cursor-pointer"
                                                             aria-label={`Remove size ${s}`}
                                                         >
                                                             ×
@@ -352,12 +355,12 @@ export default function AdminProducts() {
                                                     handleAddCustomSize();
                                                 }
                                             }}
-                                            className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-[15px] text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-slate-500"
+                                            className="flex-1 bg-white border border-slate-200 px-4 py-2.5 text-[15px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300"
                                         />
                                         <button
                                             type="button"
                                             onClick={handleAddCustomSize}
-                                            className="bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-[14px] font-bold px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
+                                            className="bg-slate-900 hover:bg-slate-800 text-white text-[14px] font-bold px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
                                         >
                                             Add Size
                                         </button>
@@ -379,8 +382,8 @@ export default function AdminProducts() {
                                                     }}
                                                     className={`text-[12px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                                                         isAdded
-                                                            ? "bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-slate-200 dark:border-slate-700 cursor-not-allowed"
-                                                            : "bg-white text-slate-600 border-slate-200 hover:border-primary/45 hover:text-primary dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-450 dark:hover:text-blue-400"
+                                                            ? "bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed"
+                                                            : "bg-white text-slate-600 border-slate-200 hover:border-primary/45 hover:text-primary"
                                                     }`}
                                                 >
                                                     {s}
@@ -431,13 +434,31 @@ export default function AdminProducts() {
                                             }} className="hidden" />
                                         </label>
                                     </div>
-                                    <p className="text-[12px] text-slate-400 mt-2">Or enter image URL below (first URL will be the main image)</p>
-                                    <input type="url" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://..." className={inputClass + " mt-2"} />
+                                    <p className="text-[12px] text-slate-400 mt-2">Or enter image URL below and click Add</p>
+                                    <div className="flex gap-2 mt-2">
+                                        <input type="url" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://... image URL" className={inputClass + " flex-1"} />
+                                        <button type="button" onClick={() => {
+                                            if (form.imageUrl && form.imageUrl.trim() !== "") {
+                                                setForm({ ...form, existingImages: [...(form.existingImages || []), form.imageUrl.trim()], imageUrl: "" });
+                                            }
+                                        }} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-slate-800 transition-colors shrink-0">Add URL</button>
+                                    </div>
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Video URL (optional)</label>
-                                    <input type="url" value={form.videoUrl} onChange={(e) => setForm({ ...form, videoUrl: e.target.value })} placeholder="https://youtube.com/... or direct video URL" className={inputClass} />
-                                    <p className="text-[12px] text-slate-400 mt-2">Paste a YouTube, Vimeo, or direct .mp4 video link to showcase the product</p>
+                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Video (optional)</label>
+                                    <div className="flex gap-3 mb-2">
+                                        <label className="flex items-center gap-3 border-2 border-dashed border-slate-200 rounded-xl px-4 py-3.5 cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all flex-1">
+                                            <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                            <span className="text-[15px] text-slate-500 font-medium">{form.videoFile ? form.videoFile.name : "Choose video file..."}</span>
+                                            <input type="file" accept="video/*" onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    setForm({ ...form, videoFile: e.target.files[0], videoUrl: "" });
+                                                }
+                                            }} className="hidden" />
+                                        </label>
+                                    </div>
+                                    <p className="text-[12px] text-slate-400 mt-2">Or enter video URL below</p>
+                                    <input type="url" value={form.videoUrl} onChange={(e) => setForm({ ...form, videoUrl: e.target.value, videoFile: null })} placeholder="https://youtube.com/... or direct video URL" className={inputClass} />
                                 </div>
                                 <div className="md:col-span-2 flex items-center gap-3 pt-3">
                                     <button type="submit" disabled={submitting}

@@ -2,7 +2,7 @@ import multer from "multer";
 import streamifier from "streamifier";
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 500 * 1024 * 1024 } });
 
 const cloudinaryConfigured =
     process.env.CLOUDINARY_CLOUD_NAME &&
@@ -21,7 +21,17 @@ const loadCloudinary = async () => {
 loadCloudinary();
 
 const uploadToCloudinary = (req, res, next) => {
-    const files = req.files || (req.file ? [req.file] : []);
+    let files = [];
+    if (req.files) {
+        if (Array.isArray(req.files)) {
+            files = req.files;
+        } else {
+            Object.values(req.files).forEach(arr => files = files.concat(arr));
+        }
+    } else if (req.file) {
+        files = [req.file];
+    }
+
     if (files.length === 0) return next();
 
     if (!cloudinaryConfigured || !cloudinary) {
@@ -30,8 +40,6 @@ const uploadToCloudinary = (req, res, next) => {
         });
     }
 
-    // Multiple files (main image + additional images)
-    const uploadedUrls = [];
     let completed = 0;
     let hasErrored = false;
     const total = files.length;
@@ -39,24 +47,31 @@ const uploadToCloudinary = (req, res, next) => {
     const checkDone = () => {
         completed++;
         if (completed === total && !hasErrored) {
-            req.imageUrl = uploadedUrls[0];
-            req.additionalImages = uploadedUrls.slice(1);
+            const imageFiles = files.filter(f => f.fieldname === "images" || !f.fieldname || f.fieldname === "file");
+            if (imageFiles.length > 0) {
+                req.imageUrl = imageFiles[0].secure_url;
+                req.additionalImages = imageFiles.slice(1).map(f => f.secure_url);
+            }
+            const videoFile = files.find(f => f.fieldname === "video");
+            if (videoFile) {
+                req.videoUrl = videoFile.secure_url;
+            }
             next();
         }
     };
 
-    files.forEach((file, idx) => {
+    files.forEach((file) => {
         const stream = cloudinary.uploader.upload_stream(
-            { folder: "extract-menswear" },
+            { folder: "extract-menswear", resource_type: "auto" },
             (error, result) => {
                 if (error) {
                     if (!hasErrored) {
                         hasErrored = true;
-                        return res.status(500).json({ message: "Image upload failed" });
+                        return res.status(500).json({ message: "File upload failed" });
                     }
                     return;
                 }
-                uploadedUrls[idx] = result.secure_url;
+                file.secure_url = result.secure_url;
                 checkDone();
             }
         );
