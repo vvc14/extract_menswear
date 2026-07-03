@@ -28,6 +28,8 @@
     "streamifier": "^0.1.1"
   },
   "devDependencies": {
-    "autocannon": "^8.0.0"
+    "@eslint/js": "^10.0.1",
+    "autocannon": "^8.0.0",
+    "eslint": "^10.6.0"
   }
 }

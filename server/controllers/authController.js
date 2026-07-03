@@ -20,7 +20,7 @@ export const googleLogin = async (req, res) => {
             audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();
-        const { email, name, sub: googleId } = payload;
+        const { email, name } = payload;
         
         if (!email) {
             return res.status(400).json({ message: "Google account must have an email associated." });
@@ -216,6 +216,7 @@ export const userRegister = async (req, res) => {
                 return res.status(400).json({ message: "Invalid email verification. Please verify your email again." });
             }
         } catch (err) {
+            console.error("Token verification failed:", err.message);
             return res.status(400).json({ message: "Email verification expired. Please verify your email again." });
         }
 

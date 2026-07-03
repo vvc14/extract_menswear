@@ -48,6 +48,7 @@ export default function Cart() {
         };
         
         syncStock();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Check if any item has stock issues

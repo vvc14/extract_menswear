@@ -89,7 +89,7 @@ async function hasMxRecords(domain) {
     try {
         const records = await dns.resolveMx(domain);
         return records && records.length > 0;
-    } catch (err) {
+    } catch {
         // ENOTFOUND = domain doesn't exist, ENODATA = no MX records
         return false;
     }

@@ -72,6 +72,7 @@ app.use("/api/coupons", couponRoutes);
 app.get("/api/health", (_, res) => res.json({ status: "ok" }));
 
 // ─── Global Error Handler — NEVER leak stack traces ───
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
     console.error("Unhandled error:", err.message);
     res.status(err.status || 500).json({ message: "Something went wrong. Please try again." });

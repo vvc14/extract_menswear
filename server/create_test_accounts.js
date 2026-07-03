@@ -58,7 +58,7 @@ async function main() {
     process.exit(0);
   } catch (err) {
     console.error('Error creating test accounts:', err);
-    try { await mongoose.disconnect(); } catch {}
+    try { await mongoose.disconnect(); } catch { /* ignore */ }
     process.exit(1);
   }
 }

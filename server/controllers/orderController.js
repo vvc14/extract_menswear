@@ -29,7 +29,7 @@ export const getOrderById = async (req, res) => {
                 // Regular user: enforce ownership
                 order = await Order.findOne({ _id: req.params.id, userId: req.user.id }).lean();
             }
-        } catch (e) {
+        } catch {
             // If ID is not a valid ObjectId, try razorpayOrderId fallback (for both admin and user)
             order = await Order.findOne({ razorpayOrderId: req.params.id }).lean();
         }
@@ -376,7 +376,7 @@ export const updateOrderStatus = async (req, res) => {
                 // Regular user: enforce ownership
                 order = await Order.findOne({ _id: req.params.id, userId: req.user.id });
             }
-        } catch (e) {
+        } catch {
             // If ID is not a valid ObjectId, try razorpayOrderId fallback (for both admin and user)
             order = await Order.findOne({ razorpayOrderId: req.params.id });
         }
