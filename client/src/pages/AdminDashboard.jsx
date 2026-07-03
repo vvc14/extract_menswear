@@ -75,7 +75,7 @@ export default function AdminDashboard() {
                             View all <HiOutlineArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
-                    <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden overflow-x-auto">
                         <table className="w-full text-[15px]">
                             <thead>
                                 <tr className="border-b border-slate-100">
