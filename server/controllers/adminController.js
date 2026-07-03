@@ -3,11 +3,30 @@ import User from "../models/User.js";
 import CategoryOption from "../models/CategoryOption.js";
 import Setting from "../models/Setting.js";
 
+const cleanUnsplashUrl = (url) => {
+    if (typeof url !== "string" || !url) return url;
+    try {
+        const parsed = new URL(url);
+        if (parsed.hostname.includes("unsplash.com") && parsed.pathname.includes("/photos/")) {
+            const segments = parsed.pathname.split("/").filter(Boolean);
+            const photoSegment = segments[1];
+            if (photoSegment && photoSegment !== "download") {
+                const id = photoSegment.split("-").pop();
+                return `https://unsplash.com/photos/${id}/download`;
+            }
+        }
+    } catch {
+        // Ignore parsing errors
+    }
+    return url;
+};
+
 export const addProduct = async (req, res) => {
     try {
         const { name, category, fabric, style, price, originalPrice, discount, stock, shippingCost, sizes, videoUrl } = req.body;
-        const imageUrl = req.imageUrl || req.body.imageUrl;
-        const additionalImages = req.additionalImages || [];
+        let imageUrl = req.imageUrl || req.body.imageUrl;
+        imageUrl = cleanUnsplashUrl(imageUrl);
+        const additionalImages = (req.additionalImages || []).map(cleanUnsplashUrl);
         const images = [imageUrl, ...additionalImages].filter(Boolean);
 
         if (!name || !category || !price || !imageUrl) {
@@ -91,16 +110,27 @@ export const updateProduct = async (req, res) => {
             updates.videoUrl = updates.videoUrl || "";
         }
 
+        if (updates.imageUrl) {
+            updates.imageUrl = cleanUnsplashUrl(updates.imageUrl);
+        }
+
         // Handle multiple images
-        const additionalImages = req.additionalImages || [];
+        let additionalImages = req.additionalImages || [];
+        additionalImages = additionalImages.map(cleanUnsplashUrl);
+        
         const parseExistingImages = (val) => {
             if (!val) return [];
-            if (Array.isArray(val)) return val;
-            try { return JSON.parse(val); } catch { return []; }
+            if (Array.isArray(val)) return val.map(cleanUnsplashUrl);
+            try { 
+                const parsed = JSON.parse(val); 
+                return Array.isArray(parsed) ? parsed.map(cleanUnsplashUrl) : [];
+            } catch { 
+                return []; 
+            }
         };
         if (req.imageUrl || additionalImages.length > 0) {
             const existingImages = parseExistingImages(updates.existingImages);
-            const mainImage = req.imageUrl || updates.imageUrl;
+            const mainImage = cleanUnsplashUrl(req.imageUrl || updates.imageUrl);
             updates.images = [...existingImages, mainImage, ...additionalImages].filter(Boolean);
             updates.imageUrl = mainImage || existingImages[0] || updates.imageUrl;
         } else if (updates.existingImages) {
