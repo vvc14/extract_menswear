@@ -155,8 +155,8 @@ export default function AdminOrders() {
             </div>
 
             {/* Orders Table */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden" style={{ marginTop: "8px" }}>
-                <table className="w-full text-[15px]">
+            <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden overflow-x-auto" style={{ marginTop: "8px" }}>
+                <table className="w-full text-[15px] min-w-[850px]">
                     <thead>
                         <tr className="border-b border-slate-100">
                             <th className="text-left px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Invoice</th>

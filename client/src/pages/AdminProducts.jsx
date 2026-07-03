@@ -557,8 +557,8 @@ export default function AdminProducts() {
             </div>
 
             {/* Products table */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden">
-                <table className="w-full text-[16px]">
+            <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden overflow-x-auto">
+                <table className="w-full text-[16px] min-w-[950px]">
                     <thead>
                         <tr className="border-b border-slate-100">
                             <th className="px-4 py-4 w-10">
