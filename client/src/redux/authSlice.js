@@ -7,7 +7,11 @@ const loadAuth = () => {
         if (adminData) {
             const parsed = JSON.parse(adminData);
             if (parsed.token && parsed.admin) {
-                return { token: parsed.token, admin: parsed.admin, user: null };
+                return { 
+                    token: parsed.token, 
+                    admin: parsed.admin, 
+                    user: { ...parsed.admin, email: parsed.admin.username } 
+                };
             }
         }
 
@@ -33,7 +37,7 @@ const authSlice = createSlice({
         loginSuccess: (state, action) => {
             state.token = action.payload.token;
             state.admin = action.payload.admin || null;
-            state.user = action.payload.user || null;
+            state.user = action.payload.user || (action.payload.admin ? { ...action.payload.admin, email: action.payload.admin.username } : null);
 
             if (action.payload.admin) {
                 // Admin sessions go to sessionStorage (ephemeral per tab/window)
