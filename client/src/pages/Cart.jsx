@@ -171,6 +171,15 @@ export default function Cart() {
         setCouponError("");
     };
 
+    // Auto-remove coupon if cart contents change
+    useEffect(() => {
+        if (appliedCoupon) {
+            handleRemoveCoupon();
+            dispatch(showAlert({ title: "Cart Updated", message: "Coupon removed because your cart was modified. Please re-apply if applicable." }));
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [subtotal, totalItems]);
+
     const handleCheckout = async () => {
         if (!user) {
             navigate("/login?redirect=cart");
