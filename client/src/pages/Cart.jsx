@@ -297,10 +297,10 @@ export default function Cart() {
                         {/* Cart items */}
                         <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                             {items.map((item) => (
-                                <div key={item._id} className="flex gap-5 p-5 sm:p-7">
+                                <div key={item._id} className="flex gap-3 sm:gap-5 p-3 sm:p-7">
                                     {/* Image */}
                                     <Link to={`/product/${item._id}`} className="shrink-0">
-                                        <div className="w-[90px] h-[110px] sm:w-[110px] sm:h-[140px] bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                                        <div className="w-[85px] h-[110px] sm:w-[110px] sm:h-[140px] bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
                                             <img src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                                         </div>
                                     </Link>
@@ -331,9 +331,9 @@ export default function Cart() {
                                             ) : null}
                                         </div>
 
-                                        <div className="flex items-center justify-between mt-4 gap-3">
+                                        <div className="flex flex-wrap items-center justify-between mt-3 sm:mt-4 gap-3">
                                             {/* Quantity */}
-                                            <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
+                                            <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800 h-9 sm:h-10">
                                                 <button
                                                     onClick={() => {
                                                         if (item.quantity === 1) {
@@ -342,37 +342,39 @@ export default function Cart() {
                                                             dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity - 1 }));
                                                         }
                                                     }}
-                                                    className="px-3 py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                                    className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer h-full"
                                                     aria-label="Decrease quantity"
                                                 >
                                                     <HiMinus className="w-3.5 h-3.5" />
                                                 </button>
-                                                <span className="px-3 py-2 text-[16px] font-bold text-slate-900 dark:text-white min-w-[36px] text-center border-x border-slate-200 dark:border-slate-700">
+                                                <span className="px-2 sm:px-3 py-1 sm:py-2 text-[14px] sm:text-[16px] font-bold text-slate-900 dark:text-white min-w-[32px] sm:min-w-[36px] text-center border-x border-slate-200 dark:border-slate-700 h-full flex items-center justify-center">
                                                     {item.quantity}
                                                 </span>
                                                 <button
                                                     disabled={item.quantity >= (item.stock || 99999) || (item.stock !== undefined && item.stock === 0)}
                                                     onClick={() => dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity + 1 }))}
-                                                    className="px-3 py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                                    className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer h-full"
                                                     aria-label="Increase quantity"
                                                 >
                                                     <HiPlus className="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
 
-                                            {/* Price */}
-                                            <p className="text-[18px] sm:text-[20px] font-extrabold text-slate-900 dark:text-white">
-                                                ₹{(item.price * item.quantity).toLocaleString("en-IN")}
-                                            </p>
+                                            <div className="flex items-center gap-3 ml-auto">
+                                                {/* Price */}
+                                                <p className="text-[16px] sm:text-[20px] font-extrabold text-slate-900 dark:text-white">
+                                                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                                                </p>
 
-                                            {/* Delete */}
-                                            <button
-                                                onClick={() => dispatch(removeFromCart({ id: item._id, size: item.size }))}
-                                                className="p-2 rounded-lg text-slate-400 hover:text-rose hover:bg-rose/10 dark:hover:bg-rose/20 transition-colors"
-                                                aria-label={`Remove ${item.name} from cart`}
-                                            >
-                                                <HiOutlineTrash className="w-5 h-5" />
-                                            </button>
+                                                {/* Delete */}
+                                                <button
+                                                    onClick={() => dispatch(removeFromCart({ id: item._id, size: item.size }))}
+                                                    className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-colors shrink-0"
+                                                    aria-label={`Remove ${item.name} from cart`}
+                                                >
+                                                    <HiOutlineTrash className="w-5 h-5" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

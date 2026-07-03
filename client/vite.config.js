@@ -9,7 +9,8 @@ export default defineConfig({
       '/api': 'http://localhost:5000',
     },
     allowedHosts: [
-      'chastise-green-hesitancy.ngrok-free.dev',
+      'chastise-green-hesitancy.ngrok-free.',
+      'mossy-roast-moonlight.ngrok-free.dev',
     ],
   },
 })

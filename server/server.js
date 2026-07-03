@@ -17,6 +17,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 // ─── Gzip Compression ───
 app.use(compression());
@@ -25,7 +26,7 @@ app.use(compression());
 app.use(helmet());
 
 // ─── CORS — strict origin only ───
-const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000", "https://chastise-green-hesitancy.ngrok-free.dev"].filter(Boolean);
+const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:3000", "https://chastise-green-hesitancy.ngrok-free.dev", "https://mossy-roast-moonlight.ngrok-free.dev"].filter(Boolean);
 app.use(cors({
     origin: (origin, cb) => {
         if (!origin || allowedOrigins.includes(origin)) cb(null, true);

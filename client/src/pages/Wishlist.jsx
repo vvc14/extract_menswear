@@ -89,7 +89,7 @@ export default function Wishlist() {
                     </div>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                     <AnimatePresence mode="popLayout">
                         {items.map((item) => {
                             const discount = item.discount || 0;
