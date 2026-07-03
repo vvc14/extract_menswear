@@ -477,3 +477,8 @@ html.dark .theme-toggle:hover {
 .theme-toggle:active {
   transform: scale(0.92);
 }
+
+/* Force hand cursor (pointer) on all links, buttons, and interactive elements */
+a, button, [role="link"], [role="button"], .cursor-pointer {
+  cursor: pointer !important;
+}

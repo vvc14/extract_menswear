@@ -202,6 +202,49 @@ export default function Navbar() {
                                     </AnimatePresence>
                                 </button>
 
+                                {/* Wishlist */}
+                                <Link
+                                    to="/wishlist"
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                    aria-label={`Wishlist, ${wishlistCount} items`}
+                                >
+                                    <span className="relative">
+                                        <HiOutlineHeart className="w-[20px] h-[20px] text-slate-700 dark:text-slate-300" />
+                                        {wishlistCount > 0 && (
+                                            <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="absolute -top-1.5 -right-2 text-white text-[9px] font-extrabold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center leading-none shadow-sm"
+                                                style={{ background: "#f43f5e" }}
+                                            >
+                                                {wishlistCount}
+                                            </motion.span>
+                                        )}
+                                    </span>
+                                </Link>
+
+                                {/* Cart */}
+                                <Link
+                                    to="/cart"
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                    aria-label={`Shopping cart, ${cartCount} items`}
+                                >
+                                    <span className="relative">
+                                        <HiOutlineShoppingCart className="w-[20px] h-[20px] text-slate-700 dark:text-slate-300" />
+                                        {cartCount > 0 && (
+                                            <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="absolute -top-1.5 -right-2 text-white text-[9px] font-extrabold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center leading-none shadow-sm"
+                                                style={{ background: "var(--gold)" }}
+                                            >
+                                                {cartCount}
+                                            </motion.span>
+                                        )}
+                                    </span>
+                                    <span className="hidden xl:block text-[15px] font-semibold text-slate-600 dark:text-slate-400">Cart</span>
+                                </Link>
+
                                 {/* User / Account */}
                                 {isLoggedIn ? (
                                     <div className="relative" ref={menuRef}>
@@ -275,49 +318,6 @@ export default function Navbar() {
                                         <span className="hidden xl:block text-[15px] font-semibold text-slate-600 dark:text-slate-400">Sign In</span>
                                     </Link>
                                 )}
-
-                                {/* Wishlist */}
-                                <Link
-                                    to="/wishlist"
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                    aria-label={`Wishlist, ${wishlistCount} items`}
-                                >
-                                    <span className="relative">
-                                        <HiOutlineHeart className="w-[20px] h-[20px] text-slate-700 dark:text-slate-300" />
-                                        {wishlistCount > 0 && (
-                                            <motion.span
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="absolute -top-1.5 -right-2 text-white text-[9px] font-extrabold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center leading-none shadow-sm"
-                                                style={{ background: "#f43f5e" }}
-                                            >
-                                                {wishlistCount}
-                                            </motion.span>
-                                        )}
-                                    </span>
-                                </Link>
-
-                                {/* Cart */}
-                                <Link
-                                    to="/cart"
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                                    aria-label={`Shopping cart, ${cartCount} items`}
-                                >
-                                    <span className="relative">
-                                        <HiOutlineShoppingCart className="w-[20px] h-[20px] text-slate-700 dark:text-slate-300" />
-                                        {cartCount > 0 && (
-                                            <motion.span
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="absolute -top-1.5 -right-2 text-white text-[9px] font-extrabold min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center leading-none shadow-sm"
-                                                style={{ background: "var(--gold)" }}
-                                            >
-                                                {cartCount}
-                                            </motion.span>
-                                        )}
-                                    </span>
-                                    <span className="hidden xl:block text-[15px] font-semibold text-slate-600 dark:text-slate-400">Cart</span>
-                                </Link>
 
                                 {/* Mobile toggle */}
                                 <button
