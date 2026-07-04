@@ -55,8 +55,36 @@ export default function Home() {
     useEffect(() => {
         const fetchNewArrivals = async () => {
             try {
-                const { data } = await API.get("/products?limit=8&sort=newest&newArrivals=true");
-                setNewArrivals(Array.isArray(data) ? data.slice(0, 8) : []);
+                const { data } = await API.get("/products?limit=30&sort=newest&newArrivals=true");
+                let arr = Array.isArray(data) ? data : [];
+                
+                // Deduplicate by name
+                const uniqueArr = [];
+                const seen = new Set();
+                for (const p of arr) {
+                    if (!seen.has(p.name)) {
+                        seen.add(p.name);
+                        uniqueArr.push(p);
+                    }
+                }
+                
+                // Separate into shirts and trousers
+                let shirts = uniqueArr.filter(p => p.category.toLowerCase() === 'shirt');
+                let trousers = uniqueArr.filter(p => p.category.toLowerCase() === 'trouser');
+                
+                // Shuffle both separately
+                shirts = shirts.sort(() => 0.5 - Math.random());
+                trousers = trousers.sort(() => 0.5 - Math.random());
+                
+                // Interleave them
+                const interleaved = [];
+                const maxLen = Math.max(shirts.length, trousers.length);
+                for(let i=0; i<maxLen; i++) {
+                    if (shirts[i]) interleaved.push(shirts[i]);
+                    if (trousers[i]) interleaved.push(trousers[i]);
+                }
+                
+                setNewArrivals(interleaved);
             } catch {
                 setNewArrivals([]);
             } finally {
@@ -203,33 +231,36 @@ export default function Home() {
                     </div>
 
                     {arrivalsLoading ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
-                            {[...Array(4)].map((_, i) => (
-                                <div key={i} className="bg-white dark:bg-slate-800/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 animate-pulse">
-                                    <div className="bg-slate-200 dark:bg-slate-700" style={{ aspectRatio: "3/4" }} />
-                                    <div className="p-5 space-y-3">
-                                        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-16" />
-                                        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full" />
-                                        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
-                                        <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-20 mt-2" />
+                        <div className="overflow-hidden w-full">
+                            <div className="flex gap-6 sm:gap-8 w-max animate-pulse">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="w-[240px] md:w-[280px] shrink-0 bg-white dark:bg-slate-800/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                                        <div className="bg-slate-200 dark:bg-slate-700" style={{ aspectRatio: "3/4" }} />
+                                        <div className="p-5 space-y-3">
+                                            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+                                            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+                                            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+                                            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-20 mt-2" />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     ) : newArrivals.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
-                            {newArrivals.map((product, i) => (
-                                <motion.div
-                                    key={product._id}
-                                    custom={i}
-                                    initial="hidden"
-                                    whileInView="visible"
-                                    viewport={{ once: true }}
-                                    variants={fadeUp}
-                                >
-                                    <ProductCard product={product} />
-                                </motion.div>
-                            ))}
+                        <div className="overflow-hidden relative w-full pt-4 pb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
+                            {/* Left gradient mask */}
+                            <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-24 bg-gradient-to-r from-slate-50 dark:from-[#0a0f1a] to-transparent z-10 pointer-events-none" />
+                            
+                            <div className="marquee-track gap-6 sm:gap-8">
+                                {[...newArrivals, ...newArrivals].map((product, i) => (
+                                    <div key={`${product._id}-${i}`} className="w-[220px] sm:w-[260px] lg:w-[280px] shrink-0">
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* Right gradient mask */}
+                            <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-24 bg-gradient-to-l from-slate-50 dark:from-[#0a0f1a] to-transparent z-10 pointer-events-none" />
                         </div>
                     ) : (
                         <div className="text-center py-16">
