@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { loginSuccess } from "../redux/authSlice";
 import API from "../services/api";
@@ -13,6 +13,14 @@ export default function AdminLogin() {
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { token, admin } = useSelector((s) => s.auth);
+
+    // Redirect if already logged in as Admin
+    useEffect(() => {
+        if (token && admin) {
+            navigate(`/${ADMIN_PATH}/dashboard`);
+        }
+    }, [token, admin, navigate]);
 
     const handleGoogleSuccess = async (credentialResponse) => {
         setError("");

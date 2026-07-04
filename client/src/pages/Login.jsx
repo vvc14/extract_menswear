@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginSuccess } from "../redux/authSlice";
 import API from "../services/api";
@@ -33,6 +33,14 @@ export default function Login() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
+    const { token, user } = useSelector((s) => s.auth);
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (token && user) {
+            navigate(redirect === "cart" ? "/cart" : redirect);
+        }
+    }, [token, user, navigate, redirect]);
 
     const goTo = (r) => navigate(r === "cart" ? "/cart" : r);
 
