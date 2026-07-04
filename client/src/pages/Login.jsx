@@ -11,11 +11,15 @@ const STEP_EMAIL = "email";
 const STEP_PASSWORD = "password";
 const STEP_OTP = "otp";
 const STEP_CREATE = "create";
+const STEP_FORGOT_OTP = "forgot_otp";
+const STEP_RESET_PASSWORD = "reset_password";
 
 export default function Login() {
     const [step, setStep] = useState(STEP_EMAIL);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [name, setName] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
@@ -90,6 +94,22 @@ export default function Login() {
         }
     };
 
+    const handleForgotPasswordRequest = async () => {
+        setError("");
+        setLoading(true);
+        try {
+            await API.post("/auth/forgot-password-send-otp", { email });
+            setStep(STEP_FORGOT_OTP);
+            setOtp(["", "", "", "", "", ""]);
+            setResendCooldown(60);
+            setTimeout(() => otpRefs.current[0]?.focus(), 300);
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to send reset code");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleOtpChange = (index, value) => {
         // Only allow digits
         if (value && !/^\d$/.test(value)) return;
@@ -146,9 +166,37 @@ export default function Login() {
         }
     };
 
+    const handleVerifyForgotOtp = async (e) => {
+        e.preventDefault();
+        const otpString = otp.join("");
+        if (otpString.length !== 6) {
+            setError("Please enter the complete 6-digit code");
+            return;
+        }
+        setError("");
+        setLoading(true);
+        try {
+            const { data } = await API.post("/auth/verify-otp", { email, otp: otpString });
+            if (data.verified) {
+                setEmailVerificationToken(data.emailVerificationToken);
+                setStep(STEP_RESET_PASSWORD);
+                setPassword("");
+                setConfirmPassword("");
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || "Verification failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleResendOtp = async () => {
         if (resendCooldown > 0) return;
-        await sendOtpRequest();
+        if (step === STEP_FORGOT_OTP) {
+            await handleForgotPasswordRequest();
+        } else {
+            await sendOtpRequest();
+        }
     };
 
     const handleLogin = async (e) => {
@@ -182,14 +230,45 @@ export default function Login() {
         }
     };
 
+    const handleResetPasswordSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters");
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+        setLoading(true);
+        try {
+            await API.post("/auth/forgot-password-reset", {
+                email,
+                emailVerificationToken,
+                newPassword: password,
+            });
+            // Automatically log in user after successful password reset
+            const { data } = await API.post("/auth/login", { email, password });
+            dispatch(loginSuccess(data));
+            goTo(redirect);
+        } catch (err) {
+            setError(err.response?.data?.message || "Password reset failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const goBack = () => {
-        if (step === STEP_CREATE) {
-            // Go back to OTP step — but since OTP is already verified, go to email
+        if (step === STEP_CREATE || step === STEP_RESET_PASSWORD) {
             setStep(STEP_EMAIL);
+        } else if (step === STEP_FORGOT_OTP) {
+            setStep(STEP_PASSWORD);
         } else {
             setStep(STEP_EMAIL);
         }
         setPassword("");
+        setConfirmPassword("");
         setName("");
         setError("");
         setOtp(["", "", "", "", "", ""]);
@@ -314,7 +393,7 @@ export default function Login() {
                                 )}
 
                                 <form onSubmit={handleLogin} className="flex flex-col gap-5">
-                                    <div>
+                                                                   <div>
                                         <label htmlFor="auth-password" className="block text-[14px] font-bold text-white/60 mb-2.5">Password</label>
                                         <div className="relative">
                                             <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
@@ -331,6 +410,16 @@ export default function Login() {
                                             />
                                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1 cursor-pointer">
                                                 {showPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
+                                            </button>
+                                        </div>
+                                        <div className="flex justify-end mt-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleForgotPasswordRequest}
+                                                disabled={loading}
+                                                className="text-[13px] font-bold text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                            >
+                                                Forgot password?
                                             </button>
                                         </div>
                                     </div>
@@ -459,6 +548,129 @@ export default function Login() {
                                         className="w-full text-white text-[16px] font-bold py-4.5 rounded-xl transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] cursor-pointer mt-1"
                                         style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
                                         {loading ? "Creating account..." : "Create Account & Sign In"}
+                                    </button>
+                                </form>
+                            </motion.div>
+                        )}
+
+                        {/* ──────── STEP 2c: OTP VERIFICATION (Forgot Password) ──────── */}
+                        {step === STEP_FORGOT_OTP && (
+                            <motion.div key="forgot-otp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}
+                                className="flex flex-col gap-6"
+                            >
+                                <div>
+                                    <button onClick={goBack} className="flex items-center gap-2 text-[14px] font-semibold text-white/40 hover:text-white/70 transition-colors mb-4 cursor-pointer">
+                                        <HiOutlineArrowLeft className="w-4 h-4" /> Back to password
+                                    </button>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
+                                            <HiOutlineShieldCheck className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h1 className="text-[28px] sm:text-[32px] font-extrabold text-white tracking-tight">Verify Reset Code</h1>
+                                    </div>
+                                    <p className="text-[15px] text-white/50 mt-2">
+                                        We've sent a 6-digit verification code to <span className="font-semibold text-white/70">{email}</span>
+                                    </p>
+                                </div>
+
+                                {error && (
+                                    <div className="bg-rose-500/15 border border-rose-500/25 text-rose-400 text-[14px] font-semibold px-4 py-3 rounded-xl">{error}</div>
+                                )}
+
+                                <form onSubmit={handleVerifyForgotOtp} className="flex flex-col gap-5">
+                                    <div>
+                                        <label className="block text-[14px] font-bold text-white/60 mb-3">Enter reset code</label>
+                                        <div className="flex gap-2.5 justify-center" onPaste={handleOtpPaste}>
+                                            {otp.map((digit, i) => (
+                                                <input
+                                                    key={i}
+                                                    ref={(el) => (otpRefs.current[i] = el)}
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    maxLength={1}
+                                                    value={digit}
+                                                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                                                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                                                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-[22px] font-bold text-white bg-white/[0.07] border border-white/[0.12] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50 transition-all"
+                                                    autoFocus={i === 0}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" disabled={loading || otp.join("").length !== 6}
+                                        className="w-full text-white text-[16px] font-bold py-4.5 rounded-xl transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] cursor-pointer mt-1"
+                                        style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
+                                        {loading ? "Verifying..." : "Verify Code"}
+                                    </button>
+                                </form>
+
+                                <div className="text-center">
+                                    <p className="text-[13px] text-white/30">
+                                        Didn't receive the code?{" "}
+                                        {resendCooldown > 0 ? (
+                                            <span className="text-white/40 font-semibold">Resend in {resendCooldown}s</span>
+                                        ) : (
+                                            <button
+                                                onClick={handleResendOtp}
+                                                disabled={loading}
+                                                className="text-blue-400 hover:text-blue-300 font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                                            >
+                                                Resend code
+                                            </button>
+                                        )}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* ──────── STEP 4: RESET PASSWORD ──────── */}
+                        {step === STEP_RESET_PASSWORD && (
+                            <motion.div key="reset-password" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}
+                                className="flex flex-col gap-6"
+                            >
+                                <div>
+                                    <button onClick={goBack} className="flex items-center gap-2 text-[14px] font-semibold text-white/40 hover:text-white/70 transition-colors mb-4 cursor-pointer">
+                                        <HiOutlineArrowLeft className="w-4 h-4" /> Cancel reset
+                                    </button>
+                                    <h1 className="text-[28px] sm:text-[32px] font-extrabold text-white tracking-tight mb-2">Set New Password</h1>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <HiOutlineShieldCheck className="w-4 h-4 text-emerald-400" />
+                                        <p className="text-[14px] text-emerald-400 font-semibold">{email} — verified</p>
+                                    </div>
+                                </div>
+
+                                {error && (
+                                    <div className="bg-rose-500/15 border border-rose-500/25 text-rose-400 text-[14px] font-semibold px-4 py-3 rounded-xl">{error}</div>
+                                )}
+
+                                <form onSubmit={handleResetPasswordSubmit} className="flex flex-col gap-5">
+                                    <div>
+                                        <label htmlFor="reset-new-password" className="block text-[14px] font-bold text-white/60 mb-2.5">New password</label>
+                                        <div className="relative">
+                                            <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                                            <input id="reset-new-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="new-password" placeholder="At least 6 characters"
+                                                className={inputClass + " pr-12"} />
+                                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1 cursor-pointer">
+                                                {showPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="reset-confirm-password" className="block text-[14px] font-bold text-white/60 mb-2.5">Confirm password</label>
+                                        <div className="relative">
+                                            <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                                            <input id="reset-confirm-password" type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" placeholder="Confirm your new password"
+                                                className={inputClass + " pr-12"} />
+                                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1 cursor-pointer">
+                                                {showConfirmPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="submit" disabled={loading}
+                                        className="w-full text-white text-[16px] font-bold py-4.5 rounded-xl transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] cursor-pointer mt-1"
+                                        style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
+                                        {loading ? "Resetting password..." : "Reset Password & Sign In"}
                                     </button>
                                 </form>
                             </motion.div>

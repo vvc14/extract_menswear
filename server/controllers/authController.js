@@ -324,3 +324,75 @@ export const updateProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// ─── Forgot Password: Send OTP to existing user ───
+export const sendForgotPasswordOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: "Email is required" });
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        // Check if account already exists
+        const existingUser = await User.findOne({ email: normalizedEmail });
+        if (!existingUser) {
+            return res.status(404).json({ message: "No account found with this email address" });
+        }
+
+        const otp = generateOtp();
+        const result = saveOtp(normalizedEmail, otp);
+
+        if (result.error) {
+            return res.status(429).json({ message: result.error });
+        }
+
+        await sendOtpEmail(normalizedEmail, otp);
+        res.json({ message: "Verification code sent to your email" });
+    } catch (error) {
+        console.error("Forgot Password OTP error:", error.message);
+        if (error.responseCode === 550 || error.code === "EENVELOPE") {
+            return res.status(400).json({ message: "This email address does not exist. Please check and try again." });
+        }
+        res.status(500).json({ message: "Failed to send verification code. Please try again." });
+    }
+};
+
+// ─── Forgot Password: Reset Password using OTP token ───
+export const resetPassword = async (req, res) => {
+    try {
+        const { email, emailVerificationToken, newPassword } = req.body;
+        if (!email || !emailVerificationToken || !newPassword) {
+            return res.status(400).json({ message: "Email, verification token, and new password are required" });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        // Verify the email verification token
+        try {
+            const decoded = jwt.verify(emailVerificationToken, process.env.JWT_SECRET);
+            if (decoded.purpose !== "email-verification" || decoded.email !== normalizedEmail) {
+                return res.status(400).json({ message: "Invalid verification. Please verify your email again." });
+            }
+        } catch (err) {
+            console.error("Token verification failed:", err.message);
+            return res.status(400).json({ message: "Verification expired. Please verify your email again." });
+        }
+
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ success: true, message: "Password reset successful" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+

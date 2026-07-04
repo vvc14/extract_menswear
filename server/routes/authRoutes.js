@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp, adminGoogleLogin } from "../controllers/authController.js";
+import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp, adminGoogleLogin, sendForgotPasswordOtp, resetPassword } from "../controllers/authController.js";
 import { userAuth } from "../middleware/auth.js";
 
 const router = Router();
@@ -11,8 +11,13 @@ router.post("/check-email", checkEmail);
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
 
+// Forgot Password / Password Reset
+router.post("/forgot-password-send-otp", sendForgotPasswordOtp);
+router.post("/forgot-password-reset", resetPassword);
+
 // Google sign-in
 router.post("/google", googleLogin);
+
 
 // Admin
 router.post("/admin-login", adminLogin);
