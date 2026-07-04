@@ -33,6 +33,17 @@ export default function ProductDetail() {
     const showReviews = true;
     const isWishlisted = wishlistItems.some((i) => i._id === product?._id);
 
+    const [lightboxZoomed, setLightboxZoomed] = useState(false);
+    const [lightboxZoomPos, setLightboxZoomPos] = useState({ x: 50, y: 50 });
+
+    const handleLightboxMouseMove = (e) => {
+        if (!lightboxZoomed) return;
+        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+        const x = ((e.clientX - left) / width) * 100;
+        const y = ((e.clientY - top) / height) * 100;
+        setLightboxZoomPos({ x, y });
+    };
+
     useEffect(() => {
         setActiveImg(0);
         setQty(1);
@@ -237,7 +248,10 @@ export default function ProductDetail() {
 
                             return (
                                 <>
-                                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 relative flex items-center justify-center bg-black">
+                                    <div 
+                                        className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 relative flex items-center justify-center bg-black cursor-pointer"
+                                        onClick={() => !isCurrentVideo && setLightboxImg(currentMedia)}
+                                    >
                                         {isCurrentVideo ? (
                                             product.videoUrl.includes("youtube.com") || product.videoUrl.includes("youtu.be") ? (
                                                 <iframe 
@@ -260,15 +274,33 @@ export default function ProductDetail() {
                                                 />
                                             )
                                         ) : (
-                                            <img src={currentMedia} alt={`${product.name} - Image ${activeImg + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 bg-white dark:bg-transparent" />
+                                            <img 
+                                                src={currentMedia} 
+                                                alt={`${product.name} - Image ${activeImg + 1}`} 
+                                                className="w-full h-full object-cover bg-white dark:bg-transparent group-hover:scale-105 transition-transform duration-700" 
+                                            />
                                         )}
                                         
                                         {allMedia.length > 1 && (
                                             <>
-                                                <button onClick={() => setActiveImg((prev) => (prev - 1 + allMedia.length) % allMedia.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Previous item">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveImg((prev) => (prev - 1 + allMedia.length) % allMedia.length);
+                                                    }} 
+                                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
+                                                    aria-label="Previous item"
+                                                >
                                                     <HiOutlineChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                                                 </button>
-                                                <button onClick={() => setActiveImg((prev) => (prev + 1) % allMedia.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10" aria-label="Next item">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveImg((prev) => (prev + 1) % allMedia.length);
+                                                    }} 
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
+                                                    aria-label="Next item"
+                                                >
                                                     <HiOutlineChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                                                 </button>
                                             </>
@@ -734,18 +766,39 @@ export default function ProductDetail() {
                 {/* Image Lightbox Modal */}
                 {lightboxImg && (
                     <div 
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center p-4 cursor-zoom-out"
-                        onClick={() => setLightboxImg("")}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center p-4"
+                        onClick={() => {
+                            setLightboxImg("");
+                            setLightboxZoomed(false);
+                        }}
                     >
                         <div className="relative max-w-4xl max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                            <img 
-                                src={lightboxImg} 
-                                alt="Review Attachment Full Size" 
-                                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-                            />
+                            <div 
+                                className="overflow-hidden rounded-lg relative select-none"
+                                style={{ cursor: lightboxZoomed ? "zoom-out" : "zoom-in" }}
+                                onClick={() => setLightboxZoomed(!lightboxZoomed)}
+                                onMouseMove={handleLightboxMouseMove}
+                                onMouseLeave={() => {
+                                    setLightboxZoomed(false);
+                                    setLightboxZoomPos({ x: 50, y: 50 });
+                                }}
+                            >
+                                <img 
+                                    src={lightboxImg} 
+                                    alt="Product Preview Full Size" 
+                                    className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl transition-transform duration-200 ease-out"
+                                    style={{
+                                        transform: lightboxZoomed ? "scale(2.5)" : "scale(1)",
+                                        transformOrigin: `${lightboxZoomPos.x}% ${lightboxZoomPos.y}%`
+                                    }}
+                                />
+                            </div>
                             <button 
-                                onClick={() => setLightboxImg("")}
-                                className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-colors cursor-pointer shadow-md"
+                                onClick={() => {
+                                    setLightboxImg("");
+                                    setLightboxZoomed(false);
+                                }}
+                                className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-colors cursor-pointer shadow-md z-10"
                                 aria-label="Close image"
                             >
                                 <HiOutlineX className="w-5 h-5" />
