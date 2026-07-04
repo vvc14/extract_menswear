@@ -16,6 +16,7 @@ const STATUS_CONFIG = {
     returned: { bg: "bg-slate-100", text: "text-slate-600", label: "Returned" },
     exchanged: { bg: "bg-slate-100", text: "text-slate-600", label: "Exchanged" },
     failed: { bg: "bg-rose-50", text: "text-rose-700", label: "Failed" },
+    cancelled: { bg: "bg-rose-50", text: "text-rose-700", label: "Cancelled" },
 };
 
 const FILTERS = [
@@ -35,6 +36,11 @@ export default function AdminOrders() {
     const [expandedId, setExpandedId] = useState(null);
     const [updating, setUpdating] = useState(null);
     const [toast, setToast] = useState("");
+
+    // Shipping details modal state
+    const [shippingModal, setShippingModal] = useState(null); // { orderId }
+    const [carrierName, setCarrierName] = useState("");
+    const [trackingNumber, setTrackingNumber] = useState("");
 
     const fetchOrders = async () => {
         try {
@@ -69,6 +75,32 @@ export default function AdminOrders() {
             setTimeout(() => setToast(""), 3000);
         } catch (err) {
             setToast(err.response?.data?.message || "Update failed");
+            setTimeout(() => setToast(""), 3000);
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    const handleShipOrderSubmit = async (e) => {
+        e.preventDefault();
+        if (!shippingModal) return;
+        
+        const { orderId } = shippingModal;
+        setUpdating(orderId);
+        try {
+            await API.put(`/orders/${orderId}/status`, { 
+                status: "shipped", 
+                carrierName, 
+                trackingNumber 
+            });
+            setOrders((prev) => prev.map((o) => o._id === orderId ? { ...o, status: "shipped", carrierName, trackingNumber } : o));
+            setToast(`Order updated to "shipped"`);
+            setTimeout(() => setToast(""), 3000);
+            setShippingModal(null);
+            setCarrierName("");
+            setTrackingNumber("");
+        } catch (err) {
+            setToast(err.response?.data?.message || "Shipping update failed");
             setTimeout(() => setToast(""), 3000);
         } finally {
             setUpdating(null);
@@ -172,7 +204,7 @@ export default function AdminOrders() {
                             const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.paid;
                             const actions = getNextActions(order.status);
                             const isExpanded = expandedId === order._id;
-                            const hasReason = order.returnReason || order.exchangeReason;
+                            const hasReason = order.returnReason || order.exchangeReason || order.cancelReason;
                             const isActionable = ["return-requested", "exchange-requested"].includes(order.status);
 
                             return (
@@ -224,9 +256,9 @@ export default function AdminOrders() {
                                                                 <HiOutlineExclamation className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                                                                 <div>
                                                                     <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-0.5">
-                                                                        {order.returnReason ? "Return Reason" : "Exchange Reason"}
+                                                                        {order.returnReason ? "Return Reason" : order.exchangeReason ? "Exchange Reason" : "Cancellation Reason"}
                                                                     </p>
-                                                                    <p className="text-[13px] text-amber-800">{order.returnReason || order.exchangeReason}</p>
+                                                                    <p className="text-[13px] text-amber-800">{order.returnReason || order.exchangeReason || order.cancelReason}</p>
                                                                 </div>
                                                             </div>
                                                         )}
@@ -256,7 +288,13 @@ export default function AdminOrders() {
                                             {actions.map((a) => (
                                                 <button
                                                     key={a.value}
-                                                    onClick={() => handleStatusUpdate(order._id, a.value)}
+                                                    onClick={() => {
+                                                        if (a.value === "shipped") {
+                                                            setShippingModal({ orderId: order._id });
+                                                        } else {
+                                                            handleStatusUpdate(order._id, a.value);
+                                                        }
+                                                    }}
                                                     disabled={updating === order._id}
                                                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors disabled:opacity-50 ${
                                                         a.value === "delivered" && a.label === "Reject"
@@ -296,6 +334,72 @@ export default function AdminOrders() {
                     >
                         {toast}
                     </motion.div>
+                )}
+            </AnimatePresence>
+            {/* Shipping Details Modal */}
+            <AnimatePresence>
+                {shippingModal && (
+                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 dark:border-slate-800"
+                        >
+                            <h3 className="text-[18px] font-extrabold text-slate-900 dark:text-white mb-2">Ship Order</h3>
+                            <p className="text-[14px] text-slate-500 dark:text-slate-400 mb-4">
+                                Enter the carrier and tracking details below to notify the customer.
+                            </p>
+                            <form onSubmit={handleShipOrderSubmit} className="flex flex-col gap-4">
+                                <div>
+                                    <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                        Carrier Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={carrierName}
+                                        onChange={(e) => setCarrierName(e.target.value)}
+                                        placeholder="e.g. BlueDart, Delhivery, DTDC"
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-primary/45"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                        Tracking Number
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={trackingNumber}
+                                        onChange={(e) => setTrackingNumber(e.target.value)}
+                                        placeholder="e.g. 1234567890"
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-primary/45"
+                                        required
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-3 mt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShippingModal(null);
+                                            setCarrierName("");
+                                            setTrackingNumber("");
+                                        }}
+                                        className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[13px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={updating}
+                                        className="px-4 py-2.5 rounded-xl bg-primary text-white text-[13px] font-bold hover:bg-primary/95 transition-colors disabled:opacity-50"
+                                    >
+                                        Confirm Shipment
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </motion.div>

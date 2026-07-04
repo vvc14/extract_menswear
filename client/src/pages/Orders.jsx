@@ -13,6 +13,7 @@ const STATUS_STYLES = {
     "exchange-requested": { bg: "bg-orange-50 dark:bg-orange-900/30", text: "text-orange-700 dark:text-orange-400", label: "Exchange Requested" },
     returned: { bg: "bg-slate-100 dark:bg-slate-700/40", text: "text-slate-600 dark:text-slate-400", label: "Returned" },
     exchanged: { bg: "bg-slate-100 dark:bg-slate-700/40", text: "text-slate-600 dark:text-slate-400", label: "Exchanged" },
+    cancelled: { bg: "bg-rose-50 dark:bg-rose-900/30", text: "text-rose-700 dark:text-rose-400", label: "Cancelled" },
 };
 
 export default function Orders() {
@@ -32,9 +33,34 @@ export default function Orders() {
     }, []);
 
     const canRequestAction = (order) => {
-        if (!["paid", "delivered"].includes(order.status)) return false;
+        if (order.status !== "delivered") return false;
         const days = Math.floor((Date.now() - new Date(order.paidAt || order.createdAt).getTime()) / (1000 * 60 * 60 * 24));
         return days <= 7;
+    };
+
+    const canCancel = (order) => {
+        return order.status === "paid";
+    };
+
+    const handleCancelOrder = async (orderId) => {
+        const reason = window.prompt("Please enter a reason for cancellation (optional):");
+        if (reason === null) return;
+        setSubmitting(true);
+        try {
+            await API.post(`/orders/${orderId}/cancel`, { reason });
+            setOrders((prev) =>
+                prev.map((o) =>
+                    o._id === orderId ? { ...o, status: "cancelled", cancelReason: reason || "Customer request" } : o
+                )
+            );
+            setToast("Order cancelled successfully!");
+            setTimeout(() => setToast(""), 4000);
+        } catch (err) {
+            setToast(err.response?.data?.message || "Cancellation failed. Please try again.");
+            setTimeout(() => setToast(""), 4000);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleSubmitRequest = async () => {
@@ -146,6 +172,17 @@ export default function Orders() {
                                             <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider">Total</p>
                                             <p className="text-[15px] font-extrabold text-slate-900 dark:text-white">₹{(order.totalAmount + (order.shipping || 0)).toLocaleString("en-IN")}</p>
                                         </div>
+                                        {order.trackingNumber && (
+                                            <>
+                                                <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
+                                                <div>
+                                                    <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider">Tracking</p>
+                                                    <p className="text-[14px] font-bold text-slate-800 dark:text-slate-200">
+                                                        {order.carrierName}: <span className="font-mono text-[13px]">{order.trackingNumber}</span>
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                     <span className={`px-3 py-1.5 rounded-lg text-[12px] font-bold uppercase tracking-wide ${status.bg} ${status.text}`}>
                                         {status.label}
@@ -203,8 +240,20 @@ export default function Orders() {
                                             </button>
                                         </>
                                     )}
+                                    {canCancel(order) && (
+                                        <button
+                                            onClick={() => handleCancelOrder(order._id)}
+                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 text-[13px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
+                                        >
+                                            <HiOutlineX className="w-4 h-4" />
+                                            Cancel Order
+                                        </button>
+                                    )}
                                     {!canAct && ["return-requested", "exchange-requested"].includes(order.status) && (
                                         <p className="text-[13px] text-amber-600 dark:text-amber-400 font-semibold">Your request is being processed</p>
+                                    )}
+                                    {order.status === "cancelled" && (
+                                        <p className="text-[13px] text-rose-500 font-semibold">This order has been cancelled</p>
                                     )}
                                 </div>
                             </motion.div>

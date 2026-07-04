@@ -34,10 +34,13 @@ const orderSchema = new mongoose.Schema({
     status: {
         type: String,
         default: "created",
-        enum: ["created", "paid", "shipped", "delivered", "return-requested", "exchange-requested", "returned", "exchanged", "failed"],
+        enum: ["created", "paid", "shipped", "delivered", "return-requested", "exchange-requested", "returned", "exchanged", "failed", "cancelled"],
     },
+    trackingNumber: { type: String },
+    carrierName: { type: String },
     returnReason: { type: String },
     exchangeReason: { type: String },
+    cancelReason: { type: String },
     createdAt: { type: Date, default: Date.now },
     paidAt: { type: Date },
 });
