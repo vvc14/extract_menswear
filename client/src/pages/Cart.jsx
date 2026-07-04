@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity, clearCart, updateCartStocks } from "../redux/cartSlice";
 import { showAlert } from "../redux/alertSlice";
@@ -78,8 +78,20 @@ export default function Cart() {
     const [couponError, setCouponError] = useState("");
     const [couponSuccess, setCouponSuccess] = useState("");
     const [applyingCoupon, setApplyingCoupon] = useState(false);
+    const [addDropdownOpen, setAddDropdownOpen] = useState(false);
+    const addMenuRef = useRef(null);
 
     const actualDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (addMenuRef.current && !addMenuRef.current.contains(event.target)) {
+                setAddDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -307,12 +319,44 @@ export default function Cart() {
                         <p className="text-[16px] text-slate-500 dark:text-slate-400 mt-1">{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
-                        <Link
-                            to="/shirts"
-                            className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
-                        >
-                            <HiOutlinePlus className="w-4.5 h-4.5" /> Add More Items
-                        </Link>
+                        <div className="relative" ref={addMenuRef}>
+                            <button
+                                onClick={() => setAddDropdownOpen(!addDropdownOpen)}
+                                className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
+                                aria-expanded={addDropdownOpen}
+                                aria-label="Add more items menu"
+                            >
+                                <HiOutlinePlus className="w-4.5 h-4.5" /> Add More Items
+                            </button>
+                            <AnimatePresence>
+                                {addDropdownOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden z-50"
+                                    >
+                                        <div className="py-1">
+                                            <Link
+                                                to="/shirts"
+                                                className="block px-4.5 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                                onClick={() => setAddDropdownOpen(false)}
+                                            >
+                                                Shirts
+                                            </Link>
+                                            <Link
+                                                to="/trousers"
+                                                className="block px-4.5 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                                onClick={() => setAddDropdownOpen(false)}
+                                            >
+                                                Trousers
+                                            </Link>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                         <button
                             onClick={() => {
                                 if (window.confirm("Are you sure you want to clear all items from your cart?")) {
