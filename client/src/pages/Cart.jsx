@@ -79,9 +79,23 @@ export default function Cart() {
     const [couponSuccess, setCouponSuccess] = useState("");
     const [applyingCoupon, setApplyingCoupon] = useState(false);
     const [addDropdownOpen, setAddDropdownOpen] = useState(false);
+    const [availableCoupons, setAvailableCoupons] = useState([]);
+    const [showCoupons, setShowCoupons] = useState(false);
     const addMenuRef = useRef(null);
 
     const actualDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
+
+    useEffect(() => {
+        const fetchCoupons = async () => {
+            try {
+                const { data } = await API.get("/coupons");
+                setAvailableCoupons(data || []);
+            } catch (err) {
+                console.error("Failed to fetch available coupons:", err);
+            }
+        };
+        fetchCoupons();
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -159,13 +173,14 @@ export default function Cart() {
         }
     };
 
-    const handleApplyCoupon = async () => {
-        if (!couponInput.trim()) return;
+    const handleApplyCoupon = async (codeOverride) => {
+        const code = codeOverride || couponInput;
+        if (!code || !code.trim()) return;
         setApplyingCoupon(true);
         setCouponError("");
         setCouponSuccess("");
         try {
-            const { data } = await API.post("/coupons/validate", { code: couponInput, subtotal });
+            const { data } = await API.post("/coupons/validate", { code, subtotal });
             setAppliedCoupon(data);
             setCouponSuccess(`Coupon applied! You saved ₹${data.discountAmount.toLocaleString("en-IN")}`);
             setCouponInput("");
@@ -691,6 +706,66 @@ export default function Cart() {
                                 </div>
                                 {couponError && <p className="text-rose-500 text-[13px] font-bold mt-2">{couponError}</p>}
                                 {couponSuccess && <p className="text-emerald text-[13px] font-bold mt-2">{couponSuccess}</p>}
+
+                                {availableCoupons.length > 0 && (
+                                    <div className="mt-3.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCoupons(!showCoupons)}
+                                            className="text-[13px] font-bold text-primary dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                                        >
+                                            {showCoupons ? "Hide Available Coupons" : "View Available Coupons"}
+                                        </button>
+                                        
+                                        <AnimatePresence>
+                                            {showCoupons && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="overflow-hidden mt-2.5 space-y-2"
+                                                >
+                                                    {availableCoupons.map((c) => {
+                                                        const isMinMet = subtotal >= c.minOrderValue;
+                                                        return (
+                                                            <div 
+                                                                key={c._id}
+                                                                className={`p-3 rounded-xl border text-[13px] transition-all flex items-center justify-between gap-3 ${
+                                                                    isMinMet 
+                                                                        ? "bg-slate-50 dark:bg-slate-900 border-slate-200/80 dark:border-slate-800"
+                                                                        : "bg-slate-50/40 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800/40 opacity-60"
+                                                                }`}
+                                                            >
+                                                                <div className="flex-1 min-w-0 text-left">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-extrabold text-[12px] bg-primary/10 dark:bg-gold/10 text-primary dark:text-gold px-2 py-0.5 rounded border border-primary/20 dark:border-gold/25 uppercase font-mono">
+                                                                            {c.code}
+                                                                        </span>
+                                                                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                                                                            {c.discountType === "percentage" ? `${c.discountValue}% OFF` : `₹${c.discountValue} OFF`}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p className="text-[11px] text-slate-500 mt-1">
+                                                                        Min order: ₹{c.minOrderValue.toLocaleString("en-IN")}
+                                                                    </p>
+                                                                </div>
+                                                                {isMinMet && !appliedCoupon && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleApplyCoupon(c.code)}
+                                                                        className="text-primary dark:text-gold font-bold hover:underline shrink-0 cursor-pointer"
+                                                                    >
+                                                                        Apply
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="border-t border-slate-200 dark:border-slate-700 pt-5 mb-8">

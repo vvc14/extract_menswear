@@ -131,3 +131,24 @@ export const validateCoupon = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// GET /api/coupons — retrieve all active, unexpired coupons for customers
+export const getActiveCoupons = async (req, res) => {
+    try {
+        const now = new Date();
+        const coupons = await Coupon.find({
+            isActive: true,
+            $or: [
+                { expiryDate: { $exists: false } },
+                { expiryDate: null },
+                { expiryDate: { $gt: now } }
+            ]
+        })
+        .select("code discountType discountValue minOrderValue")
+        .sort({ createdAt: -1 });
+
+        res.json(coupons);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
