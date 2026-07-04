@@ -189,6 +189,47 @@ export default function Orders() {
                                     </span>
                                 </div>
 
+                                {/* Order Tracking Progress Timeline */}
+                                {["paid", "shipped", "delivered"].includes(order.status) && (
+                                    <div className="px-6 py-5 bg-slate-50/50 dark:bg-slate-800/20 border-b border-slate-100 dark:border-slate-700/80">
+                                        <div className="max-w-md mx-auto relative flex items-center justify-between text-[11px] sm:text-[12px] font-bold text-slate-400 dark:text-slate-500">
+                                            {/* Connector line */}
+                                            <div className="absolute left-[15%] right-[15%] top-1/2 -translate-y-1/2 h-1 bg-slate-200 dark:bg-slate-700 -z-10 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-primary dark:bg-gold transition-all duration-500" 
+                                                    style={{ 
+                                                        width: order.status === "delivered" ? "100%" : order.status === "shipped" ? "50%" : "0%" 
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* Steps */}
+                                            {[
+                                                { label: "Placed", key: "paid", active: true },
+                                                { label: "Shipped", key: "shipped", active: ["shipped", "delivered"].includes(order.status) },
+                                                { label: "Delivered", key: "delivered", active: order.status === "delivered" },
+                                            ].map((step, idx) => (
+                                                <div key={idx} className="flex flex-col items-center gap-1.5 bg-white dark:bg-slate-900/10 px-2 relative z-10">
+                                                    <div 
+                                                        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                                                            step.active 
+                                                                ? "border-primary dark:border-gold bg-primary dark:bg-gold text-white dark:text-slate-900" 
+                                                                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+                                                        }`}
+                                                    >
+                                                        {step.active ? (
+                                                            <span className="w-1.5 h-1.5 bg-white dark:bg-slate-900 rounded-full" />
+                                                        ) : (
+                                                            <span className="w-1.5 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                                                        )}
+                                                    </div>
+                                                    <span className={step.active ? "text-primary dark:text-gold" : ""}>{step.label}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Order items */}
                                 <div className="divide-y divide-slate-100 dark:divide-slate-700">
                                     {order.items.map((item, idx) => (
