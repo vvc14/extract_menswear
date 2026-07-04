@@ -8,7 +8,8 @@ import API from "../services/api";
 import { 
     HiOutlineTrash, HiMinus, HiPlus, HiOutlineShoppingCart, 
     HiOutlineShieldCheck, HiOutlineArrowLeft, HiOutlineHome, 
-    HiOutlinePhone, HiOutlineUser, HiOutlinePlus, HiOutlineCheck 
+    HiOutlinePhone, HiOutlineUser, HiOutlinePlus, HiOutlineCheck,
+    HiOutlinePencil
 } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -81,6 +82,7 @@ export default function Cart() {
     const [addDropdownOpen, setAddDropdownOpen] = useState(false);
     const [availableCoupons, setAvailableCoupons] = useState([]);
     const [showCoupons, setShowCoupons] = useState(false);
+    const [editAddressIdx, setEditAddressIdx] = useState(null);
     const addMenuRef = useRef(null);
 
     const actualDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
@@ -145,17 +147,23 @@ export default function Cart() {
 
         setSavingAddress(true);
         try {
-            const isFirst = addresses.length === 0;
-            const newAddress = { ...addressForm, isDefault: isFirst };
-            const updatedAddresses = [...addresses, newAddress];
+            let updatedAddresses = [...addresses];
+            if (editAddressIdx !== null) {
+                updatedAddresses[editAddressIdx] = { ...addressForm };
+            } else {
+                const isFirst = addresses.length === 0;
+                const newAddress = { ...addressForm, isDefault: isFirst };
+                updatedAddresses.push(newAddress);
+            }
 
             const { data } = await API.put("/auth/profile", {
                 addresses: updatedAddresses,
             });
 
             setAddresses(data.addresses || updatedAddresses);
-            setSelectedIdx(updatedAddresses.length - 1);
+            setSelectedIdx(editAddressIdx !== null ? editAddressIdx : updatedAddresses.length - 1);
             setShowForm(false);
+            setEditAddressIdx(null);
             setAddressForm({
                 name: "",
                 phone: "",
@@ -171,6 +179,32 @@ export default function Cart() {
         } finally {
             setSavingAddress(false);
         }
+    };
+
+    const handleDeleteAddress = async (e, idx) => {
+        e.stopPropagation();
+        if (!window.confirm("Are you sure you want to delete this address?")) return;
+        
+        const updatedAddresses = addresses.filter((_, i) => i !== idx);
+        try {
+            const { data } = await API.put("/auth/profile", { addresses: updatedAddresses });
+            setAddresses(data.addresses || updatedAddresses);
+            if (selectedIdx === idx) {
+                setSelectedIdx(updatedAddresses.length > 0 ? 0 : null);
+            } else if (selectedIdx > idx) {
+                setSelectedIdx(selectedIdx - 1);
+            }
+        } catch (err) {
+            console.error("Failed to delete address:", err);
+            dispatch(showAlert({ title: "Delete Failed", message: err.response?.data?.message || "Failed to delete address. Please try again." }));
+        }
+    };
+
+    const handleEditAddressClick = (e, idx) => {
+        e.stopPropagation();
+        setEditAddressIdx(idx);
+        setAddressForm({ ...addresses[idx] });
+        setShowForm(true);
     };
 
     const handleApplyCoupon = async (codeOverride) => {
@@ -480,7 +514,7 @@ export default function Cart() {
                             <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
                                 <div className="flex items-center justify-between mb-6">
                                     <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-                                        <HiOutlineHome className="w-5.5 h-5.5 text-primary dark:text-gold" /> Delivery Address
+                                        <HiOutlineHome className="w-5.5 h-5.5 text-primary dark:text-gold" /> {editAddressIdx !== null ? "Edit Address" : "Delivery Address"}
                                     </h2>
                                     {!showForm && (
                                         <button 
@@ -591,7 +625,7 @@ export default function Cart() {
                                                 {addresses.length > 0 && (
                                                     <button 
                                                         type="button" 
-                                                        onClick={() => setShowForm(false)}
+                                                        onClick={() => { setShowForm(false); setEditAddressIdx(null); setAddressForm({ name: "", phone: "", street: "", city: "", state: "", pincode: "", country: "India" }); }}
                                                         className="px-5 py-2 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 cursor-pointer"
                                                     >
                                                         Cancel
@@ -618,11 +652,29 @@ export default function Cart() {
                                                             : "border-slate-200/60 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-900/50"
                                                     }`}
                                                 >
-                                                    {selectedIdx === idx && (
-                                                        <span className="absolute top-4 right-4 bg-primary dark:bg-gold text-white dark:text-slate-900 rounded-full p-1 flex items-center justify-center">
-                                                            <HiOutlineCheck className="w-3.5 h-3.5" />
-                                                        </span>
-                                                    )}
+                                                    <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={(e) => handleEditAddressClick(e, idx)}
+                                                            className="p-1 text-slate-400 hover:text-primary dark:hover:text-gold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                                                            title="Edit Address"
+                                                        >
+                                                            <HiOutlinePencil className="w-4 h-4" />
+                                                        </button>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={(e) => handleDeleteAddress(e, idx)}
+                                                            className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
+                                                            title="Delete Address"
+                                                        >
+                                                            <HiOutlineTrash className="w-4 h-4" />
+                                                        </button>
+                                                        {selectedIdx === idx && (
+                                                            <span className="bg-primary dark:bg-gold text-white dark:text-slate-900 rounded-full p-0.5 flex items-center justify-center">
+                                                                <HiOutlineCheck className="w-3.5 h-3.5" />
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             <span className="font-bold text-slate-800 dark:text-white text-[15px]">{addr.name}</span>

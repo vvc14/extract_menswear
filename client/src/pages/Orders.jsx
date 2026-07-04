@@ -209,7 +209,7 @@ export default function Orders() {
                                                 { label: "Shipped", key: "shipped", active: ["shipped", "delivered"].includes(order.status) },
                                                 { label: "Delivered", key: "delivered", active: order.status === "delivered" },
                                             ].map((step, idx) => (
-                                                <div key={idx} className="flex flex-col items-center gap-1.5 bg-white dark:bg-slate-900/10 px-2 relative z-10">
+                                                <div key={idx} className="flex flex-col items-center gap-1.5 px-2 relative z-10">
                                                     <div 
                                                         className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                                                             step.active 
