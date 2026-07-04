@@ -272,9 +272,14 @@ export default function Cart() {
                     <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-md text-center leading-[1.7]">
                         Looks like you haven't added anything to your cart yet. Explore our collection and find something you love.
                     </p>
-                    <Link to="/shirts" className="btn-primary">
-                        Continue Shopping
-                    </Link>
+                    <div className="flex flex-wrap items-center justify-center gap-4">
+                        <Link to="/shirts" className="btn-primary">
+                            Shop Shirts
+                        </Link>
+                        <Link to="/trousers" className="btn-outline">
+                            Shop Trousers
+                        </Link>
+                    </div>
                 </motion.div>
             </main>
         );
@@ -301,16 +306,24 @@ export default function Cart() {
                         <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight">Shopping Cart</h1>
                         <p className="text-[16px] text-slate-500 dark:text-slate-400 mt-1">{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
                     </div>
-                    <button
-                        onClick={() => {
-                            if (window.confirm("Are you sure you want to clear all items from your cart?")) {
-                                dispatch(clearCart());
-                            }
-                        }}
-                        className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-rose-500/20 text-rose-500 hover:bg-rose-500/25 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
-                    >
-                        <HiOutlineTrash className="w-4.5 h-4.5" /> Clear Cart
-                    </button>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                            to="/shirts"
+                            className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
+                        >
+                            <HiOutlinePlus className="w-4.5 h-4.5" /> Add More Items
+                        </Link>
+                        <button
+                            onClick={() => {
+                                if (window.confirm("Are you sure you want to clear all items from your cart?")) {
+                                    dispatch(clearCart());
+                                }
+                            }}
+                            className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-rose-500/20 text-rose-500 hover:bg-rose-500/25 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
+                        >
+                            <HiOutlineTrash className="w-4.5 h-4.5" /> Clear Cart
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-10 md:gap-14">
