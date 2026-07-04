@@ -3,23 +3,45 @@ import API from "../services/api";
 import { buildQueryString } from "../utils/filterLogic";
 import ProductCard from "../components/ProductCard";
 import FilterSidebar from "../components/FilterSidebar";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { HiOutlineAdjustments, HiOutlineArrowRight, HiOutlineSortDescending, HiOutlineArrowLeft } from "react-icons/hi";
 
 const PER_PAGE = 12;
 
 export default function Trousers() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
     const [total, setTotal] = useState(0);
-    const [filters, setFilters] = useState({ fabric: [], style: [], size: [], minPrice: 0, maxPrice: 10000 });
+
+    const queryParams = new URLSearchParams(location.search);
+    const urlFabric = queryParams.get("fabric");
+
+    const [filters, setFilters] = useState({ 
+        fabric: urlFabric ? [urlFabric] : [], 
+        style: [], 
+        size: [], 
+        minPrice: 0, 
+        maxPrice: 10000 
+    });
     const [sortBy, setSortBy] = useState("newest");
     const [showMobileFilter, setShowMobileFilter] = useState(false);
     const loadMoreRef = useRef(null);
+
+    // Sync URL fabric query parameter with filters state
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const f = params.get("fabric");
+        if (f) {
+            setFilters(prev => ({ ...prev, fabric: [f] }));
+        } else {
+            setFilters(prev => ({ ...prev, fabric: [] }));
+        }
+    }, [location.search]);
 
     // Fetch a specific page of products
     const fetchPage = useCallback(async (f, pageNum, append = false) => {

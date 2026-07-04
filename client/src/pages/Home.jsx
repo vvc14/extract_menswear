@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { HiOutlineArrowRight, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineSparkles } from "react-icons/hi";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { HiOutlineArrowRight, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineSparkles, HiOutlineX } from "react-icons/hi";
 import API from "../services/api";
 import ProductCard from "../components/ProductCard";
 
@@ -39,8 +39,18 @@ const fadeUp = {
 };
 
 export default function Home() {
+    const navigate = useNavigate();
     const [newArrivals, setNewArrivals] = useState([]);
     const [arrivalsLoading, setArrivalsLoading] = useState(true);
+    const [selectedFabric, setSelectedFabric] = useState(null);
+
+    const handleFabricClick = (fabricName) => {
+        if (fabricName === "Linen" || fabricName === "Oxford" || fabricName === "Satin") {
+            navigate(`/shirts?fabric=${fabricName}`);
+        } else {
+            setSelectedFabric(fabricName);
+        }
+    };
 
     useEffect(() => {
         const fetchNewArrivals = async () => {
@@ -288,14 +298,15 @@ export default function Home() {
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
                         {FABRICS.map((fabric, i) => (
-                            <motion.div
+                            <motion.button
+                                onClick={() => handleFabricClick(fabric.name)}
                                 key={fabric.name}
                                 custom={i}
                                 initial="hidden"
                                 whileInView="visible"
                                 viewport={{ once: true }}
                                 variants={fadeUp}
-                                className="card-hover group bg-white dark:bg-slate-800/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700"
+                                className="card-hover group bg-white dark:bg-slate-800/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 text-left w-full cursor-pointer focus:outline-none"
                             >
                                 <div className="overflow-hidden" style={{ aspectRatio: "1/1" }}>
                                     <img
@@ -309,7 +320,7 @@ export default function Home() {
                                     <h3 className="text-[16px] font-bold text-slate-900 dark:text-white mb-1.5">{fabric.name}</h3>
                                     <p className="text-[13px] text-slate-500 dark:text-slate-400 leading-[1.65]">{fabric.desc}</p>
                                 </div>
-                            </motion.div>
+                            </motion.button>
                         ))}
                     </div>
                 </div>
@@ -357,6 +368,55 @@ export default function Home() {
                     </motion.div>
                 </div>
             </section>
+            
+            <AnimatePresence>
+                {selectedFabric && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative"
+                        >
+                            <button
+                                onClick={() => setSelectedFabric(null)}
+                                className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                            >
+                                <HiOutlineX className="w-5 h-5" />
+                            </button>
+                            
+                            <div className="text-center mb-6">
+                                <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-primary dark:text-gold mb-3">
+                                    <HiOutlineSparkles className="w-6 h-6" />
+                                </span>
+                                <h3 className="text-[20px] font-bold text-slate-900 dark:text-white">
+                                    Explore {selectedFabric} Collection
+                                </h3>
+                                <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1">
+                                    Choose a category to browse products made from this fabric.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <Link
+                                    to={`/shirts?fabric=${selectedFabric}`}
+                                    onClick={() => setSelectedFabric(null)}
+                                    className="btn-primary py-3.5 text-center font-bold text-[15px] rounded-xl cursor-pointer"
+                                >
+                                    Shirts
+                                </Link>
+                                <Link
+                                    to={`/trousers?fabric=${selectedFabric}`}
+                                    onClick={() => setSelectedFabric(null)}
+                                    className="btn-outline py-3.5 text-center font-bold text-[15px] rounded-xl cursor-pointer"
+                                >
+                                    Trousers
+                                </Link>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </main>
     );
 }
