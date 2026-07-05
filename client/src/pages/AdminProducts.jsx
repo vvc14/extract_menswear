@@ -4,11 +4,13 @@ import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSearch, HiOutlinePhotograph, HiOutlineCollection, HiOutlineTruck, HiOutlineCog } from "react-icons/hi";
+import { useConfirm } from "../context/ConfirmContext";
 
 const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", videoFile: null, videoUrl: "", selectedSizes: [], existingImages: [] };
 
 export default function AdminProducts() {
     const dispatch = useDispatch();
+    const confirm = useConfirm();
     const [products, setProducts] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -183,7 +185,7 @@ export default function AdminProducts() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this product?")) return;
+        if (!(await confirm("Delete this product?"))) return;
         try {
             await API.delete(`/admin/products/${id}`);
             fetchProducts();

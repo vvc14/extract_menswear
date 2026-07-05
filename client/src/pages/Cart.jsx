@@ -12,12 +12,14 @@ import {
     HiOutlinePencil
 } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
+import { useConfirm } from "../context/ConfirmContext";
 
 export default function Cart() {
     const items = useSelector((s) => s.cart.items);
     const user = useSelector((s) => s.auth.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const confirm = useConfirm();
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
@@ -183,7 +185,7 @@ export default function Cart() {
 
     const handleDeleteAddress = async (e, idx) => {
         e.stopPropagation();
-        if (!window.confirm("Are you sure you want to delete this address?")) return;
+        if (!(await confirm("Are you sure you want to delete this address?"))) return;
         
         const updatedAddresses = addresses.filter((_, i) => i !== idx);
         try {
@@ -407,8 +409,8 @@ export default function Cart() {
                             </AnimatePresence>
                         </div>
                         <button
-                            onClick={() => {
-                                if (window.confirm("Are you sure you want to clear all items from your cart?")) {
+                            onClick={async () => {
+                                if (await confirm("Are you sure you want to clear all items from your cart?")) {
                                     dispatch(clearCart());
                                 }
                             }}

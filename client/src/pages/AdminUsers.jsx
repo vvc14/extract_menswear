@@ -4,9 +4,11 @@ import { showAlert } from "../redux/alertSlice";
 import API from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineShieldCheck, HiOutlineUser, HiOutlineSearch, HiOutlineUsers, HiOutlineTrash, HiOutlineExclamation } from "react-icons/hi";
+import { useConfirm } from "../context/ConfirmContext";
 
 export default function AdminUsers() {
     const dispatch = useDispatch();
+    const confirm = useConfirm();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -30,9 +32,9 @@ export default function AdminUsers() {
         return () => { isMounted = false; };
     }, []);
 
-    const toggleRole = async (userId, currentRole) => {
-        const newRole = currentRole === "admin" ? "user" : "admin";
-        if (!window.confirm(`Change this user's role to "${newRole}"?`)) return;
+    const handleRoleChange = async (userId, currentRole) => {
+        const newRole = currentRole === "admin" ? "customer" : "admin";
+        if (!(await confirm(`Change this user's role to "${newRole}"?`))) return;
         try {
             const { data } = await API.put(`/admin/users/${userId}/role`, { role: newRole });
             setUsers((prev) => prev.map((u) => (u._id === data._id ? data : u)));
@@ -147,7 +149,7 @@ export default function AdminUsers() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button onClick={() => toggleRole(u._id, u.role)}
+                                            <button onClick={() => handleRoleChange(u._id, u.role)}
                                                 className={`text-[13px] font-bold px-4 py-2 rounded-lg transition-all ${u.role === "admin"
                                                         ? "text-rose-600 bg-rose-50 hover:bg-rose-100"
                                                         : "text-primary bg-primary/10 hover:bg-primary/20"

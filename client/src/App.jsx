@@ -38,6 +38,7 @@ const AdminSettings = lazy(() => import("./pages/AdminSettings"));
 const AdminCoupons = lazy(() => import("./pages/AdminCoupons"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 import { ThemeProvider } from "./context/ThemeContext";
+import { ConfirmProvider } from "./context/ConfirmContext";
 import { preloadRazorpay } from "./services/razorpay";
 import ModalAlert from "./components/ModalAlert";
 
@@ -127,10 +128,12 @@ export default function App() {
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Provider store={store}>
         <ThemeProvider>
-          <BrowserRouter>
-            <AppRoutes />
-            <ModalAlert />
-          </BrowserRouter>
+          <ConfirmProvider>
+            <BrowserRouter>
+              <AppRoutes />
+              <ModalAlert />
+            </BrowserRouter>
+          </ConfirmProvider>
         </ThemeProvider>
       </Provider>
     </GoogleOAuthProvider>

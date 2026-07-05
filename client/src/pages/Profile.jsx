@@ -10,12 +10,14 @@ import {
     HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlinePlus, 
     HiOutlineTrash, HiOutlineCheck, HiOutlinePencil, HiOutlineLockClosed
 } from "react-icons/hi";
+import { useConfirm } from "../context/ConfirmContext";
 
 export default function Profile() {
     const user = useSelector((s) => s.auth.user);
     const token = useSelector((s) => s.auth.token);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const confirm = useConfirm();
 
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
@@ -109,8 +111,8 @@ export default function Profile() {
         saveProfileChanges(name, updated);
     };
 
-    const handleRemoveAddress = (index) => {
-        if (!window.confirm("Are you sure you want to delete this address?")) return;
+    const handleRemoveAddress = async (index) => {
+        if (!(await confirm("Are you sure you want to delete this address?"))) return;
         
         let updated = addresses.filter((_, i) => i !== index);
         // If we deleted the default address, make the first remaining one default
