@@ -33,7 +33,7 @@ export default function AdminUsers() {
     }, []);
 
     const handleRoleChange = async (userId, currentRole) => {
-        const newRole = currentRole === "admin" ? "customer" : "admin";
+        const newRole = currentRole === "admin" ? "user" : "admin";
         if (!(await confirm(`Change this user's role to "${newRole}"?`))) return;
         try {
             const { data } = await API.put(`/admin/users/${userId}/role`, { role: newRole });
