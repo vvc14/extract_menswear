@@ -38,6 +38,14 @@ const couponSchema = new mongoose.Schema(
             type: Date,
             default: null, // null means never expires
         },
+        oncePerUser: {
+            type: Boolean,
+            default: false,
+        },
+        usedBy: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }],
     },
     { timestamps: true }
 );

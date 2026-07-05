@@ -54,6 +54,7 @@ export default function AdminCoupons() {
                 usageLimit: coupon.usageLimit || "",
                 expiryDate: coupon.expiryDate ? new Date(coupon.expiryDate).toISOString().split('T')[0] : "",
                 isActive: coupon.isActive,
+                oncePerUser: coupon.oncePerUser || false,
             });
         } else {
             setEditingCoupon(null);
@@ -65,6 +66,7 @@ export default function AdminCoupons() {
                 usageLimit: "",
                 expiryDate: "",
                 isActive: true,
+                oncePerUser: false,
             });
         }
         setShowForm(true);
@@ -290,10 +292,17 @@ export default function AdminCoupons() {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 pt-2">
-                                        <input type="checkbox" id="isActive" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})}
-                                            className="w-5 h-5 text-primary border-slate-300 rounded focus:ring-primary" />
-                                        <label htmlFor="isActive" className="font-semibold text-slate-700 cursor-pointer text-[15px]">Coupon is active</label>
+                                    <div className="flex flex-col gap-3 pt-2">
+                                        <div className="flex items-center gap-3">
+                                            <input type="checkbox" id="isActive" checked={form.isActive} onChange={e => setForm({...form, isActive: e.target.checked})}
+                                                className="w-5 h-5 text-primary border-slate-300 rounded focus:ring-primary" />
+                                            <label htmlFor="isActive" className="font-semibold text-slate-700 cursor-pointer text-[15px]">Coupon is active</label>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <input type="checkbox" id="oncePerUser" checked={form.oncePerUser} onChange={e => setForm({...form, oncePerUser: e.target.checked})}
+                                                className="w-5 h-5 text-primary border-slate-300 rounded focus:ring-primary" />
+                                            <label htmlFor="oncePerUser" className="font-semibold text-slate-700 cursor-pointer text-[15px]">Once per user only</label>
+                                        </div>
                                     </div>
                                 </form>
                             </div>

@@ -1,11 +1,12 @@
 import Coupon from "../models/Coupon.js";
+import jwt from "jsonwebtoken";
 
 // ─── ADMIN ENDPOINTS ───
 
 // Create a new coupon
 export const createCoupon = async (req, res) => {
     try {
-        const { code, discountType, discountValue, minOrderValue, usageLimit, expiryDate, isActive } = req.body;
+        const { code, discountType, discountValue, minOrderValue, usageLimit, expiryDate, isActive, oncePerUser } = req.body;
         
         const existing = await Coupon.findOne({ code: code.toUpperCase() });
         if (existing) {
@@ -19,7 +20,8 @@ export const createCoupon = async (req, res) => {
             minOrderValue,
             usageLimit,
             expiryDate,
-            isActive
+            isActive,
+            oncePerUser
         });
 
         res.status(201).json(coupon);
@@ -101,6 +103,21 @@ export const validateCoupon = async (req, res) => {
 
         if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
             return res.status(400).json({ message: "This coupon has reached its usage limit." });
+        }
+
+        if (coupon.oncePerUser) {
+            const header = req.headers.authorization;
+            if (!header || !header.startsWith("Bearer ")) {
+                return res.status(401).json({ message: "Please sign in to use this coupon." });
+            }
+            try {
+                const decoded = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET);
+                if (coupon.usedBy.includes(decoded.id)) {
+                    return res.status(400).json({ message: "You have already used this coupon." });
+                }
+            } catch {
+                return res.status(401).json({ message: "Session expired. Please sign in again." });
+            }
         }
 
         if (coupon.minOrderValue && subtotal < coupon.minOrderValue) {

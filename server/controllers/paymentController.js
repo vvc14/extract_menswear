@@ -150,6 +150,9 @@ export const createOrder = async (req, res) => {
                 if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
                     throw Object.assign(new Error("This coupon has reached its usage limit"), { statusCode: 400 });
                 }
+                if (coupon.oncePerUser && coupon.usedBy.includes(userId)) {
+                    throw Object.assign(new Error("You have already used this coupon"), { statusCode: 400 });
+                }
                 if (coupon.minOrderValue && computedSubtotal < coupon.minOrderValue) {
                     throw Object.assign(new Error(`Minimum order value of ₹${coupon.minOrderValue} required`), { statusCode: 400 });
                 }
@@ -259,9 +262,13 @@ export const verifyPayment = async (req, res) => {
 
             // Increment coupon usage count if a coupon was used
             if (order.couponCode) {
+                const updateQuery = { $inc: { usedCount: 1 } };
+                if (order.userId) {
+                    updateQuery.$push = { usedBy: order.userId };
+                }
                 await Coupon.findOneAndUpdate(
                     { code: order.couponCode },
-                    { $inc: { usedCount: 1 } }
+                    updateQuery
                 );
             }
 
