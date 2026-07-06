@@ -1,6 +1,6 @@
-import nodemailer from "nodemailer";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import { sendEmail, isEmailConfigured } from "../utils/emailTransporter.js";
 
 // GET /api/orders — all orders for the logged-in user
 export const getUserOrders = async (req, res) => {
@@ -63,19 +63,13 @@ export const requestReturn = async (req, res) => {
         await order.save();
 
         // Notify admin via email
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-            });
-            transporter
-                .sendMail({
-                    from: `"Extract Menswear" <${process.env.EMAIL_USER}>`,
-                    to: "janassistai@gmail.com",
-                    subject: `Return Request — ${order.invoiceNumber}`,
-                    text: `Return request from ${order.userName} (${order.userEmail})\n\nInvoice: ${order.invoiceNumber}\nReason: ${order.returnReason}\nOrder Total: ₹${order.totalAmount}\n\nItems:\n${order.items.map((i) => `- ${i.name} x${i.quantity} @ ₹${i.price}`).join("\n")}`,
-                })
-                .catch((err) => console.error("Return email error:", err));
+        if (isEmailConfigured()) {
+            sendEmail({
+                to: "janassistai@gmail.com",
+                subject: `Return Request — ${order.invoiceNumber}`,
+                text: `Return request from ${order.userName} (${order.userEmail})\n\nInvoice: ${order.invoiceNumber}\nReason: ${order.returnReason}\nOrder Total: Rs.${order.totalAmount}\n\nItems:\n${order.items.map((i) => `- ${i.name} x${i.quantity} @ Rs.${i.price}`).join("\n")}`,
+                replyTo: order.userEmail,
+            }).catch((err) => console.error("Return email error:", err));
         }
 
         res.json({ message: "Return request submitted successfully" });
@@ -105,19 +99,13 @@ export const requestExchange = async (req, res) => {
         await order.save();
 
         // Notify admin via email
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-            });
-            transporter
-                .sendMail({
-                    from: `"Extract Menswear" <${process.env.EMAIL_USER}>`,
-                    to: "janassistai@gmail.com",
-                    subject: `Exchange Request — ${order.invoiceNumber}`,
-                    text: `Exchange request from ${order.userName} (${order.userEmail})\n\nInvoice: ${order.invoiceNumber}\nReason: ${order.exchangeReason}\nOrder Total: ₹${order.totalAmount}\n\nItems:\n${order.items.map((i) => `- ${i.name} x${i.quantity} @ ₹${i.price}`).join("\n")}`,
-                })
-                .catch((err) => console.error("Exchange email error:", err));
+        if (isEmailConfigured()) {
+            sendEmail({
+                to: "janassistai@gmail.com",
+                subject: `Exchange Request — ${order.invoiceNumber}`,
+                text: `Exchange request from ${order.userName} (${order.userEmail})\n\nInvoice: ${order.invoiceNumber}\nReason: ${order.exchangeReason}\nOrder Total: Rs.${order.totalAmount}\n\nItems:\n${order.items.map((i) => `- ${i.name} x${i.quantity} @ Rs.${i.price}`).join("\n")}`,
+                replyTo: order.userEmail,
+            }).catch((err) => console.error("Exchange email error:", err));
         }
 
         res.json({ message: "Exchange request submitted successfully" });
@@ -222,7 +210,7 @@ export const updateOrderStatus = async (req, res) => {
         await order.save();
 
         // Send customer notification for key status changes
-        if (order.userEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        if (order.userEmail && isEmailConfigured()) {
             let subject = "";
             let title = "";
             let message = "";
@@ -251,12 +239,7 @@ export const updateOrderStatus = async (req, res) => {
             }
 
             if (subject) {
-                const transporter = nodemailer.createTransport({
-                    service: "gmail",
-                    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-                });
-                transporter.sendMail({
-                    from: `"Extract Menswear" <${process.env.EMAIL_USER}>`,
+                sendEmail({
                     to: order.userEmail,
                     subject,
                     html: buildStatusEmailHtml(order, status, title, message),
@@ -289,17 +272,12 @@ export const cancelOrder = async (req, res) => {
         await restoreOrderStock(order);
 
         // Notify user via email
-        if (order.userEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        if (order.userEmail && isEmailConfigured()) {
             const subject = `Order Cancelled: ${order.invoiceNumber}`;
             const title = `Order Cancelled`;
-            const message = `Hi ${order.userName || "Customer"},<br/><br/>Your order (${order.invoiceNumber}) has been cancelled successfully as requested.<br/>Reason: ${order.cancelReason}<br/><br/>A full refund of ₹${(order.totalAmount + (order.shipping || 0)).toLocaleString("en-IN")} will be credited back to your original payment method.`;
+            const message = `Hi ${order.userName || "Customer"},<br/><br/>Your order (${order.invoiceNumber}) has been cancelled successfully as requested.<br/>Reason: ${order.cancelReason}<br/><br/>A full refund of Rs.${(order.totalAmount + (order.shipping || 0)).toLocaleString("en-IN")} will be credited back to your original payment method.`;
 
-            const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-            });
-            transporter.sendMail({
-                from: `"Extract Menswear" <${process.env.EMAIL_USER}>`,
+            sendEmail({
                 to: order.userEmail,
                 subject,
                 html: buildStatusEmailHtml(order, "cancelled", title, message),

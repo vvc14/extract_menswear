@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import { sendEmail, isEmailConfigured } from "../utils/emailTransporter.js";
 import razorpayInstance from "../config/razorpay.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
@@ -273,19 +273,13 @@ export const verifyPayment = async (req, res) => {
             }
 
             // Send confirmation email with invoice PDF asynchronously
-            if (order.userEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+            if (order.userEmail && isEmailConfigured()) {
                 (async () => {
                     try {
-                        const transporter = nodemailer.createTransport({
-                            service: "gmail",
-                            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-                        });
-
                         const pdfBuffer = await generateInvoicePDFBuffer(order);
                         console.log(`✅ Invoice PDF generated for ${invoiceNumber} (${pdfBuffer.length} bytes)`);
 
-                        await transporter.sendMail({
-                            from: `"Extract Menswear" <${process.env.EMAIL_USER}>`,
+                        await sendEmail({
                             to: order.userEmail,
                             subject: `Order Confirmed — ${invoiceNumber}`,
                             html: buildEmailHtml(order),

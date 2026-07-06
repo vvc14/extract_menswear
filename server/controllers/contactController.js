@@ -1,5 +1,5 @@
 import Contact from "../models/Contact.js";
-import nodemailer from "nodemailer";
+import { sendEmail, isEmailConfigured } from "../utils/emailTransporter.js";
 
 export const submitContact = async (req, res) => {
     try {
@@ -15,24 +15,14 @@ export const submitContact = async (req, res) => {
 
         const contact = await Contact.create({ name, email, message });
 
-        // Send email using nodemailer
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-            const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS,
-                },
-            });
-
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
+        // Send email using centralized transporter
+        if (isEmailConfigured()) {
+            sendEmail({
                 to: "janassistai@gmail.com",
                 subject: `New Contact Request from ${name}`,
                 text: `You have received a new message from your website contact form.\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
-            };
-
-            transporter.sendMail(mailOptions).catch(err => console.error("Background email error:", err));
+                replyTo: email,
+            }).catch(err => console.error("Background email error:", err));
         } else {
             console.warn("EMAIL_USER and EMAIL_PASS are not set in .env. Email was not sent.");
         }
