@@ -1,14 +1,39 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import crypto from "crypto";
 
-// ─── Resend client (proper transactional email service) ───
-let _resend = null;
+// ─── Singleton transporter ───
+let _transporter = null;
 
-function getResend() {
-    if (!_resend) {
-        _resend = new Resend(process.env.RESEND_API_KEY);
+function getTransporter() {
+    if (!_transporter) {
+        // Use Mailjet SMTP if configured, otherwise fall back to Gmail
+        if (process.env.MAILJET_API_KEY && process.env.MAILJET_SECRET_KEY) {
+            _transporter = nodemailer.createTransport({
+                host: "in-v3.mailjet.com",
+                port: 587,
+                secure: false,
+                auth: {
+                    user: process.env.MAILJET_API_KEY,
+                    pass: process.env.MAILJET_SECRET_KEY,
+                },
+                pool: true,
+                maxConnections: 3,
+            });
+            console.log("📧 Email: Using Mailjet SMTP relay");
+        } else {
+            _transporter = nodemailer.createTransport({
+                service: "gmail",
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS,
+                },
+                pool: true,
+                maxConnections: 3,
+            });
+            console.log("📧 Email: Using Gmail SMTP (fallback)");
+        }
     }
-    return _resend;
+    return _transporter;
 }
 
 /**
@@ -36,69 +61,67 @@ function htmlToPlainText(html) {
 }
 
 /**
- * Send an email via Resend with proper deliverability.
+ * Generate a proper RFC 2822 Message-ID.
+ */
+function generateMessageId() {
+    const domain = (process.env.EMAIL_USER || "noreply@extract.com").split("@")[1] || "extract.com";
+    const uniqueId = crypto.randomBytes(16).toString("hex");
+    return `<${uniqueId}@${domain}>`;
+}
+
+/**
+ * Send an email with anti-spam best practices.
  *
  * @param {Object} options
  * @param {string} options.to - Recipient email
  * @param {string} options.subject - Email subject
  * @param {string} [options.html] - HTML body
  * @param {string} [options.text] - Plain text body (auto-generated from html if omitted)
- * @param {Array}  [options.attachments] - File attachments [{filename, content}]
+ * @param {Array}  [options.attachments] - File attachments
  * @param {string} [options.replyTo] - Reply-to address
  * @returns {Promise}
  */
 export async function sendEmail(options) {
-    if (!process.env.RESEND_API_KEY) {
-        console.warn("⚠️  RESEND_API_KEY not set. Email skipped.");
+    if (!process.env.EMAIL_USER) {
+        console.warn("⚠️  EMAIL_USER not set. Email skipped.");
         return;
     }
 
-    const resend = getResend();
+    const transporter = getTransporter();
+    const fromAddress = `"Extract Menswear" <${process.env.EMAIL_USER}>`;
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 
     // Auto-generate plain text from HTML if not provided
     const plainText = options.text || htmlToPlainText(options.html || "");
 
-    // Format attachments for Resend (expects Buffer content)
-    const attachments = (options.attachments || []).map((att) => ({
-        filename: att.filename,
-        content: att.content, // Buffer
-        content_type: att.contentType,
-    }));
-
-    const emailPayload = {
-        // onboarding@resend.dev is Resend's shared sender — works without domain verification
-        // Once you verify your own domain in Resend dashboard, change this to your domain email
-        from: "Extract Menswear <onboarding@resend.dev>",
-        to: [options.to],
+    const mailOptions = {
+        from: fromAddress,
+        to: options.to,
         subject: options.subject,
         html: options.html || undefined,
         text: plainText,
-        reply_to: options.replyTo || process.env.EMAIL_USER || undefined,
+        replyTo: options.replyTo || process.env.EMAIL_USER,
+        attachments: options.attachments || [],
+        headers: {
+            "Message-ID": generateMessageId(),
+            "X-Priority": "3",
+            "X-Mailer": "Extract Menswear Notifications",
+            "List-Unsubscribe": `<${clientUrl}/profile>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+            "Feedback-ID": "transactional:extract:account:orders",
+        },
     };
 
-    if (attachments.length > 0) {
-        emailPayload.attachments = attachments;
-    }
-
-    try {
-        const { data, error } = await resend.emails.send(emailPayload);
-        if (error) {
-            console.error("❌ Resend error:", error);
-            throw new Error(error.message);
-        }
-        console.log(`📧 Email sent via Resend (ID: ${data?.id})`);
-        return data;
-    } catch (err) {
-        console.error("❌ Email send failed:", err.message);
-        throw err;
-    }
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`📧 Email sent to ${options.to} (ID: ${result.messageId})`);
+    return result;
 }
 
 /**
  * Check if email service is configured.
  */
 export function isEmailConfigured() {
-    return !!process.env.RESEND_API_KEY;
+    return !!((process.env.MAILJET_API_KEY && process.env.MAILJET_SECRET_KEY) || (process.env.EMAIL_USER && process.env.EMAIL_PASS));
 }
 
 export default { sendEmail, isEmailConfigured };
