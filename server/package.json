@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node tests/e2e.test.mjs",
+    "lint": "eslint ."
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -24,14 +26,17 @@
     "mongoose": "^8.9.5",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^9.0.1",
-    "pdfkit": "^0.18.0",
     "razorpay": "^2.9.6",
-    "resend": "^6.17.1",
     "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "autocannon": "^8.0.0",
-    "eslint": "^10.6.0"
+    "eslint": "^10.6.0",
+    "mongodb-memory-server-core": "^10.4.3",
+    "supertest": "^7.3.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
