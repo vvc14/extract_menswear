@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../redux/cartSlice";
+import { addToCart, MAX_QTY_PER_LINE } from "../redux/cartSlice";
 import { toggleWishlist } from "../redux/wishlistSlice";
 import { showAlert } from "../redux/alertSlice";
-import API from "../services/api";
+import API, { apiErrorMessage } from "../services/api";
+import { stockForSize } from "../utils/stock";
 import { motion } from "framer-motion";
 import { HiOutlineShoppingCart, HiStar, HiOutlineStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart, HiOutlineArrowLeft, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExclamation, HiOutlineChatAlt2, HiOutlinePhotograph, HiOutlineX, HiOutlineTrash } from "react-icons/hi";
 import ProductCard from "../components/ProductCard";
@@ -15,6 +16,7 @@ export default function ProductDetail() {
     const navigate = useNavigate();
     const user = useSelector((s) => s.auth.user);
     const wishlistItems = useSelector((s) => s.wishlist.items);
+    const cartItems = useSelector((s) => s.cart.items);
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [added, setAdded] = useState(false);
@@ -77,55 +79,73 @@ export default function ProductDetail() {
         fetchProduct();
     }, [id]);
 
-    // Poll latest stock every 3 seconds to keep it in sync for multiple concurrent users
+    // Refresh stock periodically so shoppers see sell-outs without reloading
     useEffect(() => {
         if (!id) return;
         const interval = setInterval(async () => {
+            if (document.hidden) return;
             try {
                 const { data } = await API.get(`/products/${id}`);
-                setProduct(prev => {
-                    if (!prev) return data;
-                    if (prev.stock !== data.stock) {
-                        setQty(q => Math.max(data.stock > 0 ? 1 : 0, Math.min(data.stock, q)));
-                        return { ...prev, stock: data.stock };
-                    }
-                    return prev;
-                });
-            } catch (err) {
-                console.error("Failed to poll product stock:", err);
+                setProduct((prev) => (prev ? { ...prev, stock: data.stock, sizeStock: data.sizeStock, price: data.price } : data));
+            } catch {
+                // ignore transient polling errors
             }
-        }, 3000);
+        }, 15000);
 
         return () => clearInterval(interval);
     }, [id]);
 
-    const handleAdd = () => {
-        if (!product || product.stock <= 0) return;
-        if (product?.sizes?.length > 0 && !selectedSize) {
+    // Units of the selected size the shopper can still add (stock minus what is already in the cart)
+    const addableFor = (size) => {
+        if (!product) return 0;
+        const available = Math.min(stockForSize(product, size), MAX_QTY_PER_LINE);
+        const inCart = cartItems.find((i) => i._id === product._id && (i.size || "") === (size || ""))?.quantity || 0;
+        return Math.max(0, available - inCart);
+    };
+
+    const tryAdd = () => {
+        if (!product || product.stock <= 0) return false;
+        const sized = product.sizes?.length > 0;
+        if (sized && !selectedSize) {
             dispatch(showAlert({ title: "Select Size", message: "Please select a size first" }));
-            return;
+            return false;
         }
-        dispatch(addToCart({ ...product, size: selectedSize, qtyToAdd: qty }));
-        
-        const newStock = Math.max(0, product.stock - qty);
-        setProduct(prev => ({
-            ...prev,
-            stock: newStock
-        }));
-        setQty(newStock > 0 ? 1 : 0);
-        
+        const size = sized ? selectedSize : "";
+        const addable = addableFor(size);
+        if (addable <= 0) {
+            dispatch(showAlert({
+                title: "Not Available",
+                message: stockForSize(product, size) > 0
+                    ? "You already have all available units of this item in your cart."
+                    : "This size is out of stock.",
+            }));
+            return false;
+        }
+        const quantity = Math.min(qty, addable);
+        dispatch(addToCart({ ...product, size, qtyToAdd: quantity, stock: stockForSize(product, size) }));
+        setQty(1);
+        return true;
+    };
+
+    const handleAdd = () => {
+        if (!tryAdd()) return;
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
     };
 
     const handleBuyNow = () => {
-        if (!product || product.stock <= 0) return;
-        if (product?.sizes?.length > 0 && !selectedSize) {
-            dispatch(showAlert({ title: "Select Size", message: "Please select a size first" }));
-            return;
+        if (tryAdd()) navigate("/cart");
+    };
+
+    const myReview = user ? product?.reviews?.find((r) => String(r.userId) === String(user.id || user._id)) : null;
+
+    const handleDeleteReview = async () => {
+        try {
+            const { data } = await API.delete(`/products/${id}/reviews`);
+            setProduct(data);
+        } catch (err) {
+            dispatch(showAlert({ title: "Could not delete review", message: apiErrorMessage(err) }));
         }
-        dispatch(addToCart({ ...product, size: selectedSize, qtyToAdd: qty }));
-        navigate("/cart");
     };
 
     const handleReviewSubmit = async (e) => {
@@ -157,7 +177,7 @@ export default function ProductDetail() {
             setReviewSuccess(true);
             setTimeout(() => setReviewSuccess(false), 3000);
         } catch (err) {
-            console.error("Failed to post review:", err);
+            dispatch(showAlert({ title: "Could not submit review", message: apiErrorMessage(err, "Failed to submit your review. Please try again.") }));
         } finally {
             setSubmittingReview(false);
         }
@@ -209,6 +229,9 @@ export default function ProductDetail() {
 
     const originalPrice = product.originalPrice || 0;
     const discount = product.discount || 0;
+    const isSized = product.sizes?.length > 0;
+    const selectedStock = isSized ? (selectedSize ? stockForSize(product, selectedSize) : null) : stockForSize(product, "");
+    const maxQty = Math.max(1, addableFor(isSized ? selectedSize : ""));
 
     return (
         <main id="main-content">
@@ -409,13 +432,20 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Stock */}
-                        {product.stock > 0 ? (
+                        {product.stock <= 0 ? (
+                            <p className="text-[15px] font-bold text-rose mb-4">Out of Stock</p>
+                        ) : selectedStock === null ? (
                             <p className="text-[15px] font-bold text-emerald mb-4 flex items-center gap-2">
                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block animate-pulse"></span>
-                                In Stock — {product.stock} available
+                                In Stock — select a size to see availability
+                            </p>
+                        ) : selectedStock > 0 ? (
+                            <p className="text-[15px] font-bold text-emerald mb-4 flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block animate-pulse"></span>
+                                In Stock — {selectedStock} available{isSized ? ` in size ${selectedSize}` : ""}
                             </p>
                         ) : (
-                            <p className="text-[15px] font-bold text-rose mb-4">Out of Stock</p>
+                            <p className="text-[15px] font-bold text-rose mb-4">Size {selectedSize} is out of stock</p>
                         )}
 
                         {/* Size Selection */}
@@ -430,8 +460,9 @@ export default function ProductDetail() {
                                         <button
                                             key={s}
                                             type="button"
-                                            onClick={() => setSelectedSize(s)}
-                                            className={`min-w-[46px] h-[46px] px-3 rounded-xl text-[14px] font-bold border transition-all cursor-pointer ${
+                                            onClick={() => { setSelectedSize(s); setQty(1); }}
+                                            title={stockForSize(product, s) <= 0 ? "Out of stock" : undefined}
+                                            className={`min-w-[46px] h-[46px] px-3 rounded-xl text-[14px] font-bold border transition-all cursor-pointer ${stockForSize(product, s) <= 0 ? "line-through opacity-50 " : ""}${
                                                 selectedSize === s
                                                     ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-md scale-[1.02]"
                                                     : "bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500"
@@ -445,7 +476,7 @@ export default function ProductDetail() {
                         )}
 
                         {/* Quantity */}
-                        {product.stock > 0 && (
+                        {selectedStock > 0 && (
                             <div className="flex items-center gap-4 mb-4">
                                 <label className="text-[15px] font-bold text-slate-700 dark:text-slate-300">Quantity:</label>
                                 <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
@@ -459,8 +490,8 @@ export default function ProductDetail() {
                                         {qty}
                                     </span>
                                     <button
-                                        disabled={qty >= product.stock}
-                                        onClick={() => setQty(Math.min(product.stock, qty + 1))}
+                                        disabled={qty >= maxQty}
+                                        onClick={() => setQty(Math.min(maxQty, qty + 1))}
                                         className="px-4 py-2 text-[15px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                                         aria-label="Increase quantity"
                                     >+</button>
@@ -719,15 +750,25 @@ export default function ProductDetail() {
                                                             {new Date(review.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                                                         </p>
                                                     </div>
-                                                    <div className="flex gap-0.5">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <HiStar
-                                                                key={i}
-                                                                className={`w-4 h-4 ${i < review.rating ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
-                                                            />
-                                                        ))}
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex gap-0.5">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <HiStar
+                                                                    key={i}
+                                                                    className={`w-4 h-4 ${i < review.rating ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        {myReview && String(review.userId) === String(myReview.userId) && (
+                                                            <button type="button" onClick={handleDeleteReview} className="text-slate-400 hover:text-rose-500 cursor-pointer" aria-label="Delete your review">
+                                                                <HiOutlineTrash className="w-4 h-4" />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
+                                                {review.verifiedPurchase && (
+                                                    <p className="text-[12px] font-bold text-emerald -mt-2 mb-2">✓ Verified purchase</p>
+                                                )}
                                                 <p className="text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed">
                                                     {review.comment}
                                                 </p>

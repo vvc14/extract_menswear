@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { showAlert } from "../redux/alertSlice";
-import API from "../services/api";
+import API, { apiErrorMessage } from "../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSearch, HiOutlinePhotograph, HiOutlineCollection, HiOutlineTruck, HiOutlineCog } from "react-icons/hi";
 import { useConfirm } from "../context/ConfirmContext";
 
-const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", stock: "", images: [], imageUrl: "", videoFile: null, videoUrl: "", selectedSizes: [], existingImages: [] };
+// sizeStock: { [size]: "12" } — per-size stock inputs. legacyStock: shared stock of an older product (null when per-size).
+const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", sizeStock: {}, legacyStock: null, originalStock: 0, images: [], imageUrl: "", videoFile: null, videoUrl: "", selectedSizes: [], existingImages: [] };
 
 export default function AdminProducts() {
     const dispatch = useDispatch();
@@ -83,7 +84,16 @@ export default function AdminProducts() {
     };
     const openEdit = (p) => {
         setEditing(p._id);
-        setForm({ name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price, originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "", stock: p.stock || 0, images: [], imageUrl: "", videoFile: null, videoUrl: p.videoUrl || "", selectedSizes: p.sizes || [], existingImages: p.images || [p.imageUrl].filter(Boolean) });
+        const perSize = Array.isArray(p.sizeStock) && p.sizeStock.length > 0;
+        setForm({
+            name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price,
+            originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "",
+            sizeStock: perSize ? Object.fromEntries(p.sizeStock.map((e) => [e.size, String(e.stock)])) : {},
+            legacyStock: perSize ? null : (p.stock || 0),
+            originalStock: p.stock || 0,
+            images: [], imageUrl: "", videoFile: null, videoUrl: p.videoUrl || "", selectedSizes: p.sizes || [],
+            existingImages: p.images || [p.imageUrl].filter(Boolean),
+        });
         setShowForm(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -137,10 +147,17 @@ export default function AdminProducts() {
             dispatch(showAlert({ title: "Validation Error", message: "Shipping cost cannot be negative" }));
             return;
         }
-        if (Number(form.stock) < 0) {
-            dispatch(showAlert({ title: "Validation Error", message: "Stock cannot be negative" }));
+        const sizeStockValues = form.selectedSizes.map((sz) => form.sizeStock[sz]);
+        if (sizeStockValues.some((v) => v !== undefined && v !== "" && (!Number.isInteger(Number(v)) || Number(v) < 0))) {
+            dispatch(showAlert({ title: "Validation Error", message: "Stock for each size must be a whole number of 0 or more" }));
             return;
         }
+        if (form.originalPrice && Number(form.originalPrice) > 0 && Number(form.originalPrice) < Number(form.price)) {
+            dispatch(showAlert({ title: "Validation Error", message: "Original price (MRP) cannot be lower than the selling price" }));
+            return;
+        }
+        // Older products share one stock number; keep it unless per-size numbers were entered
+        const sendSizeStock = !editing || form.legacyStock === null || sizeStockValues.some((v) => v !== undefined && v !== "");
         setSubmitting(true);
         const formData = new FormData();
         formData.append("name", form.name);
@@ -151,7 +168,10 @@ export default function AdminProducts() {
         formData.append("originalPrice", form.originalPrice || 0);
         formData.append("discount", form.discount || 0);
         formData.append("shippingCost", form.shippingCost || 0);
-        formData.append("stock", form.stock);
+        if (sendSizeStock) {
+            formData.append("sizeStock", JSON.stringify(Object.fromEntries(form.selectedSizes.map((sz) => [sz, Number(form.sizeStock[sz] || 0)]))));
+            if (editing) formData.append("expectedStock", form.originalStock);
+        }
         formData.append("sizes", JSON.stringify(form.selectedSizes || []));
         formData.append("videoUrl", form.videoUrl || "");
         // Multiple images upload
@@ -163,10 +183,11 @@ export default function AdminProducts() {
         if (form.videoFile) {
             formData.append("video", form.videoFile);
         }
-        // Send existing images as JSON so server can preserve/combine them
-        if (form.existingImages && form.existingImages.length > 0) {
-            formData.append("existingImages", JSON.stringify(form.existingImages));
-        } else if (form.imageUrl && (!form.images || form.images.length === 0)) {
+        // When editing, always send the kept images so removals are applied
+        if (editing) {
+            formData.append("existingImages", JSON.stringify(form.existingImages || []));
+        }
+        if (form.imageUrl && (!form.images || form.images.length === 0)) {
             formData.append("imageUrl", form.imageUrl);
         }
 
@@ -179,7 +200,8 @@ export default function AdminProducts() {
             setShowForm(false);
             fetchProducts();
         } catch (err) {
-            console.error("Failed to save product:", err);
+            dispatch(showAlert({ title: "Could not save product", message: apiErrorMessage(err, "Failed to save product. Please try again.") }));
+            if (err.response?.status === 409) fetchProducts();
         }
         setSubmitting(false);
     };
@@ -299,8 +321,40 @@ export default function AdminProducts() {
                                     <input type="number" min="0" value={form.price} onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) handleFormChange("price", v); }} required placeholder="2499" className={inputClass} />
                                 </div>
                                 <div>
-                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stock</label>
-                                    <input type="number" min="0" value={form.stock} onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) handleFormChange("stock", v); }} placeholder="50" className={inputClass} />
+                                    <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                        Stock per size{form.selectedSizes.length > 0 ? ` (total ${form.selectedSizes.reduce((sum, sz) => sum + (Number(form.sizeStock[sz]) || 0), 0)})` : ""}
+                                    </label>
+                                    {form.legacyStock !== null && (
+                                        <p className="text-[12px] text-amber-600 mb-2">
+                                            This product currently shares {form.legacyStock} units across all sizes. Enter stock for each size to track them separately, or leave blank to keep the shared stock.
+                                        </p>
+                                    )}
+                                    {form.selectedSizes.length === 0 ? (
+                                        <p className="text-[13px] text-slate-400">Add sizes below, then enter stock for each.</p>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {form.selectedSizes.map((sz) => (
+                                                <label key={sz} className="flex items-center gap-1.5 text-[13px] font-bold text-slate-600 dark:text-slate-300">
+                                                    {sz}
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        step="1"
+                                                        value={form.sizeStock[sz] ?? ""}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value;
+                                                            if (v === "" || (Number(v) >= 0 && Number.isInteger(Number(v)))) {
+                                                                setForm({ ...form, sizeStock: { ...form.sizeStock, [sz]: v } });
+                                                            }
+                                                        }}
+                                                        placeholder="0"
+                                                        className="w-16 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-[14px] bg-white dark:bg-slate-900"
+                                                        aria-label={`Stock for size ${sz}`}
+                                                    />
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Original Price / MRP (₹)</label>

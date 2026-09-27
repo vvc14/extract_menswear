@@ -55,6 +55,7 @@ export default function AdminCoupons() {
                 expiryDate: coupon.expiryDate ? new Date(coupon.expiryDate).toISOString().split('T')[0] : "",
                 isActive: coupon.isActive,
                 oncePerUser: coupon.oncePerUser || false,
+                isPublic: coupon.isPublic !== false,
             });
         } else {
             setEditingCoupon(null);
@@ -67,6 +68,7 @@ export default function AdminCoupons() {
                 expiryDate: "",
                 isActive: true,
                 oncePerUser: false,
+                isPublic: true,
             });
         }
         setShowForm(true);
@@ -302,6 +304,11 @@ export default function AdminCoupons() {
                                             <input type="checkbox" id="oncePerUser" checked={form.oncePerUser} onChange={e => setForm({...form, oncePerUser: e.target.checked})}
                                                 className="w-5 h-5 text-primary border-slate-300 rounded focus:ring-primary" />
                                             <label htmlFor="oncePerUser" className="font-semibold text-slate-700 cursor-pointer text-[15px]">Once per user only</label>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <input type="checkbox" id="isPublic" checked={form.isPublic !== false} onChange={e => setForm({...form, isPublic: e.target.checked})}
+                                                className="w-5 h-5 text-primary border-slate-300 rounded focus:ring-primary" />
+                                            <label htmlFor="isPublic" className="font-semibold text-slate-700 cursor-pointer text-[15px]">Show in cart suggestions (uncheck for private codes)</label>
                                         </div>
                                     </div>
                                 </form>

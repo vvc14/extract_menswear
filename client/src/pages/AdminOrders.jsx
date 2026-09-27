@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import API from "../services/api";
+import API, { apiErrorMessage } from "../services/api";
+import { useConfirm } from "../context/ConfirmContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     HiOutlineClipboardList, HiOutlineRefresh, HiOutlineReply, HiOutlineTruck,
@@ -36,6 +37,13 @@ export default function AdminOrders() {
     const [expandedId, setExpandedId] = useState(null);
     const [updating, setUpdating] = useState(null);
     const [toast, setToast] = useState("");
+    const [stats, setStats] = useState(null);
+    const confirm = useConfirm();
+
+    const showToast = (message) => {
+        setToast(message);
+        setTimeout(() => setToast(""), 5000);
+    };
 
     // Shipping details modal state
     const [shippingModal, setShippingModal] = useState(null); // { orderId }
@@ -44,15 +52,20 @@ export default function AdminOrders() {
 
     const fetchOrders = async () => {
         try {
-            const { data } = await API.get("/orders/admin");
-            setOrders(data);
+            const [{ data }, statsRes] = await Promise.all([
+                API.get("/orders/admin"),
+                API.get("/orders/admin/stats").catch(() => ({ data: null })),
+            ]);
+            setOrders(Array.isArray(data) ? data : []);
+            setStats(statsRes.data);
         } catch (err) {
-            console.error("Failed to fetch orders:", err);
+            showToast(apiErrorMessage(err, "Failed to load orders"));
         } finally {
             setLoading(false);
         }
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { fetchOrders(); }, []);
 
     const filtered = orders.filter((o) => {
@@ -66,16 +79,32 @@ export default function AdminOrders() {
         return matchSearch && o.status === filter;
     });
 
-    const handleStatusUpdate = async (orderId, newStatus) => {
+    const handleStatusUpdate = async (orderId, newStatus, label) => {
+        if (["cancelled", "returned"].includes(newStatus)) {
+            const ok = await confirm(`${label || newStatus}: this restocks the items and refunds the customer in full through Razorpay. Continue?`);
+            if (!ok) return;
+        }
         setUpdating(orderId);
         try {
-            await API.put(`/orders/${orderId}/status`, { status: newStatus });
-            setOrders((prev) => prev.map((o) => o._id === orderId ? { ...o, status: newStatus } : o));
-            setToast(`Order updated to "${newStatus}"`);
-            setTimeout(() => setToast(""), 3000);
+            const { data } = await API.put(`/orders/${orderId}/status`, { status: newStatus });
+            showToast(data.message || `Order updated to "${newStatus}"`);
+            await fetchOrders();
         } catch (err) {
-            setToast(err.response?.data?.message || "Update failed");
-            setTimeout(() => setToast(""), 3000);
+            showToast(apiErrorMessage(err, "Update failed"));
+            if (err.response?.status === 409) fetchOrders();
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    const handleRetryRefund = async (orderId) => {
+        setUpdating(orderId);
+        try {
+            const { data } = await API.post(`/orders/${orderId}/refund`);
+            showToast(data.message || "Refund initiated");
+            await fetchOrders();
+        } catch (err) {
+            showToast(apiErrorMessage(err, "Refund failed"));
         } finally {
             setUpdating(null);
         }
@@ -93,15 +122,13 @@ export default function AdminOrders() {
                 carrierName, 
                 trackingNumber 
             });
-            setOrders((prev) => prev.map((o) => o._id === orderId ? { ...o, status: "shipped", carrierName, trackingNumber } : o));
-            setToast(`Order updated to "shipped"`);
-            setTimeout(() => setToast(""), 3000);
+            showToast('Order updated to "shipped"');
             setShippingModal(null);
             setCarrierName("");
             setTrackingNumber("");
+            await fetchOrders();
         } catch (err) {
-            setToast(err.response?.data?.message || "Shipping update failed");
-            setTimeout(() => setToast(""), 3000);
+            showToast(apiErrorMessage(err, "Shipping update failed"));
         } finally {
             setUpdating(null);
         }
@@ -109,25 +136,29 @@ export default function AdminOrders() {
 
     const getNextActions = (status) => {
         switch (status) {
-            case "paid": return [{ label: "Mark Shipped", value: "shipped", icon: HiOutlineTruck }];
+            case "paid": return [
+                { label: "Mark Shipped", value: "shipped", icon: HiOutlineTruck },
+                { label: "Cancel & Refund", value: "cancelled", icon: HiOutlineX, danger: true },
+            ];
             case "shipped": return [{ label: "Mark Delivered", value: "delivered", icon: HiOutlineCheck }];
             case "return-requested": return [
-                { label: "Approve Return", value: "returned", icon: HiOutlineCheck },
-                { label: "Reject", value: "delivered", icon: HiOutlineX },
+                { label: "Approve Return & Refund", value: "returned", icon: HiOutlineCheck },
+                { label: "Reject", value: "delivered", icon: HiOutlineX, danger: true },
             ];
             case "exchange-requested": return [
                 { label: "Approve Exchange", value: "exchanged", icon: HiOutlineCheck },
-                { label: "Reject", value: "delivered", icon: HiOutlineX },
+                { label: "Reject", value: "delivered", icon: HiOutlineX, danger: true },
             ];
             default: return [];
         }
     };
 
     // Stats
-    const totalOrders = orders.length;
-    const pendingReturns = orders.filter((o) => o.status === "return-requested").length;
-    const pendingExchanges = orders.filter((o) => o.status === "exchange-requested").length;
-    const totalRevenue = orders.filter((o) => !["failed", "returned"].includes(o.status)).reduce((s, o) => s + (o.totalAmount || 0) + (o.shipping || 0), 0);
+    // Revenue comes from the server so every admin screen uses the same definition
+    const totalOrders = stats?.totalOrders ?? orders.length;
+    const pendingReturns = stats?.pendingReturns ?? orders.filter((o) => o.status === "return-requested").length;
+    const pendingExchanges = stats?.pendingExchanges ?? orders.filter((o) => o.status === "exchange-requested").length;
+    const totalRevenue = stats?.revenue ?? 0;
 
     if (loading) {
         return (
@@ -233,7 +264,7 @@ export default function AdminOrders() {
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
                                                                     <p className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</p>
-                                                                    <p className="text-[11px] text-slate-400">Qty: {item.quantity} × ₹{item.price?.toLocaleString("en-IN")}</p>
+                                                                    <p className="text-[11px] text-slate-400">{item.size ? `Size ${item.size} · ` : ""}Qty: {item.quantity} × ₹{item.price?.toLocaleString("en-IN")}</p>
                                                                 </div>
                                                                 <p className="text-[13px] font-bold text-slate-700 shrink-0">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
                                                             </div>
@@ -249,6 +280,21 @@ export default function AdminOrders() {
                                                                 <p>
                                                                     <strong>Address:</strong> {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}, {order.shippingAddress.country}
                                                                 </p>
+                                                            </div>
+                                                        )}
+                                                        {order.exchangeItems?.length > 0 && (
+                                                            <div className="mt-2 p-2.5 bg-orange-50 rounded-lg border border-orange-200 text-[13px] text-orange-800">
+                                                                <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5">Size exchange{order.status === "exchange-requested" ? " (replacement reserved)" : ""}</p>
+                                                                {order.exchangeItems.map((x, i) => (
+                                                                    <p key={i}>{x.name} × {x.quantity}: {x.fromSize || "—"} → {x.toSize}</p>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        {order.refund?.status && (
+                                                            <div className={`mt-2 p-2.5 rounded-lg border text-[13px] ${order.refund.status === "failed" ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-emerald-50 border-emerald-200 text-emerald-800"}`}>
+                                                                <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5">Refund {order.refund.status}</p>
+                                                                <p>₹{Number(order.refund.amount || 0).toLocaleString("en-IN")}{order.refund.razorpayRefundId ? ` · ${order.refund.razorpayRefundId}` : ""}</p>
+                                                                {order.refund.error && <p>{order.refund.error}</p>}
                                                             </div>
                                                         )}
                                                         {hasReason && (
@@ -292,12 +338,12 @@ export default function AdminOrders() {
                                                         if (a.value === "shipped") {
                                                             setShippingModal({ orderId: order._id });
                                                         } else {
-                                                            handleStatusUpdate(order._id, a.value);
+                                                            handleStatusUpdate(order._id, a.value, a.label);
                                                         }
                                                     }}
                                                     disabled={updating === order._id}
                                                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors disabled:opacity-50 ${
-                                                        a.value === "delivered" && a.label === "Reject"
+                                                        a.danger
                                                             ? "bg-rose-50 text-rose-600 hover:bg-rose-100"
                                                             : "bg-primary/10 text-primary hover:bg-primary/20"
                                                     }`}
@@ -306,7 +352,17 @@ export default function AdminOrders() {
                                                     {updating === order._id ? "..." : a.label}
                                                 </button>
                                             ))}
-                                            {actions.length === 0 && <span className="text-[12px] text-slate-400">—</span>}
+                                            {["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed") && (
+                                                <button
+                                                    onClick={() => handleRetryRefund(order._id)}
+                                                    disabled={updating === order._id}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+                                                >
+                                                    <HiOutlineRefresh className="w-3.5 h-3.5" />
+                                                    {updating === order._id ? "..." : "Retry refund"}
+                                                </button>
+                                            )}
+                                            {actions.length === 0 && !(["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed")) && <span className="text-[12px] text-slate-400">—</span>}
                                         </div>
                                     </td>
                                 </tr>

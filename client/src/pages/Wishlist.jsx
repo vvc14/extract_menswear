@@ -25,7 +25,7 @@ export default function Wishlist() {
             navigate(`/product/${item._id}`);
             return;
         }
-        dispatch(addToCart(item));
+        dispatch(addToCart({ ...item, stock: item.stock ?? 1 }));
         setAddedIds((prev) => new Set(prev).add(item._id));
         setTimeout(() => {
             dispatch(removeFromWishlist(item._id));
@@ -43,7 +43,7 @@ export default function Wishlist() {
         const nonSizedOutOfStock = items.filter((item) => (!item.sizes || item.sizes.length === 0) && item.stock !== undefined && item.stock <= 0);
 
         nonSizedAvailable.forEach((item) => {
-            dispatch(addToCart(item));
+            dispatch(addToCart({ ...item, stock: item.stock ?? 1 }));
             dispatch(removeFromWishlist(item._id));
         });
 

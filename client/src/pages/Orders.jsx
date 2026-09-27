@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineClipboardList, HiOutlineDownload, HiOutlineRefresh, HiOutlineReply, HiOutlineX, HiOutlineShoppingCart, HiOutlineArrowLeft } from "react-icons/hi";
-import API from "../services/api";
+import API, { apiErrorMessage } from "../services/api";
+import { stockForSize } from "../utils/stock";
 import { generateInvoicePDF } from "../utils/invoiceGenerator";
 
 const STATUS_STYLES = {
@@ -24,18 +25,47 @@ export default function Orders() {
     const [reason, setReason] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState("");
+    // Size exchange: { [itemId]: newSize } and product data for the order being exchanged
+    const [exchangeSel, setExchangeSel] = useState({});
+    const [exchangeProducts, setExchangeProducts] = useState({});
 
-    useEffect(() => {
+    const loadOrders = () =>
         API.get("/orders")
-            .then(({ data }) => setOrders(data))
+            .then(({ data }) => setOrders(Array.isArray(data) ? data : []))
             .catch(() => setOrders([]))
             .finally(() => setLoading(false));
+
+    useEffect(() => {
+        loadOrders();
     }, []);
 
+    const showToast = (message) => {
+        setToast(message);
+        setTimeout(() => setToast(""), 5000);
+    };
+
+    // Return/exchange window: 7 days from delivery (payment date for older orders)
     const canRequestAction = (order) => {
         if (order.status !== "delivered") return false;
-        const days = Math.floor((Date.now() - new Date(order.paidAt || order.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-        return days <= 7;
+        const from = order.deliveredAt || order.paidAt || order.createdAt;
+        return Date.now() - new Date(from).getTime() <= 7 * 24 * 60 * 60 * 1000;
+    };
+
+    const openModal = async (type, order) => {
+        setReason("");
+        setExchangeSel({});
+        setModal({ type, orderId: order._id, items: order.items });
+        if (type !== "exchange") return;
+        const ids = [...new Set(order.items.map((i) => i.productId))];
+        const entries = await Promise.all(ids.map(async (id) => {
+            try {
+                const { data } = await API.get(`/products/${id}`);
+                return [id, data];
+            } catch {
+                return [id, null];
+            }
+        }));
+        setExchangeProducts(Object.fromEntries(entries));
     };
 
     const canCancel = (order) => {
@@ -47,39 +77,31 @@ export default function Orders() {
         if (reason === null) return;
         setSubmitting(true);
         try {
-            await API.post(`/orders/${orderId}/cancel`, { reason });
-            setOrders((prev) =>
-                prev.map((o) =>
-                    o._id === orderId ? { ...o, status: "cancelled", cancelReason: reason || "Customer request" } : o
-                )
-            );
-            setToast("Order cancelled successfully!");
-            setTimeout(() => setToast(""), 4000);
+            const { data } = await API.post(`/orders/${orderId}/cancel`, { reason });
+            showToast(data.message || "Order cancelled successfully!");
+            await loadOrders();
         } catch (err) {
-            setToast(err.response?.data?.message || "Cancellation failed. Please try again.");
-            setTimeout(() => setToast(""), 4000);
+            showToast(apiErrorMessage(err, "Cancellation failed. Please try again."));
         } finally {
             setSubmitting(false);
         }
     };
 
+    const exchangeLines = Object.entries(exchangeSel).filter(([, size]) => size).map(([itemId, size]) => ({ itemId, size }));
+    const canSubmitRequest = modal && reason.trim() && (modal.type !== "exchange" || exchangeLines.length > 0);
+
     const handleSubmitRequest = async () => {
-        if (!modal || !reason.trim()) return;
+        if (!canSubmitRequest) return;
         setSubmitting(true);
         try {
-            await API.post(`/orders/${modal.orderId}/${modal.type}`, { reason });
-            setOrders((prev) =>
-                prev.map((o) =>
-                    o._id === modal.orderId ? { ...o, status: `${modal.type}-requested` } : o
-                )
-            );
-            setToast(`${modal.type === "return" ? "Return" : "Exchange"} request submitted successfully!`);
+            const body = modal.type === "exchange" ? { reason, items: exchangeLines } : { reason };
+            await API.post(`/orders/${modal.orderId}/${modal.type}`, body);
+            showToast(`${modal.type === "return" ? "Return" : "Exchange"} request submitted successfully!`);
             setModal(null);
             setReason("");
-            setTimeout(() => setToast(""), 4000);
+            await loadOrders();
         } catch (err) {
-            setToast(err.response?.data?.message || "Request failed. Please try again.");
-            setTimeout(() => setToast(""), 4000);
+            showToast(apiErrorMessage(err, "Request failed. Please try again."));
         } finally {
             setSubmitting(false);
         }
@@ -88,8 +110,8 @@ export default function Orders() {
     const handleDownload = async (order) => {
         try {
             await generateInvoicePDF(order);
-        } catch (err) {
-            console.error("Invoice download error:", err);
+        } catch {
+            showToast("Could not generate the invoice. Please try again.");
         }
     };
 
@@ -245,7 +267,7 @@ export default function Orders() {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-[15px] font-semibold text-slate-900 dark:text-white truncate">{item.name}</p>
-                                                <p className="text-[13px] text-slate-500 dark:text-slate-400">Qty: {item.quantity} × ₹{item.price.toLocaleString("en-IN")}</p>
+                                                <p className="text-[13px] text-slate-500 dark:text-slate-400">{item.size ? `Size ${item.size} · ` : ""}Qty: {item.quantity} × ₹{item.price.toLocaleString("en-IN")}</p>
                                             </div>
                                             <p className="text-[15px] font-bold text-slate-900 dark:text-white shrink-0">
                                                 ₹{(item.price * item.quantity).toLocaleString("en-IN")}
@@ -265,20 +287,20 @@ export default function Orders() {
                                     </button>
                                     {canAct && (
                                         <>
-                                            <button
-                                                onClick={() => { setModal({ type: "return", orderId: order._id }); setReason(""); }}
+                                            {!order.returnRejected && <button
+                                                onClick={() => openModal("return", order)}
                                                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-[13px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                                             >
                                                 <HiOutlineReply className="w-4 h-4" />
                                                 Request Return
-                                            </button>
-                                            <button
-                                                onClick={() => { setModal({ type: "exchange", orderId: order._id }); setReason(""); }}
+                                            </button>}
+                                            {!order.exchangeRejected && <button
+                                                onClick={() => openModal("exchange", order)}
                                                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-[13px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                                             >
                                                 <HiOutlineRefresh className="w-4 h-4" />
                                                 Request Exchange
-                                            </button>
+                                            </button>}
                                         </>
                                     )}
                                     {canCancel(order) && (
@@ -294,7 +316,21 @@ export default function Orders() {
                                         <p className="text-[13px] text-amber-600 dark:text-amber-400 font-semibold">Your request is being processed</p>
                                     )}
                                     {order.status === "cancelled" && (
-                                        <p className="text-[13px] text-rose-500 font-semibold">This order has been cancelled</p>
+                                        <p className="text-[13px] text-rose-500 font-semibold">This order has been cancelled{order.cancelReason ? ` — ${order.cancelReason}` : ""}</p>
+                                    )}
+                                    {order.refund?.status && (
+                                        <p className={`text-[13px] font-semibold ${order.refund.status === "processed" ? "text-emerald" : order.refund.status === "failed" ? "text-rose-500" : "text-amber-600"}`}>
+                                            {order.refund.status === "processed"
+                                                ? `Refund of ₹${Number(order.refund.amount || 0).toLocaleString("en-IN")} completed`
+                                                : order.refund.status === "failed"
+                                                    ? "Refund is being handled by our team"
+                                                    : `Refund of ₹${Number(order.refund.amount || 0).toLocaleString("en-IN")} initiated (5-7 business days)`}
+                                        </p>
+                                    )}
+                                    {order.exchangeItems?.length > 0 && ["exchange-requested", "exchanged"].includes(order.status) && (
+                                        <p className="text-[13px] text-slate-500 dark:text-slate-400 font-semibold w-full">
+                                            Exchange: {order.exchangeItems.map((x) => `${x.name} ${x.fromSize || ""} → ${x.toSize}`).join(", ")}
+                                        </p>
                                     )}
                                 </div>
                             </motion.div>
@@ -345,8 +381,34 @@ export default function Orders() {
                             <p className="text-[14px] text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
                                 {modal.type === "return"
                                     ? "Please tell us why you'd like to return this order. Refund will be processed within 5-7 business days."
-                                    : "Please tell us why you'd like to exchange this order and we'll arrange a replacement."}
+                                    : "Pick the new size for each item you want to exchange, and tell us why. We reserve the replacement for you right away."}
                             </p>
+                            {modal.type === "exchange" && (
+                                <div className="mb-5 space-y-3">
+                                    <p className="text-[13px] font-bold text-slate-500 uppercase tracking-wider">Choose new sizes</p>
+                                    {(modal.items || []).map((item) => {
+                                        const product = exchangeProducts[item.productId];
+                                        const sizes = (product?.sizes || []).filter((sz) => sz !== item.size);
+                                        return (
+                                            <div key={item._id} className="flex items-center justify-between gap-3">
+                                                <span className="text-[14px] text-slate-700 dark:text-slate-300 truncate">{item.name}{item.size ? ` (${item.size})` : ""}</span>
+                                                <select
+                                                    value={exchangeSel[item._id] || ""}
+                                                    onChange={(e) => setExchangeSel((prev) => ({ ...prev, [item._id]: e.target.value }))}
+                                                    className="border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1.5 text-[14px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                                                    disabled={!product || sizes.length === 0}
+                                                >
+                                                    <option value="">{product === undefined ? "Loading…" : sizes.length ? "Keep" : "Not available"}</option>
+                                                    {sizes.map((sz) => {
+                                                        const available = stockForSize(product, sz) >= item.quantity;
+                                                        return <option key={sz} value={sz} disabled={!available}>{sz}{available ? "" : " (out of stock)"}</option>;
+                                                    })}
+                                                </select>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                             <textarea
                                 value={reason}
                                 onChange={(e) => setReason(e.target.value)}
@@ -363,7 +425,7 @@ export default function Orders() {
                                 </button>
                                 <button
                                     onClick={handleSubmitRequest}
-                                    disabled={!reason.trim() || submitting}
+                                    disabled={!canSubmitRequest || submitting}
                                     className="flex-1 py-3 rounded-xl bg-primary text-white text-[14px] font-bold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {submitting ? "Submitting..." : "Submit Request"}

@@ -1,6 +1,12 @@
 const loadRazorpayScript = () =>
     new Promise((resolve) => {
-        if (document.getElementById("razorpay-sdk")) return resolve(true);
+        if (window.Razorpay) return resolve(true);
+        const existing = document.getElementById("razorpay-sdk");
+        if (existing) {
+            existing.addEventListener("load", () => resolve(true), { once: true });
+            existing.addEventListener("error", () => resolve(false), { once: true });
+            return;
+        }
         const script = document.createElement("script");
         script.id = "razorpay-sdk";
         script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -12,13 +18,24 @@ const loadRazorpayScript = () =>
 // Preload SDK eagerly so checkout opens instantly
 export const preloadRazorpay = () => { loadRazorpayScript(); };
 
-export const initiateRazorpayPayment = async ({ orderId, amount, currency, onSuccess, onFailure }) => {
+// The server holds stock for 30 minutes; close Checkout well before that.
+const CHECKOUT_TIMEOUT_SECONDS = 15 * 60;
+
+/**
+ * Opens Razorpay Checkout.
+ * onSuccess(response)  — payment completed (response has order/payment ids + signature)
+ * onDismiss()          — customer closed Checkout or it timed out without a successful payment
+ * onFailure(message)   — SDK failed to load, or a payment attempt failed (Checkout stays open for retry)
+ */
+export const initiateRazorpayPayment = async ({ orderId, amount, currency, prefill, onSuccess, onDismiss, onFailure }) => {
     const loaded = await loadRazorpayScript();
-    if (!loaded) {
-        onFailure?.("Razorpay SDK failed to load");
+    if (!loaded || !window.Razorpay) {
+        onFailure?.("Payment service failed to load. Please check your connection and try again.");
+        onDismiss?.();
         return;
     }
 
+    let completed = false;
     const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount,
@@ -27,10 +44,22 @@ export const initiateRazorpayPayment = async ({ orderId, amount, currency, onSuc
         name: "Extract Menswear",
         description: "Premium Menswear Purchase",
         theme: { color: "#1a1a1a" },
-        handler: (response) => onSuccess?.(response),
-        modal: { ondismiss: () => onFailure?.("Payment cancelled") },
+        prefill: prefill || {},
+        timeout: CHECKOUT_TIMEOUT_SECONDS,
+        retry: { enabled: true, max_count: 3 },
+        handler: (response) => {
+            completed = true;
+            onSuccess?.(response);
+        },
+        modal: {
+            confirm_close: true,
+            ondismiss: () => { if (!completed) onDismiss?.(); },
+        },
     };
 
     const rzp = new window.Razorpay(options);
+    rzp.on("payment.failed", (resp) => {
+        onFailure?.(resp?.error?.description || "Payment failed. You can try again.");
+    });
     rzp.open();
 };

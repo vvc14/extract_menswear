@@ -162,7 +162,7 @@ export default function Login() {
         setError("");
         setLoading(true);
         try {
-            const { data } = await API.post("/auth/verify-otp", { email, otp: otpString });
+            const { data } = await API.post("/auth/verify-otp", { email, otp: otpString, purpose: "signup" });
             if (data.verified) {
                 setEmailVerificationToken(data.emailVerificationToken);
                 setStep(STEP_CREATE);
@@ -184,7 +184,7 @@ export default function Login() {
         setError("");
         setLoading(true);
         try {
-            const { data } = await API.post("/auth/verify-otp", { email, otp: otpString });
+            const { data } = await API.post("/auth/verify-otp", { email, otp: otpString, purpose: "reset" });
             if (data.verified) {
                 setEmailVerificationToken(data.emailVerificationToken);
                 setStep(STEP_RESET_PASSWORD);

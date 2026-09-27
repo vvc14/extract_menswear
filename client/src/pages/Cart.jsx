@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { removeFromCart, updateQuantity, clearCart, updateCartStocks } from "../redux/cartSlice";
+import { removeFromCart, updateQuantity, clearCart, updateCartStocks, MAX_QTY_PER_LINE } from "../redux/cartSlice";
 import { showAlert } from "../redux/alertSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { initiateRazorpayPayment } from "../services/razorpay";
-import API from "../services/api";
+import API, { apiErrorMessage } from "../services/api";
+import { stockForSize } from "../utils/stock";
 import { 
     HiOutlineTrash, HiMinus, HiPlus, HiOutlineShoppingCart, 
     HiOutlineShieldCheck, HiOutlineArrowLeft, HiOutlineHome, 
@@ -25,39 +26,50 @@ export default function Cart() {
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
     const shipping = items.reduce((sum, i) => sum + (Number(i.shippingCost) || 0) * i.quantity, 0);
 
-    // Fetch and sync the latest product stock dynamically from the database on load
+    // Refresh price and per-size stock for every line from the database on load
     useEffect(() => {
         if (items.length === 0) return;
-        
+
         const syncStock = async () => {
-            try {
-                const stockUpdates = [];
-                for (const item of items) {
-                    try {
-                        const { data } = await API.get(`/products/${item._id}`);
-                        stockUpdates.push({ id: item._id, stock: data.stock });
-                    } catch (err) {
-                        console.error(`Failed to sync stock for product ${item._id}:`, err);
-                    }
+            const ids = [...new Set(items.map((i) => i._id))];
+            const results = await Promise.all(ids.map(async (id) => {
+                try {
+                    const { data } = await API.get(`/products/${id}`);
+                    return [id, data];
+                } catch (err) {
+                    return [id, err.response?.status === 404 ? null : undefined];
                 }
-                
-                if (stockUpdates.length > 0) {
-                    dispatch(updateCartStocks(stockUpdates));
-                }
-            } catch (err) {
-                console.error("Failed to sync cart stocks:", err);
-            }
+            }));
+            const byId = new Map(results);
+            const updates = items.map((item) => {
+                const product = byId.get(item._id);
+                if (product === null) return { id: item._id, size: item.size, deleted: true };
+                if (!product) return null;
+                return {
+                    id: item._id,
+                    size: item.size,
+                    stock: stockForSize(product, item.size),
+                    price: product.price,
+                    shippingCost: product.shippingCost || 0,
+                    name: product.name,
+                    sizes: product.sizes || [],
+                };
+            }).filter(Boolean);
+            if (updates.length > 0) dispatch(updateCartStocks(updates));
         };
-        
+
         syncStock();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Check if any item has stock issues
     const hasStockIssues = items.some((item) => {
-        const stock = item.stock !== undefined ? item.stock : 99999;
+        const stock = Number.isFinite(item.stock) ? item.stock : 0;
         return stock === 0 || item.quantity > stock;
     });
+
+    const [placingOrder, setPlacingOrder] = useState(false);
+    const [checkoutError, setCheckoutError] = useState("");
 
     const [addresses, setAddresses] = useState([]);
     const [selectedIdx, setSelectedIdx] = useState(null);
@@ -244,6 +256,8 @@ export default function Cart() {
     }, [subtotal, totalItems]);
 
     const handleCheckout = async () => {
+        if (placingOrder) return;
+        setCheckoutError("");
         if (!user) {
             navigate("/login?redirect=cart");
             return;
@@ -272,8 +286,6 @@ export default function Cart() {
         }
 
         const selectedAddress = addresses[selectedIdx];
-
-        // Format checks on checkout to ensure data compliance
         if (!/^\d{10}$/.test(selectedAddress.phone)) {
             dispatch(showAlert({ title: "Invalid Address Data", message: "The selected address contains an invalid phone number. It must be exactly 10 digits." }));
             return;
@@ -283,41 +295,71 @@ export default function Cart() {
             return;
         }
 
+        setPlacingOrder(true);
+        let razorpayOrderId = null;
         try {
+            // The server prices everything from the database; we only send what was chosen
             const { data } = await API.post("/payment/razorpay/order", {
-                amount: subtotal - actualDiscount,
-                shipping,
-                userId: user._id || user.id,
-                userEmail: user.email,
-                userName: user.name,
                 shippingAddress: selectedAddress,
                 couponCode: appliedCoupon ? appliedCoupon.code : undefined,
-                items: items.map((i) => ({
-                    productId: i._id,
-                    name: i.name,
-                    price: i.price,
-                    quantity: i.quantity,
-                    size: i.size || "",
-                    imageUrl: i.imageUrl || "",
-                    images: i.images || [],
-                })),
+                items: items.map((i) => ({ productId: i._id, quantity: i.quantity, size: i.size || "" })),
             });
+            razorpayOrderId = data.orderId;
+
+            // Prices may have changed since the items were added: confirm the real amount first
+            const displayedTotal = subtotal - actualDiscount + shipping;
+            if (data.summary && Math.round(data.summary.total) !== Math.round(displayedTotal)) {
+                const proceed = await confirm(
+                    `Prices were updated since you added these items. Your new total is ₹${data.summary.total.toLocaleString("en-IN")} (was ₹${displayedTotal.toLocaleString("en-IN")}). Continue to payment?`
+                );
+                if (!proceed) {
+                    await API.post("/payment/razorpay/cancel", { razorpayOrderId }).catch(() => {});
+                    dispatch(updateCartStocks((data.items || []).map((line) => ({
+                        id: String(line.productId),
+                        size: line.size,
+                        price: line.price,
+                        stock: items.find((i) => i._id === String(line.productId) && (i.size || "") === line.size)?.stock,
+                    }))));
+                    setPlacingOrder(false);
+                    return;
+                }
+            }
 
             await initiateRazorpayPayment({
                 orderId: data.orderId,
                 amount: data.amount,
                 currency: data.currency,
+                prefill: { name: user.name, email: user.email, contact: selectedAddress.phone },
                 onSuccess: async (response) => {
-                    const verifyRes = await API.post("/payment/razorpay/verify", response);
-                    dispatch(clearCart());
-                    navigate("/payment-success", { state: { orderId: verifyRes.data.orderId, invoiceNumber: verifyRes.data.invoiceNumber } });
+                    try {
+                        const verifyRes = await API.post("/payment/razorpay/verify", response);
+                        dispatch(clearCart());
+                        navigate("/payment-success", { state: { orderId: verifyRes.data.orderId, invoiceNumber: verifyRes.data.invoiceNumber } });
+                    } catch (err) {
+                        if (err.response?.status === 409) {
+                            dispatch(clearCart());
+                            dispatch(showAlert({ title: "Order Cancelled", message: apiErrorMessage(err) }));
+                        } else {
+                            // The payment went through; the server also confirms it via the Razorpay webhook
+                            dispatch(showAlert({
+                                title: "Payment Received",
+                                message: "Your payment was received but we could not confirm it just now. It will appear in your orders within a few minutes. Please do not pay again.",
+                            }));
+                        }
+                        navigate("/orders");
+                    } finally {
+                        setPlacingOrder(false);
+                    }
                 },
-                onFailure: (err) => {
-                    console.error("Razorpay payment failed:", err);
+                onDismiss: () => {
+                    API.post("/payment/razorpay/cancel", { razorpayOrderId }).catch(() => {});
+                    setPlacingOrder(false);
                 },
+                onFailure: (message) => setCheckoutError(message),
             });
         } catch (err) {
-            console.error("Checkout process failed:", err);
+            setCheckoutError(apiErrorMessage(err, "Could not start checkout. Please try again."));
+            setPlacingOrder(false);
         }
     };
 
@@ -481,7 +523,7 @@ export default function Cart() {
                                                     {item.quantity}
                                                 </span>
                                                 <button
-                                                    disabled={item.quantity >= (item.stock || 99999) || (item.stock !== undefined && item.stock === 0)}
+                                                    disabled={item.quantity >= Math.min(item.stock || 0, MAX_QTY_PER_LINE)}
                                                     onClick={() => dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity + 1 }))}
                                                     className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer h-full"
                                                     aria-label="Increase quantity"
@@ -831,11 +873,14 @@ export default function Cart() {
 
                             <button
                                 onClick={handleCheckout}
-                                disabled={hasStockIssues}
+                                disabled={hasStockIssues || placingOrder}
                                 className={`w-full py-[18px] text-[16px] mb-5 cursor-pointer rounded-xl font-bold transition-all ${hasStockIssues ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed' : 'btn-primary'}`}
                             >
-                                {hasStockIssues ? 'Update Cart to Proceed' : 'Proceed to Pay'}
+                                {hasStockIssues ? 'Update Cart to Proceed' : placingOrder ? 'Processing…' : 'Proceed to Pay'}
                             </button>
+                            {checkoutError && (
+                                <p role="alert" className="text-rose-500 text-[13px] font-bold -mt-3 mb-4 text-center">{checkoutError}</p>
+                            )}
 
                             {hasStockIssues && (
                                 <p className="text-[13px] text-rose-500 font-semibold text-center mb-4 bg-rose-50 dark:bg-rose-500/10 rounded-lg px-4 py-2.5">

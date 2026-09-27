@@ -21,6 +21,9 @@ export default function Profile() {
 
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
+    // false for Google-created accounts that never set a password
+    const [passwordSet, setPasswordSet] = useState(true);
     const [addresses, setAddresses] = useState([]);
     
     // Address form state
@@ -51,6 +54,7 @@ export default function Profile() {
                 const { data } = await API.get("/auth/profile");
                 setName(data.name || "");
                 setAddresses(data.addresses || []);
+                setPasswordSet(data.passwordSet !== false);
             } catch (err) {
                 console.error("Failed to load profile:", err);
                 setMessage({ type: "error", text: "Failed to load profile details." });
@@ -159,15 +163,23 @@ export default function Profile() {
                     setSaving(false);
                     return;
                 }
+                if (passwordSet && !currentPassword) {
+                    setMessage({ type: "error", text: "Enter your current password to set a new one." });
+                    setSaving(false);
+                    return;
+                }
                 payload.password = finalPassword;
+                payload.currentPassword = currentPassword;
             }
 
             const { data } = await API.put("/auth/profile", payload);
 
-            // Update Redux state and local storage
-            dispatch(loginSuccess({ token, user: { id: data._id, name: data.name, email: data.email, role: data.role } }));
-            setMessage({ type: "success", text: "Profile updated successfully!" });
-            setPassword(""); // Clear password field after successful update
+            // A password change signs out other sessions and returns a fresh token for this one
+            dispatch(loginSuccess({ token: data.token || token, user: { id: data._id, name: data.name, email: data.email, role: data.role } }));
+            setMessage({ type: "success", text: finalPassword ? "Password changed. Other devices have been signed out." : "Profile updated successfully!" });
+            if (finalPassword) setPasswordSet(true);
+            setPassword(""); // Clear password fields after successful update
+            setCurrentPassword("");
         } catch (err) {
             console.error("Profile update failed:", err);
             setMessage({ type: "error", text: err.response?.data?.message || "Failed to update profile." });
@@ -257,8 +269,24 @@ export default function Profile() {
                                         </div>
                                     </div>
 
+                                    {passwordSet && password && (
+                                        <div>
+                                            <label className={labelClass}>Current password</label>
+                                            <div className="relative">
+                                                <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                                                <input
+                                                    type="password"
+                                                    value={currentPassword}
+                                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                                    placeholder="Required to change your password"
+                                                    autoComplete="current-password"
+                                                    className={inputClass}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                     <div>
-                                        <label className={labelClass}>Password (leave blank to keep unchanged)</label>
+                                        <label className={labelClass}>{passwordSet ? "New password (leave blank to keep unchanged)" : "Set a password (optional)"}</label>
                                         <div className="relative">
                                             <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
                                             <input
@@ -266,6 +294,7 @@ export default function Profile() {
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 placeholder="Set or change password"
+                                                autoComplete="new-password"
                                                 className={inputClass}
                                             />
                                         </div>

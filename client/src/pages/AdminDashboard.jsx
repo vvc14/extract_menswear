@@ -38,15 +38,17 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [productsRes, usersRes, ordersRes] = await Promise.all([
+                const [productsRes, usersRes, ordersRes, orderStatsRes] = await Promise.all([
                     API.get("/products"),
                     API.get("/admin/users").catch(() => ({ data: [] })),
-                    API.get("/orders/admin").catch(() => ({ data: [] })),
+                    API.get("/orders/admin", { params: { page: 1, limit: 5 } }).catch(() => ({ data: { orders: [] } })),
+                    API.get("/orders/admin/stats").catch(() => ({ data: null })),
                 ]);
                 
                 const products = productsRes.data;
                 const users = usersRes.data;
-                const orders = ordersRes.data;
+                const recentOrders = Array.isArray(ordersRes.data) ? ordersRes.data.slice(0, 5) : (ordersRes.data?.orders || []);
+                const orderStats = orderStatsRes.data;
 
                 setStats({
                     totalProducts: products.length,
@@ -55,13 +57,11 @@ export default function AdminDashboard() {
                     recentProducts: products.slice(0, 5),
                 });
                 
-                const activeOrders = orders.filter((o) => !["failed", "cancelled", "returned", "created"].includes(o.status));
-                const revenue = activeOrders.reduce((sum, o) => sum + (o.totalAmount || 0) + (o.shipping || 0), 0);
-
+                // Revenue is aggregated on the server (same definition as the Orders page)
                 setOrdersStats({
-                    totalOrders: orders.filter(o => o.status !== "created").length,
-                    totalRevenue: revenue,
-                    recentOrders: orders.filter(o => o.status !== "created").slice(0, 5),
+                    totalOrders: orderStats?.totalOrders || 0,
+                    totalRevenue: orderStats?.revenue || 0,
+                    recentOrders,
                 });
                 setUserCount(users.length || 0);
             } catch (err) {
