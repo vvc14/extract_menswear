@@ -5,6 +5,7 @@ const adminSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true },
     role: { type: String, default: "admin" },
+    tokenVersion: { type: Number, default: 0 },
 });
 
 adminSchema.pre("save", async function (next) {

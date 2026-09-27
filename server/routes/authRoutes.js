@@ -1,31 +1,30 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp, adminGoogleLogin, sendForgotPasswordOtp, resetPassword } from "../controllers/authController.js";
 import { userAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-// Email check (unified flow)
-router.post("/check-email", checkEmail);
+// Strict limit only on credential / OTP endpoints (not on profile reads)
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many attempts, please try again later." },
+});
 
-// OTP email verification
-router.post("/send-otp", sendOtp);
-router.post("/verify-otp", verifyOtp);
+router.post("/check-email", authLimiter, checkEmail);
+router.post("/send-otp", authLimiter, sendOtp);
+router.post("/verify-otp", authLimiter, verifyOtp);
+router.post("/forgot-password-send-otp", authLimiter, sendForgotPasswordOtp);
+router.post("/forgot-password-reset", authLimiter, resetPassword);
+router.post("/google", authLimiter, googleLogin);
+router.post("/admin-login", authLimiter, adminLogin);
+router.post("/admin-google", authLimiter, adminGoogleLogin);
+router.post("/register", authLimiter, userRegister);
+router.post("/login", authLimiter, userLogin);
 
-// Forgot Password / Password Reset
-router.post("/forgot-password-send-otp", sendForgotPasswordOtp);
-router.post("/forgot-password-reset", resetPassword);
-
-// Google sign-in
-router.post("/google", googleLogin);
-
-
-// Admin
-router.post("/admin-login", adminLogin);
-router.post("/admin-google", adminGoogleLogin);
-
-// User
-router.post("/register", userRegister);
-router.post("/login", userLogin);
 router.get("/profile", userAuth, getProfile);
 router.put("/profile", userAuth, updateProfile);
 

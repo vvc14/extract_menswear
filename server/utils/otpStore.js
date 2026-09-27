@@ -1,64 +1,60 @@
-/**
- * In-memory OTP store with auto-expiry.
- * For production, consider using Redis for multi-instance support.
- */
+import crypto from "crypto";
+import Otp from "../models/Otp.js";
 
-const store = new Map();
+// OTPs live in MongoDB (hashed) so they survive restarts and work across instances.
+// Signup and password-reset codes are stored under separate keys.
 
 const OTP_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_ATTEMPTS = 5;
 const COOLDOWN_MS = 60 * 1000; // 1 minute between resends
 
+const keyFor = (email, purpose) => `${purpose}:${email.toLowerCase().trim()}`;
+const hashOtp = (otp) => crypto.createHmac("sha256", process.env.JWT_SECRET).update(String(otp)).digest("hex");
+
 export function generateOtp() {
-    return String(Math.floor(100000 + Math.random() * 900000)); // 6-digit
+    return String(crypto.randomInt(100000, 1000000)); // 6-digit, CSPRNG
 }
 
-export function saveOtp(email, otp) {
-    const key = email.toLowerCase().trim();
-    const existing = store.get(key);
-
-    // Enforce cooldown to prevent spam
-    if (existing && Date.now() - existing.createdAt < COOLDOWN_MS) {
+export async function saveOtp(email, otp, purpose) {
+    const key = keyFor(email, purpose);
+    const existing = await Otp.findOne({ key }).lean();
+    if (existing && existing.expiresAt > new Date() && Date.now() - new Date(existing.createdAt).getTime() < COOLDOWN_MS) {
         return { error: "Please wait before requesting another code" };
     }
-
-    // Clear any existing timer
-    if (existing?.timer) clearTimeout(existing.timer);
-
-    const timer = setTimeout(() => store.delete(key), OTP_EXPIRY_MS);
-
-    store.set(key, {
-        otp,
-        attempts: 0,
-        createdAt: Date.now(),
-        timer,
-    });
-
+    await Otp.findOneAndUpdate(
+        { key },
+        { key, otpHash: hashOtp(otp), attempts: 0, createdAt: new Date(), expiresAt: new Date(Date.now() + OTP_EXPIRY_MS) },
+        { upsert: true }
+    );
     return { success: true };
 }
 
-export function verifyOtp(email, otp) {
-    const key = email.toLowerCase().trim();
-    const entry = store.get(key);
+export async function verifyOtp(email, otp, purpose) {
+    const key = keyFor(email, purpose);
+    const entry = await Otp.findOne({ key });
 
-    if (!entry) {
+    if (!entry || entry.expiresAt <= new Date()) {
         return { valid: false, message: "Verification code expired. Please request a new one." };
     }
-
     if (entry.attempts >= MAX_ATTEMPTS) {
-        store.delete(key);
-        if (entry.timer) clearTimeout(entry.timer);
+        await Otp.deleteOne({ _id: entry._id });
         return { valid: false, message: "Too many attempts. Please request a new code." };
     }
 
-    entry.attempts += 1;
+    // Count the attempt atomically before comparing
+    await Otp.updateOne({ _id: entry._id }, { $inc: { attempts: 1 } });
+    const attemptsUsed = entry.attempts + 1;
 
-    if (entry.otp !== otp) {
-        return { valid: false, message: `Invalid code. ${MAX_ATTEMPTS - entry.attempts} attempts remaining.` };
+    const expected = Buffer.from(entry.otpHash, "hex");
+    const given = Buffer.from(hashOtp(String(otp ?? "").trim()), "hex");
+    if (expected.length !== given.length || !crypto.timingSafeEqual(expected, given)) {
+        return { valid: false, message: `Invalid code. ${Math.max(0, MAX_ATTEMPTS - attemptsUsed)} attempts remaining.` };
     }
 
-    // OTP is valid — clean up
-    if (entry.timer) clearTimeout(entry.timer);
-    store.delete(key);
+    await Otp.deleteOne({ _id: entry._id });
     return { valid: true };
+}
+
+export async function clearOtp(email, purpose) {
+    await Otp.deleteOne({ key: keyFor(email, purpose) });
 }
