@@ -1,35 +1,32 @@
 import Contact from "../models/Contact.js";
-import { sendEmail, isEmailConfigured } from "../utils/emailTransporter.js";
+import { handleError } from "../utils/httpError.js";
+import { notifyAdmin } from "../services/orderService.js";
+
+const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
 
 export const submitContact = async (req, res) => {
     try {
-        const { name, email, message } = req.body;
+        const name = typeof req.body.name === "string" ? req.body.name.trim() : "";
+        const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+        const message = typeof req.body.message === "string" ? req.body.message.trim() : "";
         if (!name || !email || !message) {
             return res.status(400).json({ message: "All fields are required" });
         }
-
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
+        if (name.length > 100 || email.length > 200 || message.length > 5000) {
+            return res.status(400).json({ message: "Your message is too long" });
+        }
+        if (!EMAIL_RE.test(email)) {
             return res.status(400).json({ message: "Please enter a valid email address (e.g., john@example.com)" });
         }
 
         const contact = await Contact.create({ name, email, message });
-
-        // Send email using centralized transporter
-        if (isEmailConfigured()) {
-            sendEmail({
-                to: "janassistai@gmail.com",
-                subject: `New Contact Request from ${name}`,
-                text: `You have received a new message from your website contact form.\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
-                replyTo: email,
-            }).catch(err => console.error("Background email error:", err));
-        } else {
-            console.warn("EMAIL_USER and EMAIL_PASS are not set in .env. Email was not sent.");
-        }
-
+        notifyAdmin(
+            `New Contact Request from ${name.replace(/[\r\n]+/g, " ")}`,
+            `You have received a new message from your website contact form.\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
+            email
+        );
         res.status(201).json({ message: "Message sent successfully", id: contact._id });
     } catch (error) {
-        console.error("Error submitting contact:", error);
-        res.status(500).json({ message: "Failed to process request. Please check email configuration." });
+        handleError(res, error, "Submit contact");
     }
 };

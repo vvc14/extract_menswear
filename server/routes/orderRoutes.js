@@ -1,15 +1,26 @@
 import { Router } from "express";
-import { userAuth } from "../middleware/auth.js";
-import authMiddleware from "../middleware/auth.js";
-import { getUserOrders, getOrderById, requestReturn, requestExchange, getAllOrders, updateOrderStatus, cancelOrder } from "../controllers/orderController.js";
+import authMiddleware, { userAuth } from "../middleware/auth.js";
+import {
+    getUserOrders,
+    getOrderById,
+    requestReturn,
+    requestExchange,
+    getAllOrders,
+    getOrderStats,
+    updateOrderStatus,
+    cancelOrder,
+    retryRefund,
+} from "../controllers/orderController.js";
 
 const router = Router();
 
-// Admin routes (must come before /:id)
+// Admin routes (must come before /:id). authMiddleware enforces the admin role.
 router.get("/admin", authMiddleware, getAllOrders);
+router.get("/admin/stats", authMiddleware, getOrderStats);
 router.put("/:id/status", authMiddleware, updateOrderStatus);
+router.post("/:id/refund", authMiddleware, retryRefund);
 
-// User routes
+// Customer routes (scoped to the signed-in user)
 router.get("/", userAuth, getUserOrders);
 router.get("/:id", userAuth, getOrderById);
 router.post("/:id/cancel", userAuth, cancelOrder);

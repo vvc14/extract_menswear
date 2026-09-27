@@ -11,12 +11,15 @@ export default [
                 console: "readonly",
                 setTimeout: "readonly",
                 clearTimeout: "readonly",
+                setInterval: "readonly",
+                clearInterval: "readonly",
+                URL: "readonly",
                 Buffer: "readonly",
                 __dirname: "readonly"
             }
         },
         rules: {
-            "no-unused-vars": "warn",
+            "no-unused-vars": "error",
             "no-undef": "error"
         }
     }

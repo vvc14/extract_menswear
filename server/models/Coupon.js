@@ -17,6 +17,7 @@ const couponSchema = new mongoose.Schema(
         discountValue: {
             type: Number,
             required: true,
+            min: 0,
         },
         minOrderValue: {
             type: Number,
@@ -37,6 +38,11 @@ const couponSchema = new mongoose.Schema(
         expiryDate: {
             type: Date,
             default: null, // null means never expires
+        },
+        // Listed on the public coupons endpoint / cart suggestions when true
+        isPublic: {
+            type: Boolean,
+            default: true,
         },
         oncePerUser: {
             type: Boolean,
