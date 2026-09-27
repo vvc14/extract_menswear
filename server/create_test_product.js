@@ -2,6 +2,13 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Product from './models/Product.js';
 
+// Safety: this script writes to whatever database MONGO_URI points at
+if (process.env.NODE_ENV === "production" && !process.argv.includes("--force")) {
+    console.error("Refusing to run against production. Re-run with --force if you really mean it.");
+    process.exit(1);
+}
+
+
 dotenv.config();
 
 async function main() {

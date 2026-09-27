@@ -14,8 +14,12 @@ const resetAdmin = async () => {
     }
 
     // Create a new secure admin from environment variables
-    const newUsername = process.env.ADMIN_USERNAME || "extractadmin";
-    const newPassword = process.env.ADMIN_PASSWORD || "Extract@2026!Secure";
+    const newUsername = process.env.ADMIN_USERNAME;
+    const newPassword = process.env.ADMIN_PASSWORD;
+    if (!newUsername || !newPassword || newPassword.length < 12) {
+        console.error("Set ADMIN_USERNAME and ADMIN_PASSWORD (12+ characters) in the environment to create an admin.");
+        process.exit(1);
+    }
 
     const existing = await Admin.findOne({ username: newUsername });
     if (existing) {
@@ -23,8 +27,6 @@ const resetAdmin = async () => {
     } else {
         await Admin.create({ username: newUsername, password: newPassword, role: "admin" });
         console.log(`✅ New admin created — username: ${newUsername}`);
-        console.log(`   Password: ${newPassword}`);
-        console.log(`   ⚠️  CHANGE THIS PASSWORD after first login!`);
     }
 
     // List all admins for verification
