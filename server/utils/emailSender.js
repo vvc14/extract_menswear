@@ -1,30 +1,25 @@
 import { sendEmail } from "./emailTransporter.js";
 
 /**
- * Send OTP verification email
+ * Send OTP verification email.
+ * Kept deliberately simple: light background, one short message, a plain-text part,
+ * no links or images — the pattern mailbox providers expect from verification codes.
  */
 export async function sendOtpEmail(toEmail, otp) {
     const html = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 30px; background: #0f172a; border-radius: 16px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Extract Menswear</h1>
-                <p style="color: #94a3b8; font-size: 14px; margin-top: 6px;">Premium Fashion</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 30px; text-align: center;">
-                <p style="color: #e2e8f0; font-size: 16px; margin: 0 0 8px;">Your verification code is</p>
-                <div style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #3b82f6; padding: 16px 0; font-family: monospace;">${otp}</div>
-                <p style="color: #64748b; font-size: 13px; margin: 12px 0 0;">This code expires in <strong style="color: #94a3b8;">10 minutes</strong></p>
-            </div>
-            <p style="color: #475569; font-size: 12px; text-align: center; margin-top: 24px; line-height: 1.5;">
-                If you didn't request this code, you can safely ignore this email.
-            </p>
+        <div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#ffffff;color:#0f172a">
+            <p style="font-size:18px;font-weight:bold;margin:0 0 20px">Extract Menswear</p>
+            <p style="font-size:15px;line-height:1.6;margin:0 0 16px">Use this code to verify your email address:</p>
+            <p style="font-size:32px;font-weight:bold;letter-spacing:6px;margin:0 0 16px;font-family:'Courier New',monospace">${otp}</p>
+            <p style="font-size:14px;line-height:1.6;color:#475569;margin:0 0 8px">The code expires in 10 minutes.</p>
+            <p style="font-size:13px;line-height:1.6;color:#64748b;margin:24px 0 0">If you didn't request this, you can ignore this email. Someone may have typed your address by mistake.</p>
         </div>
     `;
 
     await sendEmail({
         to: toEmail,
-        subject: "Your Verification Code — Extract Menswear",
+        subject: `${otp} is your Extract Menswear verification code`,
         html,
-        text: `Extract Menswear — Verification Code\n\nYour verification code is: ${otp}\n\nThis code expires in 10 minutes.\n\nIf you didn't request this code, you can safely ignore this email.`,
+        text: `Extract Menswear\n\nUse this code to verify your email address: ${otp}\n\nThe code expires in 10 minutes.\n\nIf you didn't request this, you can ignore this email.`,
     });
 }

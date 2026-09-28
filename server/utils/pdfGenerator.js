@@ -8,7 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const generateInvoicePDFBuffer = async (order) => {
-    const doc = new jsPDF();
+    // compress keeps the attachment small (large attachments hurt deliverability)
+    const doc = new jsPDF({ compress: true });
     const pw = doc.internal.pageSize.getWidth();   // 210
     const ph = doc.internal.pageSize.getHeight();   // 297
 
@@ -53,7 +54,7 @@ export const generateInvoicePDFBuffer = async (order) => {
 
     if (logoBase64) {
         try {
-            doc.addImage(logoBase64, "PNG", 12, 8, 18, 18);
+            doc.addImage(logoBase64, "PNG", 12, 8, 18, 18, undefined, "FAST");
             doc.setFontSize(7);
             doc.setFont("helvetica", "normal");
             doc.setTextColor(212, 175, 55);

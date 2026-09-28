@@ -75,3 +75,44 @@ export const buildStatusEmailHtml = (order, title, paragraphs) => {
                 <p style="margin:4px 0 0;font-size:13px;color:#64748b">Order total: <strong style="color:#0f172a">${inr((order.totalAmount || 0) + (order.shipping || 0))}</strong></p>
             </div>`);
 };
+
+// ─── Plain-text versions (sent alongside the HTML; improves deliverability and accessibility) ───
+const rs = (n) => `Rs. ${Number(n || 0).toLocaleString("en-IN")}`;
+
+export const buildOrderConfirmationText = (order) => {
+    const shipping = order.shipping || 0;
+    const discount = order.discountAmount || 0;
+    const lines = order.items.map((i) => `- ${i.name}${i.size ? ` (${i.size})` : ""} x${i.quantity}: ${rs(i.price * i.quantity)}`);
+    return [
+        `Hi ${order.userName || "there"},`,
+        "",
+        "Thank you for your order. Your payment was successful.",
+        "",
+        `Invoice: ${order.invoiceNumber || "-"}`,
+        `Payment ID: ${order.razorpayPaymentId || "-"}`,
+        "",
+        ...lines,
+        "",
+        `Subtotal: ${rs(order.totalAmount + discount)}`,
+        discount ? `Discount (${order.couponCode}): -${rs(discount)}` : null,
+        `Shipping: ${shipping === 0 ? "FREE" : rs(shipping)}`,
+        `Total paid: ${rs(order.totalAmount + shipping)}`,
+        "",
+        "Your invoice is attached. Returns and exchanges are available within 7 days of delivery.",
+        "",
+        "Extract Menswear",
+    ].filter((l) => l !== null).join("\n");
+};
+
+export const buildStatusEmailText = (order, title, paragraphs) =>
+    [
+        title,
+        "",
+        ...paragraphs.filter(Boolean),
+        "",
+        `Invoice: ${order.invoiceNumber || "-"}`,
+        `Order total: ${rs((order.totalAmount || 0) + (order.shipping || 0))}`,
+        "",
+        "Extract Menswear",
+    ].join("\n");
+

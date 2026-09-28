@@ -5,7 +5,7 @@ import Counter from "../models/Counter.js";
 import razorpayInstance from "../config/razorpay.js";
 import { reserveItems, releaseItems, releaseLine } from "../utils/inventory.js";
 import { sendEmail, isEmailConfigured } from "../utils/emailTransporter.js";
-import { buildOrderConfirmationHtml, buildStatusEmailHtml } from "../utils/emailTemplates.js";
+import { buildOrderConfirmationHtml, buildOrderConfirmationText, buildStatusEmailHtml, buildStatusEmailText } from "../utils/emailTemplates.js";
 import { generateInvoicePDFBuffer } from "../utils/pdfGenerator.js";
 import { httpError } from "../utils/httpError.js";
 
@@ -16,7 +16,8 @@ export const RETURN_WINDOW_DAYS = 7;
 export const toPaise = (rupees) => Math.round(Number(rupees) * 100);
 export const orderChargeRupees = (order) => (order.totalAmount || 0) + (order.shipping || 0);
 
-export const adminNotifyEmail = () => process.env.ADMIN_NOTIFY_EMAIL || process.env.EMAIL_USER || null;
+export const adminNotifyEmail = () =>
+    process.env.ADMIN_NOTIFY_EMAIL || process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM || process.env.EMAIL_USER || null;
 
 const log = (event, data) => console.log(JSON.stringify({ ts: new Date().toISOString(), event, ...data }));
 
@@ -187,6 +188,7 @@ export const notifyCustomer = (order, status, extra = {}) => {
             `If you have any issues, you can request a return or exchange within ${RETURN_WINDOW_DAYS} days from your Orders page.`,
         ]],
         returned: [`Return Update: Order ${inv}`, "Return Approved", [
+                text: buildOrderConfirmationText(order),
             `Hi ${name}, your return request for order ${inv} has been approved.`,
             refundLine,
         ]],
@@ -209,7 +211,12 @@ export const notifyCustomer = (order, status, extra = {}) => {
     const tpl = templates[status];
     if (!tpl) return;
     const [subject, title, paragraphs] = tpl;
-    safeSend({ to: order.userEmail, subject, html: buildStatusEmailHtml(order, title, paragraphs) }, `Status (${status})`);
+    safeSend({
+        to: order.userEmail,
+        subject,
+        html: buildStatusEmailHtml(order, title, paragraphs),
+        text: buildStatusEmailText(order, title, paragraphs),
+    }, `Status (${status})`);
 };
 
 export const notifyAdmin = (subject, text, replyTo) => {

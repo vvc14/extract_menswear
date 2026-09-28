@@ -21,6 +21,11 @@ const { default: app } = await import("./app.js");
 const { default: connectDB } = await import("./config/db.js");
 const { expireStaleOrders } = await import("./services/orderService.js");
 const { runStartupMigrations } = await import("./utils/startupMigrations.js");
+const { describeEmailSetup } = await import("./utils/emailTransporter.js");
+
+// Explain email settings that are known to break delivery or land in spam
+const emailSetup = describeEmailSetup();
+for (const warning of emailSetup.warnings) console.warn(`📧 ${warning}`);
 
 const PORT = process.env.PORT || 5000;
 

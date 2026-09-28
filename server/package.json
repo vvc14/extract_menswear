@@ -6,7 +6,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node tests/e2e.test.mjs",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "email:test": "node scripts/emailTest.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
