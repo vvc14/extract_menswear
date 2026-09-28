@@ -21,7 +21,7 @@ await mongoose.connect(mongo.getUri());
 
 const { default: app } = await imp("app.js");
 const { runStartupMigrations } = await imp("utils/startupMigrations.js");
-const { expireStaleOrders } = await imp("services/orderService.js");
+const { expireStaleOrders, failUnpaidOrder } = await imp("services/orderService.js");
 const { signUserToken, signAdminToken, signOtpToken } = await imp("utils/tokens.js");
 const { default: razorpay } = await imp("config/razorpay.js");
 const { default: User } = await imp("models/User.js");
@@ -50,8 +50,14 @@ razorpay.payments.fetch = async (id) => {
     return { id, ...p };
 };
 razorpay.payments.capture = async (id) => { payments.get(id).status = "captured"; return {}; };
+let refundTimesOutAfterCreating = false;
+razorpay.payments.fetchMultipleRefund = async (paymentId) => ({ items: refunds.filter((r) => r.payment_id === paymentId) });
 razorpay.payments.refund = async (paymentId, { amount }) => {
     if (refundShouldFail) throw { error: { description: "Gateway down" } };
+    if (refundTimesOutAfterCreating) {
+        refunds.push({ id: `rfnd_${refunds.length + 1}`, payment_id: paymentId, amount, status: "processed" });
+        throw new Error("ETIMEDOUT");
+    }
     const r = { id: `rfnd_${refunds.length + 1}`, payment_id: paymentId, amount, status: "processed" };
     refunds.push(r);
     return r;
@@ -285,6 +291,27 @@ await test("late payment after sell-out is cancelled and refunded in full", asyn
     assert.equal(await stockOf(p._id, "S"), 0);
 });
 
+await test("order expiring at the same moment it is paid still ends up paid", async () => {
+    const u = await makeUser();
+    const p = await makeProduct();
+    const res = await checkout(u.auth, [{ productId: p._id, size: "S", quantity: 1 }]);
+    const order = await Order.findOne({ razorpayOrderId: res.body.orderId });
+    const body = pay(res.body.orderId);
+    // While the server is talking to Razorpay, the expiry job fails the order and frees its stock
+    const realFetch = razorpay.payments.fetch;
+    let raced = false;
+    razorpay.payments.fetch = async (id) => {
+        if (!raced) { raced = true; await failUnpaidOrder(order._id, "expired", "test"); }
+        return realFetch(id);
+    };
+    const v = await request(app).post("/api/payment/razorpay/verify").send(body);
+    razorpay.payments.fetch = realFetch;
+    assert.equal(v.status, 200, JSON.stringify(v.body));
+    assert.equal(v.body.status, "paid");
+    assert.equal((await Order.findById(order._id)).status, "paid");
+    assert.equal(await stockOf(p._id, "S"), 1, "stock taken exactly once");
+});
+
 console.log("\nCoupons");
 await test("usage limit holds under concurrency; failure releases the use", async () => {
     await Coupon.create({ code: "ONE", discountType: "fixed", discountValue: 100, usageLimit: 1 });
@@ -416,6 +443,32 @@ await test("unpaid order cannot be admin-cancelled into phantom stock", async ()
     assert.equal(await stockOf(p._id, "M"), 5);
     assert.equal((await request(app).put(`/api/orders/${order._id}/status`).set(adminAuth).send({ status: "failed" })).status, 409);
     assert.equal(await stockOf(p._id, "M"), 5);
+});
+
+await test("parcel returned to origin restocks and refunds", async () => {
+    const u = await makeUser();
+    const p = await makeProduct();
+    const order = await placePaidOrder(u, [{ productId: p._id, size: "M", quantity: 2 }]);
+    const put = (status) => request(app).put(`/api/orders/${order._id}/status`).set(adminAuth).send({ status });
+    assert.equal((await put("shipped")).status, 200);
+    const before = refunds.length;
+    assert.equal((await put("returned")).status, 200);
+    assert.equal(await stockOf(p._id, "M"), 5);
+    assert.equal(refunds.length, before + 1);
+});
+
+await test("retrying a refund that timed out but succeeded does not refund twice", async () => {
+    const u = await makeUser();
+    const p = await makeProduct();
+    const order = await placePaidOrder(u, [{ productId: p._id, size: "M", quantity: 1 }]);
+    refundTimesOutAfterCreating = true;
+    await request(app).put(`/api/orders/${order._id}/status`).set(adminAuth).send({ status: "cancelled" });
+    refundTimesOutAfterCreating = false;
+    assert.equal((await Order.findById(order._id)).refund.status, "failed");
+    const before = refunds.length;
+    assert.equal((await request(app).post(`/api/orders/${order._id}/refund`).set(adminAuth)).status, 200);
+    assert.equal(refunds.length, before, "no second refund created");
+    assert.equal((await Order.findById(order._id)).refund.status, "processed");
 });
 
 console.log("\nPrivacy (IDOR)");

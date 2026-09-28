@@ -21,7 +21,8 @@ const REVENUE_STATUSES = ["paid", "shipped", "delivered", "return-requested", "e
 const ADMIN_TRANSITIONS = {
     created: ["failed"],
     paid: ["shipped", "cancelled"],
-    shipped: ["delivered"],
+    // "returned" from shipped = parcel came back to us undelivered (RTO): restock and refund
+    shipped: ["delivered", "returned"],
     "return-requested": ["returned", "delivered"],
     "exchange-requested": ["exchanged", "delivered"],
 };

@@ -112,6 +112,33 @@ export const issueRefund = async (orderId, reason, actor = "system") => {
     );
     if (!claimed) return { skipped: "already-refunded", refund: current.refund };
 
+    // A previous attempt may have timed out after Razorpay actually created the refund:
+    // reconcile with the gateway before creating another one.
+    if (current.refund?.status === "failed") {
+        try {
+            const existing = await razorpayInstance.payments.fetchMultipleRefund(claimed.razorpayPaymentId, { count: 10 });
+            const found = (existing?.items || []).find((r) => r.status !== "failed");
+            if (found) {
+                const status = found.status === "processed" ? "processed" : "pending";
+                await Order.updateOne(
+                    { _id: orderId },
+                    {
+                        $set: {
+                            "refund.razorpayRefundId": found.id,
+                            "refund.status": status,
+                            "refund.error": null,
+                            ...(status === "processed" ? { "refund.processedAt": new Date() } : {}),
+                        },
+                        $push: { statusHistory: { status: `refund-${status}`, by: actor, note: `Found existing refund ${found.id}` } },
+                    }
+                );
+                return { refundId: found.id, status, amount };
+            }
+        } catch (err) {
+            console.error(`Could not check existing refunds for order ${orderId}:`, err?.error?.description || err.message);
+        }
+    }
+
     try {
         const refund = await razorpayInstance.payments.refund(claimed.razorpayPaymentId, {
             amount: toPaise(amount),
@@ -161,6 +188,7 @@ export const sendOrderConfirmation = (order) => {
                 to: order.userEmail,
                 subject: `Order Confirmed — ${order.invoiceNumber}`,
                 html: buildOrderConfirmationHtml(order),
+                text: buildOrderConfirmationText(order),
                 attachments: [{ filename: `Invoice_${order.invoiceNumber}.pdf`, content: pdfBuffer, contentType: "application/pdf" }],
             });
         } catch (err) {
@@ -188,7 +216,6 @@ export const notifyCustomer = (order, status, extra = {}) => {
             `If you have any issues, you can request a return or exchange within ${RETURN_WINDOW_DAYS} days from your Orders page.`,
         ]],
         returned: [`Return Update: Order ${inv}`, "Return Approved", [
-                text: buildOrderConfirmationText(order),
             `Hi ${name}, your return request for order ${inv} has been approved.`,
             refundLine,
         ]],
@@ -246,7 +273,7 @@ const confirmPaymentWithGateway = async (order, razorpayPaymentId) => {
     }
 };
 
-export const markOrderPaid = async ({ razorpayOrderId, razorpayPaymentId, source }) => {
+export const markOrderPaid = async ({ razorpayOrderId, razorpayPaymentId, source }, attempt = 1) => {
     const order = await Order.findOne({ razorpayOrderId });
     if (!order) throw httpError(404, "Order not found");
 
@@ -300,9 +327,15 @@ export const markOrderPaid = async ({ razorpayOrderId, razorpayPaymentId, source
     );
 
     if (!paid) {
-        // Lost a race with a concurrent confirmation: undo our reservation
+        // The status changed under us: undo our reservation, then look again.
         if (reservedNow) await releaseItems(order.items.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })));
-        return { order: await Order.findById(order._id), alreadyProcessed: true };
+        const latest = await Order.findById(order._id);
+        // The expiry job or a closed checkout failed the order at the same moment it was paid:
+        // the money is captured, so process it again as a late payment (re-reserves stock).
+        if (latest && ["created", "failed"].includes(latest.status) && attempt < 3) {
+            return markOrderPaid({ razorpayOrderId, razorpayPaymentId, source }, attempt + 1);
+        }
+        return { order: latest, alreadyProcessed: true };
     }
 
     // Coupon use: already held unless the reservation expired; honour the discount either way

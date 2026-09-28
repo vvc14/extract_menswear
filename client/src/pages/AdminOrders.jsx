@@ -140,7 +140,10 @@ export default function AdminOrders() {
                 { label: "Mark Shipped", value: "shipped", icon: HiOutlineTruck },
                 { label: "Cancel & Refund", value: "cancelled", icon: HiOutlineX, danger: true },
             ];
-            case "shipped": return [{ label: "Mark Delivered", value: "delivered", icon: HiOutlineCheck }];
+            case "shipped": return [
+                { label: "Mark Delivered", value: "delivered", icon: HiOutlineCheck },
+                { label: "Returned to Origin & Refund", value: "returned", icon: HiOutlineReply, danger: true },
+            ];
             case "return-requested": return [
                 { label: "Approve Return & Refund", value: "returned", icon: HiOutlineCheck },
                 { label: "Reject", value: "delivered", icon: HiOutlineX, danger: true },
