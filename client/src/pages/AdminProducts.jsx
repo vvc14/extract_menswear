@@ -242,29 +242,29 @@ export default function AdminProducts() {
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", marginBottom: "32px" }}>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 style={{ fontSize: "36px", fontWeight: 800, letterSpacing: "-0.025em", color: "#0f172a", marginBottom: "8px" }}>Products</h1>
+                    <h1 className="text-[28px] sm:text-[36px]" style={{ fontWeight: 800, letterSpacing: "-0.025em", color: "#0f172a", marginBottom: "8px" }}>Products</h1>
                     <p style={{ fontSize: "16px", color: "#64748b" }}>{products.length} product{products.length !== 1 ? "s" : ""} in catalog</p>
                 </div>
-                <button onClick={openAdd} className="flex items-center gap-2 bg-gradient-to-r from-primary to-blue-600 text-white text-[15px] font-bold px-8 py-4 rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all shrink-0">
+                <button onClick={openAdd} className="flex items-center gap-2 bg-gradient-to-r from-primary to-blue-600 text-white text-[15px] font-bold px-5 sm:px-8 py-3 sm:py-4 rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all shrink-0">
                     <HiOutlinePlus className="w-5 h-5" /> Add Product
                 </button>
             </div>
 
             {/* Search & Filter bar */}
-            <div style={{ display: "flex", flexDirection: "row", gap: "16px", marginBottom: "32px" }}>
-                <div className="relative flex-1">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <div className="relative flex-1 min-w-0">
                     <HiOutlineSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                         type="text" placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)}
                         className="w-full bg-white border border-slate-200 pl-11 pr-4 py-3 text-[16px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400"
                     />
                 </div>
-                <div className="flex gap-1.5 bg-white border border-slate-200 rounded-xl p-1.5">
+                <div className="flex gap-1.5 bg-white border border-slate-200 rounded-xl p-1.5 self-start sm:self-auto">
                     {["all", "shirt", "trouser"].map((cat) => (
                         <button key={cat} onClick={() => setFilterCat(cat)}
-                            className={`px-5 py-2.5 text-[14px] font-bold rounded-lg capitalize transition-all ${filterCat === cat ? "bg-primary text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+                            className={`px-4 sm:px-5 py-2.5 text-[14px] font-bold rounded-lg capitalize transition-all ${filterCat === cat ? "bg-primary text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
                             {cat === "all" ? "All" : cat + "s"}
                         </button>
                     ))}
@@ -411,12 +411,12 @@ export default function AdminProducts() {
                                                     handleAddCustomSize();
                                                 }
                                             }}
-                                            className="flex-1 bg-white border border-slate-200 px-4 py-2.5 text-[15px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300"
+                                            className="flex-1 min-w-0 bg-white border border-slate-200 px-4 py-2.5 text-[15px] text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300"
                                         />
                                         <button
                                             type="button"
                                             onClick={handleAddCustomSize}
-                                            className="bg-slate-900 hover:bg-slate-800 text-white text-[14px] font-bold px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
+                                            className="shrink-0 whitespace-nowrap bg-slate-900 hover:bg-slate-800 text-white text-[14px] font-bold px-4 sm:px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
                                         >
                                             Add Size
                                         </button>
@@ -492,7 +492,7 @@ export default function AdminProducts() {
                                     </div>
                                     <p className="text-[12px] text-slate-400 mt-2">Or enter image URL below and click Add</p>
                                     <div className="flex gap-2 mt-2">
-                                        <input type="url" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://... image URL" className={inputClass + " flex-1"} />
+                                        <input type="url" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://... image URL" className={inputClass + " flex-1 min-w-0"} />
                                         <button type="button" onClick={() => {
                                             if (form.imageUrl && form.imageUrl.trim() !== "") {
                                                 setForm({ ...form, existingImages: [...(form.existingImages || []), form.imageUrl.trim()], imageUrl: "" });
@@ -518,7 +518,7 @@ export default function AdminProducts() {
                                 </div>
                                 <div className="md:col-span-2 flex items-center gap-3 pt-3">
                                     <button type="submit" disabled={submitting}
-                                        className="bg-gradient-to-r from-primary to-blue-600 text-white text-[16px] font-bold px-12 py-4.5 rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50">
+                                        className="bg-gradient-to-r from-primary to-blue-600 text-white text-[16px] font-bold px-8 sm:px-12 py-4 rounded-xl whitespace-nowrap hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50">
                                         {submitting ? "Saving..." : editing ? "Update Product" : "Add Product"}
                                     </button>
                                     <button type="button" onClick={() => setShowForm(false)} className="text-[16px] font-semibold text-slate-500 px-8 py-4.5 rounded-xl hover:bg-slate-100 transition-colors">
@@ -540,7 +540,7 @@ export default function AdminProducts() {
                 <AnimatePresence>
                     {showManage && (
                         <motion.div key="manage-panel" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} style={{ overflow: "hidden", marginTop: "8px" }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", padding: "32px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "20px" }}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-[60px] p-5 sm:p-8" style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "20px" }}>
                                 {["shirt", "trouser"].map((cat) => (
                                     <div key={cat} style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
                                         <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0f172a", textTransform: "capitalize", borderBottom: "1px solid #f1f5f9", paddingBottom: "16px", margin: 0 }}>{cat} Options</h3>
@@ -635,7 +635,7 @@ export default function AdminProducts() {
 
             {/* Products table */}
             <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden overflow-x-auto">
-                <table className="w-full text-[16px] min-w-[950px]">
+                <table className="w-full text-[16px] md:min-w-[950px]">
                     <thead>
                         <tr className="border-b border-slate-100">
                             <th className="px-4 py-4 w-10">
@@ -646,8 +646,8 @@ export default function AdminProducts() {
                             <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Category</th>
                             <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Fabric</th>
                             <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Stock</th>
-                            <th className="text-right px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Price</th>
-                            <th className="text-right px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider" style={{ width: 110 }}>Actions</th>
+                            <th className="text-right px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Price</th>
+                            <th className="text-right px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell" style={{ width: 110 }}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -657,14 +657,31 @@ export default function AdminProducts() {
                                     <input type="checkbox" checked={selectedIds.includes(p._id)} onChange={() => toggleSelect(p._id)}
                                         className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/30 cursor-pointer" />
                                 </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-4">
+                                <td className="px-3 md:px-6 py-4 max-w-0 md:max-w-none w-full md:w-auto">
+                                    <div className="flex items-center gap-3 md:gap-4">
                                         <div className="w-11 h-14 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200/50">
                                             <img src={p.images && p.images.length > 0 ? p.images[0] : p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                                         </div>
-                                        <div className="min-w-0">
+                                        <div className="min-w-0 flex-1">
                                             <p className="font-semibold text-slate-900 text-[16px] truncate">{p.name}</p>
                                             <p className="text-[13px] text-slate-400 md:hidden capitalize">{p.category}</p>
+                                            {/* Phone layout: price, stock and actions */}
+                                            <div className="md:hidden mt-1.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="font-bold text-slate-900 text-[15px]">₹{(p.price || 0).toLocaleString("en-IN")}</span>
+                                                    <span className={`text-[12px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap ${(p.stock || 0) > 10 ? "text-emerald-700 bg-emerald-50" : (p.stock || 0) > 0 ? "text-amber-700 bg-amber-50" : "text-rose-700 bg-rose-50"}`}>
+                                                        {(p.stock || 0) > 0 ? `Qty ${p.stock}` : "Out"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center shrink-0">
+                                                    <button onClick={() => openEdit(p)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-primary cursor-pointer" aria-label={`Edit ${p.name}`}>
+                                                        <HiOutlinePencil className="w-5 h-5" />
+                                                    </button>
+                                                    <button onClick={() => handleDelete(p._id)} className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 cursor-pointer" aria-label={`Delete ${p.name}`}>
+                                                        <HiOutlineTrash className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -678,12 +695,12 @@ export default function AdminProducts() {
                                         {(p.stock || 0) > 0 ? p.stock : "Out"}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right hidden md:table-cell">
                                     <span className="font-bold text-slate-900 text-[17px]">₹{(p.price || 0).toLocaleString("en-IN")}</span>
                                     {p.discount > 0 && <span className="ml-2 text-[12px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">{p.discount}% OFF</span>}
                                     {p.shippingCost > 0 ? <p className="text-[12px] font-bold text-slate-400 mt-1">+₹{p.shippingCost} Ship</p> : <p className="text-[12px] font-bold text-emerald-500 mt-1">Free Ship</p>}
                                 </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right hidden md:table-cell">
                                     <div className="flex items-center justify-end gap-1.5">
                                         <button onClick={() => openEdit(p)} className="p-2.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-primary cursor-pointer" aria-label={`Edit ${p.name}`}>
                                             <HiOutlinePencil className="w-5 h-5" />

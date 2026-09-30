@@ -108,17 +108,17 @@ export default function AdminUsers() {
                     <table className="w-full text-[16px]">
                         <thead>
                             <tr className="border-b border-slate-100">
-                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">User</th>
+                                <th className="text-left px-4 md:px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">User</th>
                                 <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Email</th>
-                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Role</th>
+                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Role</th>
                                 <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Joined</th>
-                                <th className="text-right px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                                <th className="text-right px-3 md:px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filtered.map((u) => (
                                 <tr key={u._id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                    <td className="px-6 py-4">
+                                    <td className="px-4 md:px-6 py-4 max-w-0 w-full sm:max-w-none sm:w-auto">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${u.role === "admin"
                                                     ? "bg-gradient-to-br from-primary to-blue-600"
@@ -131,11 +131,21 @@ export default function AdminUsers() {
                                             <div className="min-w-0">
                                                 <p className="font-semibold text-slate-900 text-[16px] truncate">{u.name}</p>
                                                 <p className="text-[13px] text-slate-400 truncate md:hidden">{u.email}</p>
+                                                {/* Phone layout: actions under the name */}
+                                                <div className="sm:hidden mt-2 flex items-center gap-2">
+                                                    <button onClick={() => handleRoleChange(u._id, u.role)}
+                                                        className={`text-[13px] font-bold px-3 py-2 rounded-lg whitespace-nowrap ${u.role === "admin" ? "text-rose-600 bg-rose-50" : "text-primary bg-primary/10"}`}>
+                                                        {u.role === "admin" ? "Revoke Admin" : "Make Admin"}
+                                                    </button>
+                                                    <button onClick={() => setDeleteModal(u)} className="px-3 py-2 rounded-lg text-rose-500 bg-rose-50" aria-label={`Delete ${u.name}`}>
+                                                        <HiOutlineTrash className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-slate-500 hidden md:table-cell truncate max-w-[220px] text-[15px]">{u.email}</td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 hidden sm:table-cell">
                                         <span className={`inline-flex items-center gap-2 text-[13px] font-bold px-3 py-1.5 rounded-lg ${u.role === "admin"
                                                 ? "bg-primary/10 text-primary"
                                                 : "bg-slate-100 text-slate-500"
@@ -147,10 +157,10 @@ export default function AdminUsers() {
                                     <td className="px-6 py-4 text-slate-400 text-[15px] hidden lg:table-cell">
                                         {new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
+                                    <td className="px-3 md:px-6 py-4 text-right hidden sm:table-cell">
                                         <div className="flex items-center justify-end gap-2">
                                             <button onClick={() => handleRoleChange(u._id, u.role)}
-                                                className={`text-[13px] font-bold px-4 py-2 rounded-lg transition-all ${u.role === "admin"
+                                                className={`text-[13px] font-bold px-3 md:px-4 py-2 rounded-lg whitespace-nowrap transition-all ${u.role === "admin"
                                                         ? "text-rose-600 bg-rose-50 hover:bg-rose-100"
                                                         : "text-primary bg-primary/10 hover:bg-primary/20"
                                                     }`}>

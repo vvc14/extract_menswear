@@ -157,6 +157,44 @@ export default function AdminOrders() {
     };
 
     // Stats
+    // Action buttons for an order row (shared by the desktop column and the phone layout)
+    const renderActions = (order, actions, align) => (
+        <div className={`flex items-center gap-1.5 flex-wrap ${align}`}>
+            {actions.map((a) => (
+                <button
+                    key={a.value}
+                    onClick={() => {
+                        if (a.value === "shipped") {
+                            setShippingModal({ orderId: order._id });
+                        } else {
+                            handleStatusUpdate(order._id, a.value, a.label);
+                        }
+                    }}
+                    disabled={updating === order._id}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors disabled:opacity-50 ${
+                        a.danger
+                            ? "bg-rose-50 text-rose-600 hover:bg-rose-100"
+                            : "bg-primary/10 text-primary hover:bg-primary/20"
+                    }`}
+                >
+                    <a.icon className="w-3.5 h-3.5" />
+                    {updating === order._id ? "..." : a.label}
+                </button>
+            ))}
+            {["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed") && (
+                <button
+                    onClick={() => handleRetryRefund(order._id)}
+                    disabled={updating === order._id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+                >
+                    <HiOutlineRefresh className="w-3.5 h-3.5" />
+                    {updating === order._id ? "..." : "Retry refund"}
+                </button>
+            )}
+            {actions.length === 0 && !(["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed")) && <span className="text-[12px] text-slate-400">—</span>}
+        </div>
+    );
+
     // Revenue comes from the server so every admin screen uses the same definition
     const totalOrders = stats?.totalOrders ?? orders.length;
     const pendingReturns = stats?.pendingReturns ?? orders.filter((o) => o.status === "return-requested").length;
@@ -199,8 +237,8 @@ export default function AdminOrders() {
             </div>
 
             {/* Search + Filters */}
-            <div style={{ display: "flex", flexDirection: "row", gap: "16px", marginBottom: "32px" }}>
-                <div className="relative flex-1">
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
+                <div className="relative flex-1 min-w-0">
                     <HiOutlineSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                         type="text" placeholder="Search by invoice, name, or email..." value={search}
@@ -208,10 +246,10 @@ export default function AdminOrders() {
                         style={{ width: "100%", background: "#fff", border: "1px solid #e2e8f0", paddingLeft: "44px", paddingRight: "16px", paddingTop: "12px", paddingBottom: "12px", fontSize: "15px", color: "#0f172a", borderRadius: "12px", outline: "none" }}
                     />
                 </div>
-                <div style={{ display: "flex", gap: "6px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "6px" }}>
+                <div className="flex gap-1.5 bg-white border border-slate-200 rounded-xl p-1.5 overflow-x-auto max-w-full">
                     {FILTERS.map((f) => (
                         <button key={f.key} onClick={() => setFilter(f.key)}
-                            className={`px-4 py-2 text-[13px] font-bold rounded-lg whitespace-nowrap transition-all ${filter === f.key ? "bg-primary text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
+                            className={`shrink-0 px-4 py-2 text-[13px] font-bold rounded-lg whitespace-nowrap transition-all ${filter === f.key ? "bg-primary text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>
                             {f.label}
                             {f.key === "returns" && pendingReturns > 0 && <span className="ml-1.5 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{pendingReturns}</span>}
                             {f.key === "exchanges" && pendingExchanges > 0 && <span className="ml-1.5 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{pendingExchanges}</span>}
@@ -222,15 +260,15 @@ export default function AdminOrders() {
 
             {/* Orders Table */}
             <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden overflow-x-auto" style={{ marginTop: "8px" }}>
-                <table className="w-full text-[15px] min-w-[850px]">
+                <table className="w-full text-[15px] md:min-w-[850px]">
                     <thead>
                         <tr className="border-b border-slate-100">
                             <th className="text-left px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Invoice</th>
                             <th className="text-left px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Customer</th>
                             <th className="text-left px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider hidden lg:table-cell">Date</th>
-                            <th className="text-right px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Total</th>
-                            <th className="text-center px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                            <th className="text-right px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider" style={{ width: 180 }}>Actions</th>
+                            <th className="text-right px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Total</th>
+                            <th className="text-center px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Status</th>
+                            <th className="text-right px-5 py-4 text-[12px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell" style={{ width: 180 }}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -251,6 +289,13 @@ export default function AdminOrders() {
                                             </p>
                                             <p className="text-[12px] text-slate-400 md:hidden">{order.userName || "—"}</p>
                                         </button>
+                                        <div className="md:hidden mt-2.5 space-y-2.5">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className={`inline-flex px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide ${st.bg} ${st.text}`}>{st.label}</span>
+                                                <span className="font-bold text-slate-900 text-[15px]">₹{((order.totalAmount || 0) + (order.shipping || 0)).toLocaleString("en-IN")}</span>
+                                            </div>
+                                            {renderActions(order, actions, "justify-start")}
+                                        </div>
                                         {/* Expanded detail */}
                                         <AnimatePresence>
                                             {isExpanded && (
@@ -323,50 +368,17 @@ export default function AdminOrders() {
                                     <td className="px-5 py-4 hidden lg:table-cell text-[14px] text-slate-500">
                                         {new Date(order.paidAt || order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                                     </td>
-                                    <td className="px-5 py-4 text-right">
+                                    <td className="px-5 py-4 text-right hidden md:table-cell">
                                         <span className="font-bold text-slate-900 text-[15px]">₹{((order.totalAmount || 0) + (order.shipping || 0)).toLocaleString("en-IN")}</span>
                                         {(order.shipping || 0) > 0 && <p className="text-[11px] text-slate-400">+₹{order.shipping} ship</p>}
                                     </td>
-                                    <td className="px-5 py-4 text-center">
+                                    <td className="px-5 py-4 text-center hidden md:table-cell">
                                         <span className={`inline-flex px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wide ${st.bg} ${st.text}`}>
                                             {st.label}
                                         </span>
                                     </td>
-                                    <td className="px-5 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                                            {actions.map((a) => (
-                                                <button
-                                                    key={a.value}
-                                                    onClick={() => {
-                                                        if (a.value === "shipped") {
-                                                            setShippingModal({ orderId: order._id });
-                                                        } else {
-                                                            handleStatusUpdate(order._id, a.value, a.label);
-                                                        }
-                                                    }}
-                                                    disabled={updating === order._id}
-                                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors disabled:opacity-50 ${
-                                                        a.danger
-                                                            ? "bg-rose-50 text-rose-600 hover:bg-rose-100"
-                                                            : "bg-primary/10 text-primary hover:bg-primary/20"
-                                                    }`}
-                                                >
-                                                    <a.icon className="w-3.5 h-3.5" />
-                                                    {updating === order._id ? "..." : a.label}
-                                                </button>
-                                            ))}
-                                            {["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed") && (
-                                                <button
-                                                    onClick={() => handleRetryRefund(order._id)}
-                                                    disabled={updating === order._id}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-50"
-                                                >
-                                                    <HiOutlineRefresh className="w-3.5 h-3.5" />
-                                                    {updating === order._id ? "..." : "Retry refund"}
-                                                </button>
-                                            )}
-                                            {actions.length === 0 && !(["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed")) && <span className="text-[12px] text-slate-400">—</span>}
-                                        </div>
+                                    <td className="px-5 py-4 text-right hidden md:table-cell">
+                                        {renderActions(order, actions, "justify-end")}
                                     </td>
                                 </tr>
                             );

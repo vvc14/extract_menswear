@@ -129,23 +129,23 @@ export default function AdminDashboard() {
                         <table className="w-full text-[14px]">
                             <thead>
                                 <tr className="border-b border-slate-100">
-                                    <th className="text-left px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Invoice</th>
-                                    <th className="text-left px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Customer</th>
-                                    <th className="text-center px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                                    <th className="text-right px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Total</th>
+                                    <th className="text-left px-3 sm:px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Invoice</th>
+                                    <th className="text-left px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Customer</th>
+                                    <th className="text-center px-1 sm:px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                                    <th className="text-right px-3 sm:px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {ordersStats.recentOrders.map((o) => (
                                     <tr key={o._id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                        <td className="px-5 py-3 font-bold text-slate-900">{o.invoiceNumber || "—"}</td>
-                                        <td className="px-5 py-3 text-slate-600">{o.userName || "—"}</td>
-                                        <td className="px-5 py-3 text-center">
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${STATUS_BADGES[o.status] || "bg-slate-100"}`}>
+                                        <td className="px-3 sm:px-5 py-3 font-bold text-slate-900 whitespace-nowrap text-[13px] sm:text-[14px]">{o.invoiceNumber || "—"}</td>
+                                        <td className="px-5 py-3 text-slate-600 hidden sm:table-cell">{o.userName || "—"}</td>
+                                        <td className="px-1 sm:px-5 py-3 text-center">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${STATUS_BADGES[o.status] || "bg-slate-100"}`}>
                                                 {o.status}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-3 text-right font-bold text-slate-900">₹{((o.totalAmount || 0) + (o.shipping || 0)).toLocaleString("en-IN")}</td>
+                                        <td className="px-3 sm:px-5 py-3 text-right font-bold text-slate-900 whitespace-nowrap text-[13px] sm:text-[14px]">₹{((o.totalAmount || 0) + (o.shipping || 0)).toLocaleString("en-IN")}</td>
                                     </tr>
                                 ))}
                                 {ordersStats.recentOrders.length === 0 && (
@@ -170,26 +170,26 @@ export default function AdminDashboard() {
                         <table className="w-full text-[14px]">
                             <thead>
                                 <tr className="border-b border-slate-100">
-                                    <th className="text-left px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Product</th>
-                                    <th className="text-left px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Category</th>
-                                    <th className="text-right px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Price</th>
+                                    <th className="text-left px-3 sm:px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Product</th>
+                                    <th className="text-left px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Category</th>
+                                    <th className="text-right px-3 sm:px-5 py-3.5 text-[12px] font-bold text-slate-400 uppercase tracking-wider">Price</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {stats.recentProducts.map((p) => (
                                     <tr key={p._id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                        <td className="px-5 py-3">
+                                        <td className="px-3 sm:px-5 py-3">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-10 bg-slate-100 rounded overflow-hidden shrink-0">
                                                     <img src={p.images && p.images.length > 0 ? p.images[0] : p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                                                 </div>
-                                                <span className="font-semibold text-slate-900 truncate max-w-[150px]">{p.name}</span>
+                                                <span className="font-semibold text-slate-900 truncate max-w-[120px] sm:max-w-[150px]">{p.name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-5 py-3">
+                                        <td className="px-5 py-3 hidden sm:table-cell">
                                             <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded capitalize">{p.category}</span>
                                         </td>
-                                        <td className="px-5 py-3 text-right font-bold text-slate-900">₹{p.price?.toLocaleString("en-IN")}</td>
+                                        <td className="px-3 sm:px-5 py-3 text-right font-bold text-slate-900 whitespace-nowrap">₹{p.price?.toLocaleString("en-IN")}</td>
                                     </tr>
                                 ))}
                                 {stats.recentProducts.length === 0 && (

@@ -155,27 +155,49 @@ export default function AdminCoupons() {
                 </div>
             ) : (
                 <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden overflow-x-auto">
-                    <table className="w-full text-[15px] min-w-[800px]">
+                    <table className="w-full text-[15px] md:min-w-[800px]">
                         <thead>
                             <tr className="border-b border-slate-100 bg-slate-50/50">
-                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Code</th>
-                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Discount</th>
-                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Usage</th>
-                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                                <th className="text-right px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                                <th className="text-left px-4 md:px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Code</th>
+                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Discount</th>
+                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Usage</th>
+                                <th className="text-left px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Status</th>
+                                <th className="text-right px-3 md:px-6 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filtered.map((c) => (
                                 <tr key={c._id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                    <td className="px-6 py-4 font-bold text-slate-900 text-[16px]">{c.code}</td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-4 md:px-6 py-4 font-bold text-slate-900 text-[16px]">
+                                        <span className="break-all">{c.code}</span>
+                                        {/* Phone layout: discount, usage and status under the code */}
+                                        <div className="md:hidden mt-2 space-y-1.5 font-normal">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md text-[13px]">
+                                                    {c.discountType === 'percentage' ? `${c.discountValue}% OFF` : `₹${c.discountValue} OFF`}
+                                                </span>
+                                                <button
+                                                    onClick={() => toggleStatus(c)}
+                                                    className={`inline-flex items-center gap-1.5 text-[12px] font-bold px-2.5 py-1 rounded-full border ${c.isActive ? "bg-emerald/10 text-emerald border-emerald/20" : "bg-slate-100 text-slate-500 border-slate-200"}`}
+                                                >
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${c.isActive ? 'bg-emerald' : 'bg-slate-400'}`}></span>
+                                                    {c.isActive ? 'Active' : 'Disabled'}
+                                                </button>
+                                            </div>
+                                            <p className="text-[12px] text-slate-500">
+                                                Used {c.usedCount}{c.usageLimit ? ` / ${c.usageLimit}` : ""}
+                                                {c.minOrderValue > 0 ? ` · Min ₹${c.minOrderValue}` : ""}
+                                                {c.expiryDate ? ` · Exp ${new Date(c.expiryDate).toLocaleDateString()}` : ""}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 hidden md:table-cell">
                                         <span className="font-semibold text-primary bg-primary/10 px-2 py-1 rounded-md text-[14px]">
                                             {c.discountType === 'percentage' ? `${c.discountValue}% OFF` : `₹${c.discountValue} OFF`}
                                         </span>
                                         {c.minOrderValue > 0 && <p className="text-[12px] text-slate-400 mt-1 font-semibold">Min: ₹{c.minOrderValue}</p>}
                                     </td>
-                                    <td className="px-6 py-4 text-slate-500">
+                                    <td className="px-6 py-4 text-slate-500 hidden md:table-cell">
                                         <span className="font-semibold text-slate-700">{c.usedCount}</span>
                                         {c.usageLimit ? ` / ${c.usageLimit}` : " (Unlimited)"}
                                         {c.expiryDate && (
@@ -184,7 +206,7 @@ export default function AdminCoupons() {
                                             </p>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 hidden md:table-cell">
                                         <button 
                                             onClick={() => toggleStatus(c)}
                                             className={`inline-flex items-center gap-1.5 text-[12px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
