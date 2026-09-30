@@ -70,10 +70,12 @@ const pay = (orderId, { amount } = {}) => {
     return { razorpay_order_id: orderId, razorpay_payment_id: paymentId, razorpay_signature: signature };
 };
 
-const webhook = (body) => {
+const webhook = (body, eventId) => {
     const raw = JSON.stringify(body);
     const sig = crypto.createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET).update(raw).digest("hex");
-    return request(app).post("/api/payment/razorpay/webhook").set("Content-Type", "application/json").set("X-Razorpay-Signature", sig).send(raw);
+    const req = request(app).post("/api/payment/razorpay/webhook").set("Content-Type", "application/json").set("X-Razorpay-Signature", sig);
+    if (eventId) req.set("X-Razorpay-Event-Id", eventId);
+    return req.send(raw);
 };
 
 // ─── Fixtures ───
@@ -468,6 +470,30 @@ await test("retrying a refund that timed out but succeeded does not refund twice
     const before = refunds.length;
     assert.equal((await request(app).post(`/api/orders/${order._id}/refund`).set(adminAuth)).status, 200);
     assert.equal(refunds.length, before, "no second refund created");
+    assert.equal((await Order.findById(order._id)).refund.status, "processed");
+});
+
+await test("duplicate webhook delivery (same event id) is ignored", async () => {
+    const u = await makeUser();
+    const p = await makeProduct();
+    const res = await checkout(u.auth, [{ productId: p._id, size: "M", quantity: 1 }]);
+    const { razorpay_payment_id } = pay(res.body.orderId);
+    const evt = { event: "payment.captured", payload: { payment: { entity: { id: razorpay_payment_id, order_id: res.body.orderId } } } };
+    const first = await webhook(evt, "evt_dup_1");
+    assert.equal(first.status, 200);
+    const second = await webhook(evt, "evt_dup_1");
+    assert.equal(second.status, 200);
+    assert.equal(second.body.duplicate, true);
+    assert.equal((await Order.findOne({ razorpayOrderId: res.body.orderId })).status, "paid");
+});
+await test("late refund.failed event cannot undo a processed refund", async () => {
+    const u = await makeUser();
+    const p = await makeProduct();
+    const order = await placePaidOrder(u, [{ productId: p._id, size: "M", quantity: 1 }]);
+    await request(app).post(`/api/orders/${order._id}/cancel`).set(u.auth).send({});
+    assert.equal((await Order.findById(order._id)).refund.status, "processed");
+    const evt = { event: "refund.failed", payload: { refund: { entity: { id: "rfnd_late", payment_id: order.razorpayPaymentId, status: "failed" } } } };
+    assert.equal((await webhook(evt, "evt_late_refund")).status, 200);
     assert.equal((await Order.findById(order._id)).refund.status, "processed");
 });
 

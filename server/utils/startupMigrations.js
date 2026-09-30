@@ -2,6 +2,7 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Otp from "../models/Otp.js";
 import Counter from "../models/Counter.js";
+import WebhookEvent from "../models/WebhookEvent.js";
 
 // Idempotent data fixes that run on every boot. Each step is safe to repeat.
 export const runStartupMigrations = async () => {
@@ -42,7 +43,7 @@ export const runStartupMigrations = async () => {
     }
 
     try {
-        await Promise.all([Order.syncIndexes(), Otp.syncIndexes(), Product.createIndexes()]);
+        await Promise.all([Order.syncIndexes(), Otp.syncIndexes(), WebhookEvent.syncIndexes(), Product.createIndexes()]);
     } catch (err) {
         // e.g. duplicate razorpayOrderId values in old data block the unique index
         console.error("⚠️  Index sync failed — fix the data and restart:", err.message);

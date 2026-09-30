@@ -143,6 +143,8 @@ export const issueRefund = async (orderId, reason, actor = "system") => {
         const refund = await razorpayInstance.payments.refund(claimed.razorpayPaymentId, {
             amount: toPaise(amount),
             speed: "normal",
+            // Unique per order: Razorpay uses the receipt to recognise repeated refund requests
+            receipt: `rf_${claimed._id}`,
             notes: { orderId: String(claimed._id), invoice: claimed.invoiceNumber || "", reason: String(reason || "").slice(0, 200) },
         });
         const status = refund.status === "processed" ? "processed" : "pending";

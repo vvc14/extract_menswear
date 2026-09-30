@@ -4,6 +4,7 @@ import razorpayInstance from "../config/razorpay.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import Coupon from "../models/Coupon.js";
+import WebhookEvent from "../models/WebhookEvent.js";
 import { reserveItems, releaseItems, availableStock } from "../utils/inventory.js";
 import { handleError, httpError } from "../utils/httpError.js";
 import {
@@ -282,6 +283,17 @@ export const razorpayWebhook = async (req, res) => {
         return res.status(400).json({ message: "Invalid payload" });
     }
 
+    // Razorpay can deliver the same event more than once (x-razorpay-event-id is unique per event)
+    const eventId = typeof req.headers["x-razorpay-event-id"] === "string" ? req.headers["x-razorpay-event-id"] : null;
+    if (eventId) {
+        try {
+            await WebhookEvent.create({ _id: eventId, event: event.event });
+        } catch (err) {
+            if (err?.code === 11000) return res.json({ received: true, duplicate: true });
+            throw err;
+        }
+    }
+
     try {
         const payment = event?.payload?.payment?.entity;
         const refund = event?.payload?.refund?.entity;
@@ -309,8 +321,9 @@ export const razorpayWebhook = async (req, res) => {
             case "refund.failed":
                 if (refund?.payment_id) {
                     const status = event.event === "refund.processed" ? "processed" : "failed";
+                    // Events can arrive out of order: never move a processed refund back to failed
                     await Order.updateOne(
-                        { razorpayPaymentId: refund.payment_id },
+                        { razorpayPaymentId: refund.payment_id, ...(status === "failed" ? { "refund.status": { $ne: "processed" } } : {}) },
                         {
                             $set: {
                                 "refund.status": status,
@@ -327,7 +340,8 @@ export const razorpayWebhook = async (req, res) => {
         }
         res.json({ received: true });
     } catch (error) {
-        // 5xx makes Razorpay retry the delivery
+        // Forget the event so Razorpay's retry is processed; 5xx makes Razorpay retry the delivery
+        if (eventId) await WebhookEvent.deleteOne({ _id: eventId }).catch(() => {});
         console.error("Webhook processing error:", error);
         res.status(500).json({ message: "Webhook processing failed" });
     }
