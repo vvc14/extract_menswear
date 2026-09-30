@@ -1,6 +1,6 @@
 # Extract Menswear — Production-Readiness Audit (Re-audit)
 
-- **Re-audit date:** 2026-09-28
+- **Re-audit date:** 2026-09-28, plus a deployment-readiness pass on 2026-09-30 (§3A)
 - **Branch audited:** `production-readiness`, after the fixes from the first audit (2026-09-27, commit `2708e7c` on `main`)
 - **Method:** every server file re-read from scratch and the checkout, payment and order flows traced end to end, with key client pages checked against the server. Findings from the first audit were re-verified against the current code rather than assumed fixed. Business rules are exercised by an automated end-to-end suite (in-memory MongoDB, Razorpay mocked).
 - **Line numbers** point to the files on this branch.
@@ -38,7 +38,7 @@
 
 | Command | Result |
 |---|---|
-| `cd server && npm test` | **37 passed, 0 failed** (end-to-end scenarios, listed in §1 and §2) |
+| `cd server && npm test` | **41 passed, 0 failed** (end-to-end scenarios, listed in §1, §2 and §3A) |
 | `cd server && npm run lint` | Clean |
 | `cd client && npx eslint .` | Clean |
 | `cd client && npx vite build` | Succeeds |
@@ -122,6 +122,50 @@ The store currently sends as a personal **@gmail.com** address. Gmail signs it, 
 
 ---
 
+## 3A. Deployment-Readiness Pass (2026-09-30)
+
+Checked against the official documentation for each platform, then fixed and tested. Sources:
+- Razorpay: [webhook validation](https://razorpay.com/docs/webhooks/validate-test/), [Node integration](https://razorpay.com/docs/payments/server-integration/nodejs/integration-steps/), [refunds API](https://razorpay.com/docs/api/refunds/create-normal/), [Standard Checkout](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/build-integration/).
+- Render: [free tier](https://render.com/docs/free), [web services](https://render.com/docs/web-services), [deploys](https://render.com/docs/deploys), [blueprint spec](https://render.com/docs/blueprint-spec).
+- Vercel: [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite).
+- Express: [security](https://expressjs.com/en/advanced/best-practice-security.html) and [performance](https://expressjs.com/en/advanced/best-practice-performance.html) best practices.
+- Brevo: [send transactional email](https://developers.brevo.com/reference/sendtransacemail).
+- Nodemailer: [changelog](https://github.com/nodemailer/nodemailer/blob/master/CHANGELOG.md).
+
+| Issue | Severity | File:Line | What the docs say / what was wrong | Fix |
+|---|---|---|---|---|
+| Catalog images and logo never deployed | **Critical** (deploy) | `client/.gitignore` (removed `public/images`) | Products are stored with paths like `/images/shirts/…jpg`, and the logo is `/images/logo.png`. The folder was git-ignored, so a host building from GitHub would serve a store with no product photos or logo. | Folder un-ignored and committed (245 files, 24 MB, none over 1 MB). The build output now contains them. |
+| Gmail SMTP can't send from Render free | **High** (deploy) | `server/utils/emailTransporter.js` | Render's free tier blocks outbound ports 25/465/587. | The Brevo HTTPS API is already supported. `render.yaml` and DEPLOYMENT.md configure it. |
+| Vulnerable `nodemailer` (4 new advisories, high) | **High** | `server/package.json` | `npm audit`: versions ≤ 10.0.8 are affected (DoS / header parsing). | Upgraded to `^10.0.13`. The only breaking change is Node ≥ 20, which is already required. 0 production vulnerabilities. |
+| No graceful shutdown | Medium | `server/server.js` | Render sends SIGTERM on every deploy and SIGKILLs after 30 s. Express recommends graceful shutdown. | The server stops accepting connections, finishes in-flight requests, closes MongoDB and exits in about 1 s. It also binds `0.0.0.0` as Render requires. Verified locally. |
+| Health check always "ok" | Medium | `server/app.js` (`/api/health`) | The host uses the health check to decide when a new deploy can take traffic. | Returns 503 until MongoDB is connected. Test added. |
+| Webhook duplicates not tracked by event id | Medium | `server/controllers/paymentController.js` (`razorpayWebhook`) | Razorpay: use `x-razorpay-event-id` to detect duplicate deliveries. | Processed event ids are stored (30-day TTL). Repeats return 200 without reprocessing, and a failed attempt is forgotten so Razorpay's retry works. Test added. |
+| Out-of-order refund events | Medium | `paymentController.js` (refund webhook) | Razorpay: don't assume event order. A late `refund.failed` could overwrite `processed`. | A processed refund is never downgraded. Test added. |
+| No refund idempotency key | Low | `server/services/orderService.js` (`issueRefund`) | Razorpay's `receipt` field identifies a refund request. | Sends `receipt: rf_<orderId>`. |
+| Login brute force limited only per IP | Medium | `server/routes/authRoutes.js` | Express: limit failed attempts per username as well as per IP. | 10 failed attempts per account per 15 min, whatever the IP. Successful logins don't count. Test added. |
+| DB connect: one 5-second try, then exit | Low | `server/config/db.js` | Cold starts on free tiers can make the first attempt time out. | 5 attempts with backoff and a 10 s selection timeout. Disconnects are logged. |
+| Unhandled rejections swallowed | Low | `server/server.js` | Express: don't keep running in an unknown state; let the process manager restart. | Logged, then graceful shutdown with exit code 1 (the host restarts it). |
+| Stale product-list responses | Medium (UX) | `client/src/pages/Shirts.jsx`, `Trousers.jsx` (`fetchPage`) | Changing filters quickly could show products for an older filter. | Only the latest request updates the list. |
+| Navbar search unencoded and unbounded | Medium | `client/src/components/Navbar.jsx` | `?search=${query}` broke on `&`/`#`, downloaded every match to show 5, and had the same stale-response race. | Query sent via axios params, `limit: 5`, stale responses ignored. |
+| Admin role errors hidden | Low | `client/src/pages/AdminUsers.jsx` | A failed role change only logged to the console. | Shows an alert with the server message. |
+| Missing `VITE_API_URL` fails silently | Low | `client/src/services/api.js` | In production the API is on another host. | Logs a clear error in production builds. `.env.example` explains it. |
+| Web Checkout `retry.max_count` | Info | `client/src/services/razorpay.js` | Razorpay: `max_count` is mobile-SDK only. | Removed. |
+| Personal ngrok hosts in Vite config | Info | `client/vite.config.js` | — | Removed. |
+
+**Deployment files added:**
+- `render.yaml`: API blueprint, with health check, Node 22, a generated `JWT_SECRET`, and secrets marked `sync: false`.
+- `client/vercel.json`: SPA rewrite as recommended by Vercel, immutable asset caching, security headers.
+- `DEPLOYMENT.md`: step-by-step guide plus a post-deploy smoke test.
+- `README.md`: how to run and check the project locally.
+
+**Verified locally in production mode** (throwaway database):
+- Health check returns 200 once the DB is connected.
+- The allowed origin gets CORS headers; an unknown origin is refused.
+- HSTS is present and `x-powered-by` is absent.
+- SIGTERM shuts down cleanly with exit code 0.
+- `npm ci --omit=dev` installs from the lockfile without dev tools.
+- The client build embeds `VITE_API_URL` and includes the images.
+
 ## 4. Remaining Findings (open)
 
 These need a business decision, an external setup step, or a larger design change. None of them is a known way to lose money or stock.
@@ -129,7 +173,7 @@ These need a business decision, an external setup step, or a larger design chang
 | Issue | Severity | File:Line | Description | Recommendation |
 |---|---|---|---|---|
 | `JWT_SECRET` exposed via git history | **High until rotated** | history of `server/test_tokens.json` | Old signed tokens are recoverable from history. | Rotate the secret on deploy. All users re-login once anyway because the token format changed. |
-| Webhook must be configured | **High until done** | `server/app.js:46`, `paymentController.js:263` | Without `RAZORPAY_WEBHOOK_SECRET` and the dashboard webhook, a payment whose browser never returns is only recorded if the customer comes back. | Configure the webhook for `payment.captured`, `order.paid`, `payment.failed`, `refund.processed` and `refund.failed`. |
+| Webhook must be configured | **High until done** | `server/app.js:46`, `paymentController.js` (`razorpayWebhook`) | Without `RAZORPAY_WEBHOOK_SECRET` and the dashboard webhook, a payment whose browser never returns is only recorded if the customer comes back. | Configure the webhook for `payment.captured`, `order.paid`, `payment.failed`, `refund.processed` and `refund.failed`. |
 | Store email from a free Gmail address | **High** (deliverability) | `server/utils/emailTransporter.js:20` | See §3.2. | Domain + Brevo/SES + SPF/DKIM/DMARC. |
 | No GST tax invoice | Medium (compliance) | `server/utils/pdfGenerator.js:166-172` | Invoices have no GSTIN, HSN codes or CGST/SGST/IGST lines. Prices are shown as tax-inclusive. | Needs your GSTIN, HSN codes and rates. Then add tax lines to the invoice. |
 | Sessions stored in `localStorage` | Medium | `client/src/redux/authSlice.js:51` | Any XSS in the storefront could read the token. React escaping and server-side revocation reduce the impact. | Later: httpOnly cookies + CSRF protection, and a Content-Security-Policy on the frontend host. |
@@ -146,7 +190,7 @@ These need a business decision, an external setup step, or a larger design chang
 
 ## 5. Executive Summary
 
-**Overall:** the business-critical core is now sound and tested. That covers checkout pricing, per-size stock, payment confirmation, refunds, coupons and the order lifecycle, with 37 end-to-end scenarios including concurrency and replay attacks. The re-audit found one more High-severity payment race and two Medium gaps, all fixed and tested on this branch.
+**Overall:** the business-critical core is now sound and tested. That covers checkout pricing, per-size stock, payment confirmation, refunds, coupons and the order lifecycle, with 41 end-to-end scenarios including concurrency and replay attacks. The re-audit found one more High-severity payment race and two Medium gaps, all fixed and tested on this branch.
 
 **Must do before launch (setup, not code):**
 1. Rotate `JWT_SECRET`.
