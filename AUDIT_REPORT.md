@@ -166,6 +166,30 @@ Checked against the official documentation for each platform, then fixed and tes
 - `npm ci --omit=dev` installs from the lockfile without dev tools.
 - The client build embeds `VITE_API_URL` and includes the images.
 
+## 3B. Mobile Layout Pass (2026-09-30)
+
+**Method:**
+- The real production build ran against the real API (seeded in-memory database) in headless Chromium.
+- Every storefront and admin page was checked at 320, 360, 390, 430 and 768 px wide, which is 130 page/width combinations, including logged-in states.
+- Each check measured anything wider than the screen and captured screenshots, which were reviewed by eye.
+- The menu, search, coupon list and admin product form were also checked in their opened states.
+
+**Result:** 0 layout problems and 0 JavaScript errors after the fixes below.
+
+| Issue | Where | Fix |
+|---|---|---|
+| Admin Orders, Products, Coupons and Users tables on phones showed only the first column; status, totals and action buttons were off-screen | `AdminOrders.jsx`, `AdminProducts.jsx`, `AdminCoupons.jsx`, `AdminUsers.jsx` | Phone layout puts status, price/stock and action buttons under each row's title; desktop table unchanged |
+| Admin orders filter tabs made the page ~300 px wider than the screen | `AdminOrders.jsx` | Tabs scroll inside their own box; search stacks above them |
+| Google sign-in button wider than its card (logo cut off) | `Login.jsx`, `AdminLogin.jsx`, `hooks/useElementWidth.js` | Button width follows its container (200–380 px, Google's allowed range) |
+| Navbar icons overlapped the logo at 320 px | `Navbar.jsx` | Smaller logo and tighter icon spacing below 360 px |
+| Long names ran under the address card's edit/delete icons | `Cart.jsx` | Space reserved on the name row; larger tap targets |
+| Product card style tag collided with the discount badge | `ProductCard.jsx` | Style/fabric tags shown from `sm` up |
+| Product breadcrumb, listing toolbar, coupon field, admin toolbars and the size-add row overflowed at 320–360 px | `ProductDetail.jsx`, `Shirts.jsx`, `Trousers.jsx`, `Cart.jsx`, `AdminProducts.jsx` | Truncation, wrapping, and shrinkable inputs |
+| Size chart needed sideways scrolling; tips ran one word per line | `SizeGuide.jsx` | Compact cells on phones; one tip per row below 480 px |
+| Fixed two-column layouts that couldn't adapt | `Contact.jsx`, `PaymentSuccess.jsx`, `AdminProducts.jsx` (options panel) | Responsive grid/stack |
+| Slide-in animations made the About page wobble sideways | `About.jsx`, `index.css` | Fade-up instead of slide-in, plus `overflow-x: clip` on the page as a safety net (keeps sticky headers working) |
+| iOS Safari zooms in when tapping fields with text under 16 px | `index.css` | Fields use 16 px on phone-sized touch screens |
+
 ## 4. Remaining Findings (open)
 
 These need a business decision, an external setup step, or a larger design change. None of them is a known way to lose money or stock.
