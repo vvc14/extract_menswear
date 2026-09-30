@@ -20,9 +20,5 @@ export default defineConfig({
         },
       },
     },
-    allowedHosts: [
-      'chastise-green-hesitancy.ngrok-free.dev',
-      'mossy-roast-moonlight.ngrok-free.dev',
-    ],
   },
 })

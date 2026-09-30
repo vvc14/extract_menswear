@@ -31,6 +31,8 @@ export default function Shirts() {
     const [sortBy, setSortBy] = useState("newest");
     const [showMobileFilter, setShowMobileFilter] = useState(false);
     const loadMoreRef = useRef(null);
+    // Only the latest request may update the list (older responses can arrive later)
+    const requestSeq = useRef(0);
 
     // Sync URL fabric query parameter with filters state
     useEffect(() => {
@@ -45,11 +47,13 @@ export default function Shirts() {
 
     // Fetch a specific page of products
     const fetchPage = useCallback(async (f, pageNum, append = false) => {
+        const seq = ++requestSeq.current;
         if (pageNum === 1) setLoading(true);
         else setLoadingMore(true);
         try {
             const qs = buildQueryString({ ...f, category: "shirt", sort: sortBy });
             const { data } = await API.get(`/products?${qs}&page=${pageNum}&limit=${PER_PAGE}`);
+            if (seq !== requestSeq.current) return;
             if (data.products) {
                 setProducts(prev => append ? [...prev, ...data.products] : data.products);
                 setHasMore(data.hasMore);
@@ -62,11 +66,14 @@ export default function Shirts() {
                 setTotal(Array.isArray(data) ? data.length : 0);
             }
         } catch {
+            if (seq !== requestSeq.current) return;
             if (!append) setProducts([]);
             setHasMore(false);
         } finally {
-            setLoading(false);
-            setLoadingMore(false);
+            if (seq === requestSeq.current) {
+                setLoading(false);
+                setLoadingMore(false);
+            }
         }
     }, [sortBy]);
 

@@ -46,7 +46,7 @@ export const initiateRazorpayPayment = async ({ orderId, amount, currency, prefi
         theme: { color: "#1a1a1a" },
         prefill: prefill || {},
         timeout: CHECKOUT_TIMEOUT_SECONDS,
-        retry: { enabled: true, max_count: 3 },
+        retry: { enabled: true },
         handler: (response) => {
             completed = true;
             onSuccess?.(response);

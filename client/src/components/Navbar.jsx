@@ -49,19 +49,23 @@ export default function Navbar() {
             setSearchResults([]);
             return;
         }
+        let cancelled = false;
         const delayDebounce = setTimeout(async () => {
             setSearchLoading(true);
             try {
-                const { data } = await API.get(`/products?search=${searchQuery}`);
-                setSearchResults(data.slice(0, 5));
+                const { data } = await API.get("/products", { params: { search: searchQuery.trim(), limit: 5 } });
+                if (!cancelled) setSearchResults(Array.isArray(data) ? data.slice(0, 5) : []);
             } catch {
-                setSearchResults([]);
+                if (!cancelled) setSearchResults([]);
             } finally {
-                setSearchLoading(false);
+                if (!cancelled) setSearchLoading(false);
             }
         }, 300);
 
-        return () => clearTimeout(delayDebounce);
+        return () => {
+            cancelled = true;
+            clearTimeout(delayDebounce);
+        };
     }, [searchQuery]);
 
     useEffect(() => {

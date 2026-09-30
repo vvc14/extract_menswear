@@ -39,7 +39,7 @@ export default function AdminUsers() {
             const { data } = await API.put(`/admin/users/${userId}/role`, { role: newRole });
             setUsers((prev) => prev.map((u) => (u._id === data._id ? data : u)));
         } catch (err) {
-            console.error("Failed to toggle role:", err);
+            dispatch(showAlert({ title: "Could not change role", message: err.response?.data?.message || "Failed to change role. Please try again." }));
         }
     };
 

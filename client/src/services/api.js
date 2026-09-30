@@ -1,5 +1,11 @@
 import axios from "axios";
 
+// In production the storefront and API live on different hosts, so VITE_API_URL must be set
+// at build time (e.g. https://api.yourstore.com/api). "/api" only works with the Vite dev proxy.
+if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+    console.error("VITE_API_URL is not set: API requests will go to the storefront host and fail.");
+}
+
 const API = axios.create({
     baseURL: import.meta.env.VITE_API_URL || "/api",
     timeout: 20000,
