@@ -5,6 +5,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import mongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
+import mongoose from "mongoose";
 import productRoutes from "./routes/productRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -82,7 +83,11 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/coupons", couponRoutes);
 
-app.get("/api/health", (_, res) => res.json({ status: "ok" }));
+// Health check (used by the host to decide when a new deploy can take traffic)
+app.get("/api/health", (_, res) => {
+    const dbReady = mongoose.connection.readyState === 1;
+    res.status(dbReady ? 200 : 503).json({ status: dbReady ? "ok" : "starting", db: dbReady ? "connected" : "disconnected" });
+});
 
 app.use("/api", (req, res) => res.status(404).json({ message: "Not found" }));
 

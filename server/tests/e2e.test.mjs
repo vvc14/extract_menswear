@@ -153,6 +153,22 @@ await test("password change needs current password and revokes old token", async
     assert.equal((await request(app).get("/api/auth/profile").set({ Authorization: `Bearer ${ok.body.token}` })).status, 200);
 });
 
+await test("failed logins are limited per account, not just per IP", async () => {
+    const u = await makeUser();
+    const statuses = [];
+    for (let i = 0; i < 11; i++) {
+        const r = await request(app).post("/api/auth/login").set("X-Forwarded-For", `10.0.0.${i + 1}`).send({ email: u.user.email, password: "wrong-password" });
+        statuses.push(r.status);
+    }
+    assert.deepEqual(statuses.slice(0, 10), Array(10).fill(401));
+    assert.equal(statuses[10], 429);
+});
+await test("health check reports database readiness", async () => {
+    const r = await request(app).get("/api/health");
+    assert.equal(r.status, 200);
+    assert.equal(r.body.db, "connected");
+});
+
 console.log("\nCheckout validation");
 await test("negative, fractional and oversized quantities are rejected", async () => {
     const u = await makeUser();
