@@ -109,11 +109,11 @@ export default function SizeGuide() {
                                     <table className="w-full text-center">
                                         <thead>
                                             <tr className="border-b border-slate-200 dark:border-slate-700" style={{ background: "rgba(26,39,68,0.04)" }}>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Size</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Chest</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Body Length</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Shoulder</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Sleeve</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Size</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Chest</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Body Length</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Shoulder</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Sleeve</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -124,11 +124,11 @@ export default function SizeGuide() {
                                                         i % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-800/30"
                                                     }`}
                                                 >
-                                                    <td className="px-8 py-6 text-[16px] font-extrabold text-slate-900 dark:text-white">{row.size}</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.chest}"</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.body}"</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.shoulder}"</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.sleeve}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] font-extrabold text-slate-900 dark:text-white">{row.size}</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.chest}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.body}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.shoulder}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.sleeve}"</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -139,11 +139,11 @@ export default function SizeGuide() {
                                     <table className="w-full text-center">
                                         <thead>
                                             <tr className="border-b border-slate-200 dark:border-slate-700" style={{ background: "rgba(26,39,68,0.04)" }}>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Size</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Waist</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Hip</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Length</th>
-                                                <th className="px-8 py-6 text-[14px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Inseam</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Size</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Waist</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Hip</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Length</th>
+                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Inseam</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -154,11 +154,11 @@ export default function SizeGuide() {
                                                         i % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-800/30"
                                                     }`}
                                                 >
-                                                    <td className="px-8 py-6 text-[16px] font-extrabold text-slate-900 dark:text-white">{row.size}</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.waist}"</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.hip}"</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.length}"</td>
-                                                    <td className="px-8 py-6 text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.inseam}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] font-extrabold text-slate-900 dark:text-white">{row.size}</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.waist}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.hip}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.length}"</td>
+                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.inseam}"</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -173,11 +173,11 @@ export default function SizeGuide() {
                         <h2 className="text-[24px] sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight text-center">
                             How to Measure
                         </h2>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-4 sm:gap-5">
                             {MEASURE_TIPS.map((tip) => (
                                 <div
                                     key={tip.title}
-                                    className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 sm:p-10 text-center"
+                                    className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-10 text-center"
                                 >
                                     <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mb-2">
                                         {tip.title}

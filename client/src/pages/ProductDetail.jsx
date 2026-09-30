@@ -238,17 +238,17 @@ export default function ProductDetail() {
             {/* Breadcrumb bar */}
             <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
-                    <nav aria-label="Breadcrumb" className="flex items-center gap-4">
+                    <nav aria-label="Breadcrumb" className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
                             <HiOutlineArrowLeft className="w-4 h-4" /> Back
                         </button>
                         <span className="text-slate-300 dark:text-slate-600">|</span>
-                        <ol className="flex items-center gap-2 text-[15px]">
-                            <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
-                            <li className="text-slate-300 dark:text-slate-600">/</li>
-                            <li><Link to={product.category === "shirt" ? "/shirts" : "/trousers"} className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors capitalize">{product.category}s</Link></li>
-                            <li className="text-slate-300 dark:text-slate-600">/</li>
-                            <li className="text-slate-900 dark:text-white font-semibold line-clamp-1">{product.name}</li>
+                        <ol className="flex items-center gap-2 text-[14px] sm:text-[15px] min-w-0">
+                            <li className="hidden sm:block shrink-0"><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
+                            <li className="hidden sm:block shrink-0 text-slate-300 dark:text-slate-600">/</li>
+                            <li className="shrink-0"><Link to={product.category === "shirt" ? "/shirts" : "/trousers"} className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors capitalize">{product.category}s</Link></li>
+                            <li className="shrink-0 text-slate-300 dark:text-slate-600">/</li>
+                            <li className="text-slate-900 dark:text-white font-semibold truncate min-w-0">{product.name}</li>
                         </ol>
                     </nav>
                 </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import useElementWidth from "../hooks/useElementWidth";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginSuccess } from "../redux/authSlice";
@@ -25,6 +26,8 @@ export default function Login() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [userName, setUserName] = useState("");
+    const googleBoxRef = useRef(null);
+    const googleBoxWidth = useElementWidth(googleBoxRef, 380);
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [emailVerificationToken, setEmailVerificationToken] = useState("");
     const [resendCooldown, setResendCooldown] = useState(0);
@@ -323,13 +326,13 @@ export default function Login() {
                                     <p className="text-[16px] text-white/50">Sign in or create your account</p>
                                 </div>
 
-                                {/* Google Sign-In */}
-                                <div className="flex justify-center">
+                                {/* Google Sign-In (Google needs a pixel width: fit it to the card, 200-380px) */}
+                                <div ref={googleBoxRef} className="flex justify-center w-full">
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={() => setError("Google sign-in failed. Please try again.")}
                                         shape="pill"
-                                        width="380"
+                                        width={String(Math.max(200, Math.min(380, googleBoxWidth)))}
                                         text="continue_with"
                                         theme="filled_black"
                                         size="large"

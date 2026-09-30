@@ -149,11 +149,11 @@ export default function Trousers() {
             {/* Content */}
             <div className="page-wrap" style={{ paddingTop: "40px", paddingBottom: "56px", display: "flex", flexDirection: "column", gap: "32px" }}>
                 {/* Toolbar */}
-                <div className="flex items-center justify-between">
-                    <p className="text-[15px] text-slate-500 dark:text-slate-400">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-[14px] sm:text-[15px] text-slate-500 dark:text-slate-400">
                         {loading ? "Loading..." : <><span className="font-bold text-slate-900 dark:text-white">{total}</span> product{total !== 1 ? "s" : ""} found</>}
                     </p>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 ml-auto">
                         {/* Sort dropdown */}
                         <div className="relative flex items-center gap-2">
                             <HiOutlineSortDescending className="w-4 h-4 text-slate-400 hidden sm:block" />
@@ -161,7 +161,7 @@ export default function Trousers() {
                                 id="sort-trousers"
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 pr-9 text-[14px] font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all"
+                                className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-3 sm:pl-4 py-2.5 pr-8 sm:pr-9 text-[13px] sm:text-[14px] font-semibold text-slate-700 dark:text-slate-300 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition-all"
                                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8.825a.7.7 0 0 1-.5-.2L2.3 5.4a.7.7 0 0 1 1-1L6 7.125 8.7 4.4a.7.7 0 0 1 1 1L6.5 8.625a.7.7 0 0 1-.5.2Z'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                             >
                                 <option value="newest">Newest First</option>

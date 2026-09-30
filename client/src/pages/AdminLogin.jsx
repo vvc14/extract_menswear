@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import useElementWidth from "../hooks/useElementWidth";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { loginSuccess } from "../redux/authSlice";
@@ -11,6 +12,8 @@ import { GoogleLogin } from "@react-oauth/google";
 export default function AdminLogin() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const googleBoxRef = useRef(null);
+    const googleBoxWidth = useElementWidth(googleBoxRef, 320);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { token, admin } = useSelector((s) => s.auth);
@@ -71,14 +74,16 @@ export default function AdminLogin() {
                             <div className="bg-rose-500/15 border border-rose-500/25 text-rose-400 text-[14px] font-semibold px-4 py-3 rounded-xl">{error}</div>
                         )}
 
-                        <div className="flex justify-center py-2 bg-white/5 rounded-xl border border-white/[0.06] hover:border-white/[0.12] transition-colors p-4">
+                        <div className="bg-white/5 rounded-xl border border-white/[0.06] hover:border-white/[0.12] transition-colors p-4">
+                          <div ref={googleBoxRef} className="flex justify-center w-full">
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => setError("Google login failed")}
                                 theme="filled_blue"
                                 size="large"
-                                width="320"
+                                width={String(Math.max(200, Math.min(320, googleBoxWidth)))}
                             />
+                          </div>
                         </div>
 
                         {/* Divider */}

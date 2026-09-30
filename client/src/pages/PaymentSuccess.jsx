@@ -53,7 +53,7 @@ export default function PaymentSuccess() {
                     </div>
                 )}
 
-                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "32px", width: "100%", padding: "0 16px" }}>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8 w-full px-4">
                     {order && (
                         <button
                             onClick={handleDownload}

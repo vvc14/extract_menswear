@@ -64,6 +64,19 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
+  /* Prevent sideways scrolling on phones (e.g. slide-in animations). `clip` keeps sticky working;
+     `hidden` is the fallback for older browsers. */
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* iOS Safari zooms the page when a focused field's font is under 16px; keep fields at 16px on phones */
+@media (max-width: 640px) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 body {

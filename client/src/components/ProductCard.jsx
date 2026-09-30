@@ -79,8 +79,8 @@ export default function ProductCard({ product, compact = false }) {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
 
-                    {/* Badges */}
-                    <div className="absolute top-3.5 left-3.5 flex flex-col gap-2 z-10">
+                    {/* Badges (hidden on phone-width cards so they don't collide with the discount badge) */}
+                    <div className="absolute top-3.5 left-3.5 hidden sm:flex flex-col gap-2 z-10">
                         {product.fabric && (
                             <span className="text-[11px] font-bold text-white backdrop-blur-md px-3 py-1.5 rounded-lg"
                                 style={{ background: "rgba(26,39,68,0.8)" }}>

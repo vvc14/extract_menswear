@@ -130,11 +130,11 @@ export default function Navbar() {
                         <div className="flex items-center justify-between w-full" style={{ height: "72px" }}>
 
                             {/* Left/Middle block: Logo, centered Links, and Search */}
-                            <div className="flex-1 flex items-center justify-between">
+                            <div className="flex-1 min-w-0 flex items-center justify-between">
                                 {/* Logo */}
                                 <div className="flex justify-start">
                                     <Link to="/" onDoubleClick={() => { window.location.href = "/"; }} className="shrink-0 flex items-center gap-2" aria-label="Extract Menswear Home">
-                                        <img src="/images/logo.png" alt="Extract Menswear" className="h-[46px] w-auto object-contain" />
+                                        <img src="/images/logo.png" alt="Extract Menswear" className="h-[38px] min-[360px]:h-[46px] w-auto object-contain" />
                                     </Link>
                                 </div>
 
@@ -177,7 +177,7 @@ export default function Navbar() {
                             <div className="hidden lg:block h-6 w-px bg-slate-200 dark:bg-slate-800 mx-4 shrink-0" />
 
                             {/* Right actions */}
-                            <div className="flex items-center gap-1 justify-end shrink-0">
+                            <div className="flex items-center gap-0 min-[360px]:gap-1 justify-end shrink-0">
 
                                 {/* Mobile Search button (hidden on desktop) */}
                                 <button

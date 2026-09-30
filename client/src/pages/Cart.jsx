@@ -690,26 +690,28 @@ export default function Cart() {
                                                 <div 
                                                     key={idx} 
                                                     onClick={() => setSelectedIdx(idx)}
-                                                    className={`p-5 rounded-xl border transition-all cursor-pointer text-left relative ${
+                                                    className={`p-5 rounded-xl border transition-all cursor-pointer text-left relative break-words ${
                                                         selectedIdx === idx 
                                                             ? "border-primary dark:border-gold bg-primary/5 dark:bg-gold/5" 
                                                             : "border-slate-200/60 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-900/50"
                                                     }`}
                                                 >
-                                                    <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                                                    <div className="absolute top-3 right-3 flex items-center gap-0.5">
                                                         <button 
                                                             type="button"
                                                             onClick={(e) => handleEditAddressClick(e, idx)}
-                                                            className="p-1 text-slate-400 hover:text-primary dark:hover:text-gold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                                                            className="p-2 text-slate-400 hover:text-primary dark:hover:text-gold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                                                             title="Edit Address"
+                                                            aria-label="Edit address"
                                                         >
                                                             <HiOutlinePencil className="w-4 h-4" />
                                                         </button>
                                                         <button 
                                                             type="button"
                                                             onClick={(e) => handleDeleteAddress(e, idx)}
-                                                            className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
+                                                            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
                                                             title="Delete Address"
+                                                            aria-label="Delete address"
                                                         >
                                                             <HiOutlineTrash className="w-4 h-4" />
                                                         </button>
@@ -720,8 +722,8 @@ export default function Cart() {
                                                         )}
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="font-bold text-slate-800 dark:text-white text-[15px]">{addr.name}</span>
+                                                        <div className="flex items-center gap-2 flex-wrap pr-24">
+                                                            <span className="font-bold text-slate-800 dark:text-white text-[15px] break-words min-w-0">{addr.name}</span>
                                                             {addr.isDefault && (
                                                                 <span className="bg-primary/10 dark:bg-gold/10 text-primary dark:text-gold text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/10 dark:border-gold/10">
                                                                     Default
@@ -790,7 +792,7 @@ export default function Cart() {
                                         value={couponInput}
                                         onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                                         disabled={appliedCoupon || applyingCoupon}
-                                        className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-[14px] rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        className="flex-1 min-w-0 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-[14px] rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     />
                                     {appliedCoupon ? (
                                         <button onClick={handleRemoveCoupon} className="px-4 font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all cursor-pointer">Remove</button>

@@ -136,7 +136,7 @@ export default function Contact() {
                             ) : (
                             <form className="space-y-6" onSubmit={handleSubmit}>
                                 {error && <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">{error}</div>}
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
                                         <label className="block text-[13px] font-semibold text-slate-600 dark:text-slate-400 mb-2" htmlFor="name">
                                             Full Name
