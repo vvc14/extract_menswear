@@ -64,9 +64,12 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
-  /* Prevent sideways scrolling on phones (e.g. slide-in animations). `clip` keeps sticky working;
-     `hidden` is the fallback for older browsers. */
-  overflow-x: hidden;
+}
+
+/* Prevent sideways scrolling on phones. Applied to the app root (not html/body) so the page keeps
+   scrolling on the window — overflow on both html and body makes iOS Safari scroll the body
+   instead, which causes jumpy scrolling and breaks scroll-to-top. `clip` keeps sticky working. */
+#root {
   overflow-x: clip;
 }
 
