@@ -299,7 +299,7 @@ export default function Orders() {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-[15px] font-semibold text-slate-900 dark:text-white truncate">{item.name}</p>
-                                                <p className="text-[13px] text-slate-500 dark:text-slate-400">{item.size ? `Size ${item.size} · ` : ""}Qty: {item.quantity} × ₹{item.price.toLocaleString("en-IN")}</p>
+                                                <p className="text-[13px] text-slate-500 dark:text-slate-400">{item.size ? `Size ${item.size} · ` : ""}Qty: {item.quantity} × ₹{Number(item.price || 0).toLocaleString("en-IN")}</p>
                                             </div>
                                             <p className="text-[15px] font-bold text-slate-900 dark:text-white shrink-0">
                                                 ₹{(item.price * item.quantity).toLocaleString("en-IN")}

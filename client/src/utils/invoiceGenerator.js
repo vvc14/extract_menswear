@@ -105,12 +105,12 @@ export const generateInvoicePDF = async (order) => {
     doc.text(order.razorpayPaymentId || "N/A", pw / 2 + 40, y + 10);
 
     // ─── Items Table ───
-    const tableBody = order.items.map((item, idx) => [
+    const tableBody = (order.items || []).map((item, idx) => [
         String(idx + 1).padStart(2, "0"),
         item.name,
         item.quantity,
-        `Rs. ${item.price.toLocaleString("en-IN")}`,
-        `Rs. ${(item.price * item.quantity).toLocaleString("en-IN")}`,
+        `Rs. ${Number(item.price || 0).toLocaleString("en-IN")}`,
+        `Rs. ${(Number(item.price || 0) * Number(item.quantity || 0)).toLocaleString("en-IN")}`,
     ]);
 
     autoTable(doc, {
@@ -151,8 +151,8 @@ export const generateInvoicePDF = async (order) => {
 
     const shipping = order.shipping || 0;
     const discount = order.discountAmount || 0;
-    const originalSubtotal = order.totalAmount + discount;
-    const grandTotal = order.totalAmount + shipping;
+    const originalSubtotal = Number(order.totalAmount || 0) + discount;
+    const grandTotal = Number(order.totalAmount || 0) + shipping;
 
     // Subtotal
     doc.setFont("helvetica", "normal");

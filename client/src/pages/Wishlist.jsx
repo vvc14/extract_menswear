@@ -199,7 +199,7 @@ export default function Wishlist() {
                                             {/* Price */}
                                             <div className="flex items-baseline gap-2.5">
                                                 <span className="text-[20px] sm:text-[22px] font-extrabold text-slate-900 dark:text-white">
-                                                    ₹{item.price.toLocaleString("en-IN")}
+                                                    ₹{Number(item.price || 0).toLocaleString("en-IN")}
                                                 </span>
                                                 {originalPrice > 0 && (
                                                     <span className="text-[13px] text-slate-400 line-through">
