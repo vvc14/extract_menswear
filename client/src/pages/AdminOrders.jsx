@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import API, { apiErrorMessage } from "../services/api";
 import { useConfirm } from "../context/ConfirmContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -171,7 +171,7 @@ export default function AdminOrders() {
                         }
                     }}
                     disabled={updating === order._id}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-colors disabled:opacity-50 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold whitespace-nowrap transition-colors disabled:opacity-50 ${
                         a.danger
                             ? "bg-rose-50 text-rose-600 hover:bg-rose-100"
                             : "bg-primary/10 text-primary hover:bg-primary/20"
@@ -185,7 +185,7 @@ export default function AdminOrders() {
                 <button
                     onClick={() => handleRetryRefund(order._id)}
                     disabled={updating === order._id}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold whitespace-nowrap bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-50"
                 >
                     <HiOutlineRefresh className="w-3.5 h-3.5" />
                     {updating === order._id ? "..." : "Retry refund"}
@@ -280,7 +280,8 @@ export default function AdminOrders() {
                             const isActionable = ["return-requested", "exchange-requested"].includes(order.status);
 
                             return (
-                                <tr key={order._id} className={`border-b border-slate-50 last:border-0 transition-colors ${isActionable ? "bg-amber-50/30" : "hover:bg-slate-50/60"}`}>
+                                <Fragment key={order._id}>
+                                <tr className={`border-b border-slate-50 last:border-0 transition-colors ${isExpanded ? "bg-slate-50/70" : isActionable ? "bg-amber-50/30" : "hover:bg-slate-50/60"}`}>
                                     <td className="px-5 py-4">
                                         <button onClick={() => setExpandedId(isExpanded ? null : order._id)} className="text-left group">
                                             <p className="text-[14px] font-bold text-slate-900 group-hover:text-primary transition-colors flex items-center gap-1.5">
@@ -296,70 +297,6 @@ export default function AdminOrders() {
                                             </div>
                                             {renderActions(order, actions, "justify-start")}
                                         </div>
-                                        {/* Expanded detail */}
-                                        <AnimatePresence>
-                                            {isExpanded && (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
-                                                    className="overflow-hidden"
-                                                >
-                                                    <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
-                                                        {order.items.map((item, i) => (
-                                                            <div key={i} className="flex items-center gap-3">
-                                                                <div className="w-9 h-11 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200/50">
-                                                                    {item.imageUrl ? <img src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> : <HiOutlineShoppingCart className="w-4 h-4 text-slate-300 m-auto mt-3" />}
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</p>
-                                                                    <p className="text-[11px] text-slate-400">{item.size ? `Size ${item.size} · ` : ""}Qty: {item.quantity} × ₹{item.price?.toLocaleString("en-IN")}</p>
-                                                                </div>
-                                                                <p className="text-[13px] font-bold text-slate-700 shrink-0">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
-                                                            </div>
-                                                        ))}
-                                                        {order.shippingAddress && order.shippingAddress.street && (
-                                                            <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 border border-slate-100 dark:border-slate-800/80 mt-3 text-[13px] text-slate-600 dark:text-slate-400">
-                                                                <p className="font-bold text-slate-800 dark:text-white mb-1 flex items-center gap-1.5">
-                                                                    <HiOutlineTruck className="w-4 h-4 text-primary dark:text-gold" /> Delivery Details
-                                                                </p>
-                                                                <p>
-                                                                    <strong>Recipient:</strong> {order.shippingAddress.name} ({order.shippingAddress.phone})
-                                                                </p>
-                                                                <p>
-                                                                    <strong>Address:</strong> {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}, {order.shippingAddress.country}
-                                                                </p>
-                                                            </div>
-                                                        )}
-                                                        {order.exchangeItems?.length > 0 && (
-                                                            <div className="mt-2 p-2.5 bg-orange-50 rounded-lg border border-orange-200 text-[13px] text-orange-800">
-                                                                <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5">Size exchange{order.status === "exchange-requested" ? " (replacement reserved)" : ""}</p>
-                                                                {order.exchangeItems.map((x, i) => (
-                                                                    <p key={i}>{x.name} × {x.quantity}: {x.fromSize || "—"} → {x.toSize}</p>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                        {order.refund?.status && (
-                                                            <div className={`mt-2 p-2.5 rounded-lg border text-[13px] ${order.refund.status === "failed" ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-emerald-50 border-emerald-200 text-emerald-800"}`}>
-                                                                <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5">Refund {order.refund.status}</p>
-                                                                <p>₹{Number(order.refund.amount || 0).toLocaleString("en-IN")}{order.refund.razorpayRefundId ? ` · ${order.refund.razorpayRefundId}` : ""}</p>
-                                                                {order.refund.error && <p>{order.refund.error}</p>}
-                                                            </div>
-                                                        )}
-                                                        {hasReason && (
-                                                            <div className="flex items-start gap-2 mt-2 p-2.5 bg-amber-50 rounded-lg border border-amber-200">
-                                                                <HiOutlineExclamation className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                                                                <div>
-                                                                    <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-0.5">
-                                                                        {order.returnReason ? "Return Reason" : order.exchangeReason ? "Exchange Reason" : "Cancellation Reason"}
-                                                                    </p>
-                                                                    <p className="text-[13px] text-amber-800">{order.returnReason || order.exchangeReason || order.cancelReason}</p>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
                                     </td>
                                     <td className="px-5 py-4 hidden md:table-cell">
                                         <p className="text-[14px] font-semibold text-slate-900">{order.userName || "—"}</p>
@@ -381,6 +318,75 @@ export default function AdminOrders() {
                                         {renderActions(order, actions, "justify-end")}
                                     </td>
                                 </tr>
+                                {isExpanded && (
+                                    <tr className="border-b border-slate-100 bg-slate-50/70">
+                                        <td colSpan={6} className="px-5 py-5">
+                                            <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+                                                <div className="min-w-0 space-y-2.5">
+                                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Items</p>
+                                                    {order.items.map((item, i) => (
+                                                            <div key={i} className="flex items-center gap-3">
+                                                                <div className="w-9 h-11 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200/50">
+                                                                    {item.imageUrl ? <img src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl} alt={item.name} className="w-full h-full object-cover" /> : <HiOutlineShoppingCart className="w-4 h-4 text-slate-300 m-auto mt-3" />}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-[13px] font-semibold text-slate-800 line-clamp-2">{item.name}</p>
+                                                                    <p className="text-[11px] text-slate-400">{item.size ? `Size ${item.size} · ` : ""}Qty: {item.quantity} × ₹{item.price?.toLocaleString("en-IN")}</p>
+                                                                </div>
+                                                                <p className="text-[13px] font-bold text-slate-700 shrink-0">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
+                                                            </div>
+                                                        ))}
+                                                    <div className="flex justify-between pt-2 mt-1 border-t border-slate-200 text-[13px]">
+                                                        <span className="text-slate-500">{order.discountAmount ? `Discount (${order.couponCode}) −₹${order.discountAmount.toLocaleString("en-IN")} · ` : ""}Shipping {order.shipping ? `₹${order.shipping.toLocaleString("en-IN")}` : "free"}</span>
+                                                        <span className="font-bold text-slate-900">Total ₹{((order.totalAmount || 0) + (order.shipping || 0)).toLocaleString("en-IN")}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="min-w-0 space-y-3">
+                                                    {order.shippingAddress && order.shippingAddress.street && (
+                                                            <div className="bg-white rounded-xl p-3 border border-slate-200 text-[13px] text-slate-600">
+                                                                <p className="font-bold text-slate-800 dark:text-white mb-1 flex items-center gap-1.5">
+                                                                    <HiOutlineTruck className="w-4 h-4 text-primary dark:text-gold" /> Delivery Details
+                                                                </p>
+                                                                <p>
+                                                                    <strong>Recipient:</strong> {order.shippingAddress.name} ({order.shippingAddress.phone})
+                                                                </p>
+                                                                <p>
+                                                                    <strong>Address:</strong> {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.pincode}, {order.shippingAddress.country}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        {order.exchangeItems?.length > 0 && (
+                                                            <div className="p-2.5 bg-orange-50 rounded-lg border border-orange-200 text-[13px] text-orange-800">
+                                                                <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5">Size exchange{order.status === "exchange-requested" ? " (replacement reserved)" : ""}</p>
+                                                                {order.exchangeItems.map((x, i) => (
+                                                                    <p key={i}>{x.name} × {x.quantity}: {x.fromSize || "—"} → {x.toSize}</p>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        {order.refund?.status && (
+                                                            <div className={`p-2.5 rounded-lg border text-[13px] ${order.refund.status === "failed" ? "bg-rose-50 border-rose-200 text-rose-800" : "bg-emerald-50 border-emerald-200 text-emerald-800"}`}>
+                                                                <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5">Refund {order.refund.status}</p>
+                                                                <p>₹{Number(order.refund.amount || 0).toLocaleString("en-IN")}{order.refund.razorpayRefundId ? ` · ${order.refund.razorpayRefundId}` : ""}</p>
+                                                                {order.refund.error && <p>{order.refund.error}</p>}
+                                                            </div>
+                                                        )}
+                                                        {hasReason && (
+                                                            <div className="flex items-start gap-2 p-2.5 bg-amber-50 rounded-lg border border-amber-200">
+                                                                <HiOutlineExclamation className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                                                <div>
+                                                                    <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-0.5">
+                                                                        {order.returnReason ? "Return Reason" : order.exchangeReason ? "Exchange Reason" : "Cancellation Reason"}
+                                                                    </p>
+                                                                    <p className="text-[13px] text-amber-800">{order.returnReason || order.exchangeReason || order.cancelReason}</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                </Fragment>
                             );
                         })}
                         {filtered.length === 0 && (
