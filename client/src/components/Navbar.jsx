@@ -388,7 +388,7 @@ export default function Navbar() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex justify-center pt-20 px-4"
+                        className="fixed inset-0 z-[100] bg-slate-900/75 flex justify-center pt-20 px-4"
                         onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
                     >
                         <motion.div

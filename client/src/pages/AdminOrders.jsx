@@ -410,7 +410,7 @@ export default function AdminOrders() {
             {/* Shipping Details Modal */}
             <AnimatePresence>
                 {shippingModal && (
-                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}

@@ -813,7 +813,7 @@ export default function ProductDetail() {
                 {/* Image Lightbox Modal */}
                 {lightboxImg && (
                     <div 
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center p-4"
+                        className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center p-4"
                         onClick={() => {
                             setLightboxImg("");
                             setLightboxZoomed(false);

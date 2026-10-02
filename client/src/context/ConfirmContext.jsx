@@ -58,7 +58,7 @@ export function ConfirmProvider({ children }) {
                     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" role="dialog" aria-modal="true">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm cursor-pointer"
+                            className="fixed inset-0 bg-slate-900/70 cursor-pointer"
                             onClick={handleCancel}
                         />
                         <motion.form

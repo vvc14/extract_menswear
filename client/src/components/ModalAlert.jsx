@@ -30,7 +30,7 @@ export default function ModalAlert() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="pointer-events-auto relative w-full bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md text-white rounded-xl border border-slate-700/50 dark:border-slate-700 shadow-2xl p-4.5 flex gap-3.5 items-start overflow-hidden"
+                        className="pointer-events-auto relative w-full bg-slate-900 dark:bg-slate-800 text-white rounded-xl border border-slate-700/50 dark:border-slate-700 shadow-2xl p-4.5 flex gap-3.5 items-start overflow-hidden"
                     >
                         {/* Gold Warning Icon */}
                         <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
