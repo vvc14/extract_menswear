@@ -190,6 +190,19 @@ Checked against the official documentation for each platform, then fixed and tes
 | Slide-in animations made the About page wobble sideways | `About.jsx`, `index.css` | Fade-up instead of slide-in, plus `overflow-x: clip` on the page as a safety net (keeps sticky headers working) |
 | iOS Safari zooms in when tapping fields with text under 16 px | `index.css` | Fields use 16 px on phone-sized touch screens |
 
+## 3C. Live-Testing Issues (2026-10-02)
+
+Issues reported from testing on an iPhone through ngrok, each reproduced, root-caused, fixed and re-verified in a phone-sized browser against a production build:
+
+| Report | Root cause | Fix |
+|---|---|---|
+| Backend "Too many requests", including the coupon error | **Cart save loop**: after each save the app replaced every cart line's size list with a new array, which counted as a change and triggered another save. That was 43 saves in 10 s on the cart page, exhausting the server's 300 writes / 15 min limit within about a minute. | Only changed fields are updated, and the cart and wishlist save only when product/size/quantity actually change (`redux/cartSlice.js`, `hooks/useCartSync.js`, `hooks/useWishlistSync.js`). Verified: 0 saves when idle. Coupon limit is now per signed-in account; development gets roomier limits. |
+| iPhone screen shaking / refreshing | (1) The save loop re-rendered the page twice a second. (2) A double tap on the logo or menu links ran a full page reload (`onDoubleClick` → `window.location.href`). (3) The dev server's live-reload connection can't reach port 5173 through ngrok, so the phone kept reconnecting and reloading. (4) `overflow-x` on both `html` and `body` makes iOS scroll the body element. (5) The product page re-rendered every 15 s even without changes. | Loop fixed; double-tap reloads removed; `npm run dev:tunnel` (live reload via port 443) plus a preview workflow documented; overflow guard moved to `#root`; product refresh updates only when stock or price changed. |
+| "Server is starting up" on first open | The API began listening only after MongoDB connected and startup migrations finished, so the dev proxy got "connection refused" in that window (for example after every `node --watch` restart). | The server listens immediately and holds API requests until the DB is ready (up to 20 s); the health check reports "starting". The client retries reads on 502/503. Verified: a request at the first instant waited ~0.3 s and returned 200. Test added. |
+| MongoDB disconnecting/reconnecting | Atlas was stable: 150 s with no drops, ~40 ms pings. The messages came from server restarts (`node --watch` restarts on every server file change); the shutdown handler logged a deliberate close as "disconnected". | Shutdown now logs "Closing MongoDB connection". In development an unhandled rejection is logged instead of stopping the server (under `--watch` it would stay down until a file changed). |
+| Fabric with no products showed an empty list | No handling for a fabric link with zero results. | Shows "Fabric not available: We don't have any Linen shirts right now. Showing all shirts instead." and switches to all shirts (`Shirts.jsx`, `Trousers.jsx`). |
+| Menu/footer links didn't go to the top when tapped from the bottom of the page | Scroll-to-top only ran when the path changed, so a link to the page you're on did nothing, and the menu stayed open. | Scroll-to-top runs on every navigation (`location.key`) and jumps instantly; menu links close the menu. Verified: scroll position 3451 → 0 from both the footer and the menu. |
+
 ## 4. Remaining Findings (open)
 
 These need a business decision, an external setup step, or a larger design change. None of them is a known way to lose money or stock.

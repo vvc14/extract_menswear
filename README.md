@@ -25,6 +25,32 @@ npm install
 npm run dev                 # http://localhost:5173 (proxies /api to the API)
 ```
 
+## Testing on your phone (ngrok)
+
+Best: test the **production build**. It's what customers get: no live-reload, one small bundle, and React's development checks switched off.
+
+```bash
+cd client
+npm run build
+npx vite preview --port 5173      # serves dist/ on port 5173 and proxies /api to the API
+```
+
+For quick iterations with live reload, use the tunnel mode of the dev server instead of `npm run dev`. It makes the live-reload connection work through HTTPS tunnels; without it, phones keep reconnecting and reloading the page:
+
+```bash
+cd client
+npm run dev:tunnel
+```
+
+Then start ngrok against port 5173:
+
+- **ngrok installed on Windows:** `ngrok http 5173 --url https://<your-domain>.ngrok-free.dev`
+- **ngrok in Docker:** `docker run -it -e NGROK_AUTHTOKEN=<token> ngrok/ngrok:latest http host.docker.internal:5173 --url https://<your-domain>.ngrok-free.dev`. Use `host.docker.internal`, not `--net=host`: on Docker Desktop the container's localhost isn't your PC.
+
+Google sign-in only works on the ngrok address after it's added to the OAuth client's **Authorized JavaScript origins**.
+
+In development, React's StrictMode intentionally runs page effects twice, so each page's requests appear twice in the Network tab. Production builds don't do this.
+
 ## Checks
 
 ```bash
