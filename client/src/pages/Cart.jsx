@@ -212,6 +212,9 @@ export default function Cart() {
         if (!(await confirm("Are you sure you want to delete this address?"))) return;
         
         const updatedAddresses = addresses.filter((_, i) => i !== idx);
+        if (addresses[idx]?.isDefault && updatedAddresses.length > 0) {
+            updatedAddresses[0] = { ...updatedAddresses[0], isDefault: true };
+        }
         try {
             const { data } = await API.put("/auth/profile", { addresses: updatedAddresses });
             setAddresses(data.addresses || updatedAddresses);

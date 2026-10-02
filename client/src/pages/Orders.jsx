@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineClipboardList, HiOutlineDownload, HiOutlineRefresh, HiOutlineReply, HiOutlineX, HiOutlineShoppingCart, HiOutlineArrowLeft } from "react-icons/hi";
 import API, { apiErrorMessage } from "../services/api";
@@ -46,6 +47,8 @@ export default function Orders() {
     const [exchangeSel, setExchangeSel] = useState({});
     const [exchangeProducts, setExchangeProducts] = useState({});
 
+    const isSignedIn = useSelector((s) => !!s.auth.token);
+
     const loadOrders = () =>
         API.get("/orders")
             .then(({ data }) => setOrders(Array.isArray(data) ? data : []))
@@ -53,8 +56,13 @@ export default function Orders() {
             .finally(() => setLoading(false));
 
     useEffect(() => {
+        if (!isSignedIn) {
+            navigate("/login?redirect=/orders", { replace: true });
+            return;
+        }
         loadOrders();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSignedIn]);
 
     const showToast = (message) => {
         setToast(message);

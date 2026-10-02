@@ -118,10 +118,10 @@ export default function Profile() {
     const handleRemoveAddress = async (index) => {
         if (!(await confirm("Are you sure you want to delete this address?"))) return;
         
-        let updated = addresses.filter((_, i) => i !== index);
-        // If we deleted the default address, make the first remaining one default
+        const updated = addresses.filter((_, i) => i !== index);
+        // If we deleted the default address, make the first remaining one default (copy, don't mutate state)
         if (addresses[index]?.isDefault && updated.length > 0) {
-            updated[0].isDefault = true;
+            updated[0] = { ...updated[0], isDefault: true };
         }
 
         setAddresses(updated);
@@ -173,6 +173,8 @@ export default function Profile() {
             }
 
             const { data } = await API.put("/auth/profile", payload);
+            // Show exactly what the server saved
+            setAddresses(data.addresses || []);
 
             // A password change signs out other sessions and returns a fresh token for this one
             dispatch(loginSuccess({ token: data.token || token, user: { id: data._id, name: data.name, email: data.email, role: data.role } }));
@@ -181,8 +183,9 @@ export default function Profile() {
             setPassword(""); // Clear password fields after successful update
             setCurrentPassword("");
         } catch (err) {
-            console.error("Profile update failed:", err);
             setMessage({ type: "error", text: err.response?.data?.message || "Failed to update profile." });
+            // The change wasn't saved: reload so the page matches the account again
+            API.get("/auth/profile").then(({ data }) => setAddresses(data.addresses || [])).catch(() => {});
         } finally {
             setSaving(false);
         }

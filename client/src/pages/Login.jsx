@@ -35,17 +35,23 @@ export default function Login() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const redirect = searchParams.get("redirect") || "/";
+    // Where to go after signing in: only paths on this site ("profile" → "/profile"; never "//other.site")
+    const redirect = (() => {
+        const raw = (searchParams.get("redirect") || "/").trim();
+        if (raw === "cart") return "/cart";
+        const path = raw.startsWith("/") ? raw : `/${raw}`;
+        return path.startsWith("//") || path.includes("\\") ? "/" : path;
+    })();
     const { token, user } = useSelector((s) => s.auth);
 
     // Redirect if already logged in
     useEffect(() => {
         if (token && user) {
-            navigate(redirect === "cart" ? "/cart" : redirect);
+            navigate(redirect, { replace: true });
         }
     }, [token, user, navigate, redirect]);
 
-    const goTo = (r) => navigate(r === "cart" ? "/cart" : r);
+    const goTo = (r) => navigate(r, { replace: true });
 
     // Resend cooldown timer
     useEffect(() => {
