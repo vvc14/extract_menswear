@@ -38,7 +38,7 @@
 
 | Command | Result |
 |---|---|
-| `cd server && npm test` | **41 passed, 0 failed** (end-to-end scenarios, listed in §1, §2 and §3A) |
+| `cd server && npm test` | **44 passed, 0 failed** (end-to-end scenarios, listed in §1–§3D) |
 | `cd server && npm run lint` | Clean |
 | `cd client && npx eslint .` | Clean |
 | `cd client && npx vite build` | Succeeds |
@@ -203,6 +203,31 @@ Issues reported from testing on an iPhone through ngrok, each reproduced, root-c
 | Fabric with no products showed an empty list | No handling for a fabric link with zero results. | Shows "Fabric not available: We don't have any Linen shirts right now. Showing all shirts instead." and switches to all shirts (`Shirts.jsx`, `Trousers.jsx`). |
 | Menu/footer links didn't go to the top when tapped from the bottom of the page | Scroll-to-top only ran when the path changed, so a link to the page you're on did nothing, and the menu stayed open. | Scroll-to-top runs on every navigation (`location.key`) and jumps instantly; menu links close the menu. Verified: scroll position 3451 → 0 from both the footer and the menu. |
 
+## 3D. Final Pre-Launch Pass (2026-10-02)
+
+The last function-by-function review across client and server, then a full re-run of every check.
+
+| Issue | Where | Fix |
+|---|---|---|
+| Typing in the "Manage options" panel switched the product form's category (a shirt could be saved as a trouser); option saves ignored errors | `client/src/pages/AdminProducts.jsx` | Separate text box per category and option type; duplicate check; Enter adds; errors shown |
+| Product delete and bulk shipping failures were silent | `AdminProducts.jsx` | Alerts with the server's message |
+| Settings save showed a generic error instead of the server's reason | `AdminSettings.jsx` | Shows the server message |
+| Invoice download (and server invoice PDF) crashed on an order line without a price | `client/src/utils/invoiceGenerator.js`, `server/utils/pdfGenerator.js`, `Orders.jsx`, `Wishlist.jsx` | Missing values treated as 0 |
+| Any DNS hiccup rejected real emails at sign-up ("domain does not exist", even for Gmail) | `server/utils/emailValidator.js` | Rejects only domains that don't exist; accepts domains without an MX record (RFC 5321); 4 s timeout |
+| New high-severity `axios` advisory | `server/package-lock.json`, `client/package-lock.json` | Upgraded to 1.20.0 (non-breaking); 0 production vulnerabilities |
+| Text selection used custom colours | `client/src/index.css` | Browser default |
+| Expanding an invoice in admin pushed the table's columns off screen on laptops | `AdminOrders.jsx` | Details in a full-width row (items and totals, then delivery, exchange, refund and reason) |
+| Sign-in from Profile went to a 404; addresses could show unsaved changes; signed-out "My Orders" showed "No orders yet"; products over ₹10,000 hidden on first load | `Login.jsx`, `Profile.jsx`, `Cart.jsx`, `Orders.jsx`, `Shirts.jsx`, `Trousers.jsx`, `FilterSidebar.jsx`, `filterLogic.js` | Fixed (see the commit history) |
+
+**Final verification:**
+- `npm test`: 44/44.
+- ESLint clean on both projects; client production build succeeds.
+- `npm audit --omit=dev`: 0 vulnerabilities on both.
+- Production-mode boot: health OK, CORS and security headers correct.
+- 130 page/width layout checks: 0 problems, 0 JavaScript errors.
+- Each page makes its API requests once.
+- Fabric fallback, scroll-to-top, menu, sign-in redirect, cancel dialog and redirect-mode payment callback all verified.
+
 ## 4. Remaining Findings (open)
 
 These need a business decision, an external setup step, or a larger design change. None of them is a known way to lose money or stock.
@@ -227,7 +252,7 @@ These need a business decision, an external setup step, or a larger design chang
 
 ## 5. Executive Summary
 
-**Overall:** the business-critical core is now sound and tested. That covers checkout pricing, per-size stock, payment confirmation, refunds, coupons and the order lifecycle, with 41 end-to-end scenarios including concurrency and replay attacks. The re-audit found one more High-severity payment race and two Medium gaps, all fixed and tested on this branch.
+**Overall:** the business-critical core is now sound and tested. That covers checkout pricing, per-size stock, payment confirmation, refunds, coupons and the order lifecycle, with 44 end-to-end scenarios including concurrency and replay attacks. The re-audit found one more High-severity payment race and two Medium gaps, all fixed and tested on this branch.
 
 **Must do before launch (setup, not code):**
 1. Rotate `JWT_SECRET`.
