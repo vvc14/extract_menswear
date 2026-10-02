@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import API from "../services/api";
+import { useDispatch } from "react-redux";
+import { showAlert } from "../redux/alertSlice";
 import { buildQueryString } from "../utils/filterLogic";
 import ProductCard from "../components/ProductCard";
 import FilterSidebar from "../components/FilterSidebar";
@@ -10,6 +12,7 @@ const PER_PAGE = 12;
 
 export default function Shirts() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const location = useLocation();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -54,6 +57,16 @@ export default function Shirts() {
             const qs = buildQueryString({ ...f, category: "shirt", sort: sortBy });
             const { data } = await API.get(`/products?${qs}&page=${pageNum}&limit=${PER_PAGE}`);
             if (seq !== requestSeq.current) return;
+            // Arrived from a fabric link (e.g. the home page) and nothing matches: say so and show everything
+            const linkedFabric = new URLSearchParams(window.location.search).get("fabric");
+            if (pageNum === 1 && linkedFabric && data.products && data.total === 0) {
+                dispatch(showAlert({
+                    title: "Fabric not available",
+                    message: `We don't have any ${linkedFabric} shirts right now. Showing all shirts instead.`,
+                }));
+                navigate("/shirts", { replace: true });
+                return;
+            }
             if (data.products) {
                 setProducts(prev => append ? [...prev, ...data.products] : data.products);
                 setHasMore(data.hasMore);
@@ -75,7 +88,7 @@ export default function Shirts() {
                 setLoadingMore(false);
             }
         }
-    }, [sortBy]);
+    }, [sortBy, dispatch, navigate]);
 
     // Reset to page 1 when filters or sort change
     useEffect(() => {
