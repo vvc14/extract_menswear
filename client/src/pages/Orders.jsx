@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineClipboardList, HiOutlineDownload, HiOutlineRefresh, HiOutlineReply, HiOutlineX, HiOutlineShoppingCart, HiOutlineArrowLeft } from "react-icons/hi";
 import API, { apiErrorMessage } from "../services/api";
@@ -19,6 +19,21 @@ const STATUS_STYLES = {
 
 export default function Orders() {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Back from the bank (redirect-mode payment on phones) with something to explain
+    useEffect(() => {
+        const status = new URLSearchParams(location.search).get("payment");
+        if (status === "pending") {
+            setToast("We're confirming your payment. If money was deducted, the order will appear here within a few minutes. Please don't pay again.");
+        } else if (status === "refunded") {
+            setToast("An item sold out while you were paying. The order was cancelled and a full refund has been started.");
+        } else {
+            return;
+        }
+        setTimeout(() => setToast(""), 8000);
+        navigate("/orders", { replace: true });
+    }, [location.search, navigate]);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState(null); // { type: "return"|"exchange", orderId }

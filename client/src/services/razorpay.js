@@ -27,6 +27,20 @@ const CHECKOUT_TIMEOUT_SECONDS = 15 * 60;
  * onDismiss()          — customer closed Checkout or it timed out without a successful payment
  * onFailure(message)   — SDK failed to load, or a payment attempt failed (Checkout stays open for retry)
  */
+// Phones and tablets: mobile browsers (iOS Safari, Brave, in-app browsers) block the pop-up window
+// Razorpay opens for net banking and some wallets, so the payment fails. Redirect mode sends the
+// whole page to the bank instead and Razorpay posts the result to our callback URL.
+export const shouldUseRedirect = () =>
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); // iPadOS reports as Mac
+
+// Absolute URL of the API callback that receives redirect-mode results
+export const razorpayCallbackUrl = () => {
+    const base = import.meta.env.VITE_API_URL || "/api";
+    const apiBase = /^https?:\/\//i.test(base) ? base : `${window.location.origin}${base}`;
+    return `${apiBase.replace(/\/+$/, "")}/payment/razorpay/callback?return=${encodeURIComponent(window.location.origin)}`;
+};
+
 export const initiateRazorpayPayment = async ({ orderId, amount, currency, prefill, onSuccess, onDismiss, onFailure }) => {
     const loaded = await loadRazorpayScript();
     if (!loaded || !window.Razorpay) {
@@ -47,6 +61,9 @@ export const initiateRazorpayPayment = async ({ orderId, amount, currency, prefi
         prefill: prefill || {},
         timeout: CHECKOUT_TIMEOUT_SECONDS,
         retry: { enabled: true },
+        // On phones: full-page redirect to the bank instead of a (blocked) pop-up; the result is
+        // posted to our server, which verifies it and sends the shopper to the success page
+        ...(shouldUseRedirect() ? { redirect: true, callback_url: razorpayCallbackUrl() } : {}),
         handler: (response) => {
             completed = true;
             onSuccess?.(response);

@@ -245,6 +245,70 @@ export const verifyPayment = async (req, res) => {
     }
 };
 
+// Where to send the shopper after a redirect-mode payment. Only our own storefront origins are
+// accepted (never an arbitrary URL from the query string).
+const safeReturnOrigin = (raw) => {
+    const fallback = (process.env.CLIENT_URL || "").replace(/\/+$/, "");
+    if (typeof raw !== "string" || !raw) return fallback;
+    let origin;
+    try {
+        origin = new URL(raw).origin;
+    } catch {
+        return fallback;
+    }
+    const allowed = [process.env.CLIENT_URL, ...(process.env.CORS_ORIGINS || "").split(",")]
+        .map((o) => (o || "").trim().replace(/\/+$/, ""))
+        .filter(Boolean);
+    if (allowed.includes(origin)) return origin;
+    // Local development / phone testing through a tunnel
+    if (process.env.NODE_ENV !== "production" && /^(https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?|https:\/\/[a-z0-9-]+\.ngrok(-free)?\.(app|dev))$/i.test(origin)) {
+        return origin;
+    }
+    return fallback;
+};
+
+// POST /api/payment/razorpay/callback?return=<storefront origin>
+// Redirect-mode Checkout (used on phones): instead of opening a pop-up for net banking/wallets
+// — which iOS browsers such as Brave and Safari block — the whole page goes to the bank and
+// Razorpay then POSTs the result here as a form. We verify it and send the shopper back.
+export const razorpayCallback = async (req, res) => {
+    const returnTo = safeReturnOrigin(req.query.return);
+    const back = (path) => res.redirect(303, `${returnTo}${path}`);
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
+
+        // Payment failed or was cancelled at the bank
+        if (!razorpay_payment_id) {
+            const reason = typeof req.body?.error?.description === "string" ? req.body.error.description.slice(0, 200) : "Payment was not completed";
+            let failedOrderId = null;
+            try {
+                failedOrderId = JSON.parse(req.body?.error?.metadata || "{}").order_id || null;
+            } catch { /* metadata is optional */ }
+            if (failedOrderId) {
+                const order = await Order.findOne({ razorpayOrderId: String(failedOrderId) }).select("_id status").lean();
+                if (order?.status === "created") await failUnpaidOrder(order._id, `Payment failed: ${reason}`, "razorpay-callback");
+            }
+            return back(`/cart?payment=failed&reason=${encodeURIComponent(reason)}`);
+        }
+
+        if (typeof razorpay_order_id !== "string" || !isHex(razorpay_signature)) throw httpError(400, "Payment verification failed");
+        const expected = Buffer.from(
+            crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex"),
+            "hex"
+        );
+        const given = Buffer.from(razorpay_signature, "hex");
+        if (expected.length !== given.length || !crypto.timingSafeEqual(expected, given)) throw httpError(400, "Payment verification failed");
+
+        const { order, cancelled } = await markOrderPaid({ razorpayOrderId: razorpay_order_id, razorpayPaymentId: razorpay_payment_id, source: "callback" });
+        if (cancelled || order.status === "cancelled") return back("/orders?payment=refunded");
+        return back(`/payment-success?orderId=${encodeURIComponent(String(order._id))}&invoice=${encodeURIComponent(order.invoiceNumber || "")}`);
+    } catch (error) {
+        console.error("Payment callback error:", error.message);
+        // The webhook still confirms genuine payments; tell the shopper not to pay twice
+        return back("/orders?payment=pending");
+    }
+};
+
 // POST /api/payment/razorpay/cancel — customer closed Checkout without paying
 export const cancelPendingOrder = async (req, res) => {
     try {

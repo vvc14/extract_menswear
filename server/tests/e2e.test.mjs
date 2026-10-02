@@ -342,6 +342,39 @@ await test("order expiring at the same moment it is paid still ends up paid", as
     assert.equal(await stockOf(p._id, "S"), 1, "stock taken exactly once");
 });
 
+await test("phone redirect payment: success redirects to the order, signature checked", async () => {
+    const u = await makeUser();
+    const p = await makeProduct();
+    const res = await checkout(u.auth, [{ productId: p._id, size: "M", quantity: 1 }]);
+    const body = pay(res.body.orderId);
+    const cb = (form, ret = "http://localhost:5173") =>
+        request(app).post(`/api/payment/razorpay/callback?return=${encodeURIComponent(ret)}`).type("form").send(form);
+    const bad = await cb({ ...body, razorpay_signature: "00".repeat(32) });
+    assert.equal(bad.status, 303);
+    assert.match(bad.headers.location, /\/orders\?payment=pending$/);
+    assert.equal((await Order.findOne({ razorpayOrderId: res.body.orderId })).status, "created");
+    const ok = await cb(body);
+    assert.equal(ok.status, 303);
+    const order = await Order.findOne({ razorpayOrderId: res.body.orderId });
+    assert.equal(order.status, "paid");
+    assert.equal(ok.headers.location, `http://localhost:5173/payment-success?orderId=${order._id}&invoice=${encodeURIComponent(order.invoiceNumber)}`);
+    // Never redirect to a foreign site
+    const evil = await cb(body, "https://evil.example");
+    assert.ok(!evil.headers.location.startsWith("https://evil.example"));
+});
+await test("phone redirect payment: failure releases stock and returns to the cart", async () => {
+    const u = await makeUser();
+    const p = await makeProduct();
+    const res = await checkout(u.auth, [{ productId: p._id, size: "S", quantity: 2 }]);
+    assert.equal(await stockOf(p._id, "S"), 0);
+    const r = await request(app).post(`/api/payment/razorpay/callback?return=${encodeURIComponent("http://localhost:5173")}`).type("form")
+        .send({ "error[code]": "BAD_REQUEST_ERROR", "error[description]": "Payment failed at bank", "error[metadata]": JSON.stringify({ order_id: res.body.orderId }) });
+    assert.equal(r.status, 303);
+    assert.equal(r.headers.location, "http://localhost:5173/cart?payment=failed&reason=Payment%20failed%20at%20bank");
+    assert.equal((await Order.findOne({ razorpayOrderId: res.body.orderId })).status, "failed");
+    assert.equal(await stockOf(p._id, "S"), 2);
+});
+
 console.log("\nCoupons");
 await test("usage limit holds under concurrency; failure releases the use", async () => {
     await Coupon.create({ code: "ONE", discountType: "fixed", discountValue: 100, usageLimit: 1 });

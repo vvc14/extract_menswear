@@ -1,20 +1,30 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { clearCart } from "../redux/cartSlice";
 import { motion } from "framer-motion";
 import { HiOutlineCheckCircle, HiOutlineDownload, HiOutlineClipboardList } from "react-icons/hi";
 import API from "../services/api";
 import { generateInvoicePDF } from "../utils/invoiceGenerator";
 
 export default function PaymentSuccess() {
-    const { state } = useLocation();
+    const location = useLocation();
+    const dispatch = useDispatch();
+    // Arrives either from the in-page Checkout (router state) or from the bank redirect (query string)
+    const query = new URLSearchParams(location.search);
+    const state = {
+        orderId: location.state?.orderId || query.get("orderId"),
+        invoiceNumber: location.state?.invoiceNumber || query.get("invoice"),
+    };
     const [order, setOrder] = useState(null);
     const [downloading, setDownloading] = useState(false);
 
     useEffect(() => {
-        if (state?.orderId) {
+        if (state.orderId) {
+            dispatch(clearCart());
             API.get(`/orders/${state.orderId}`).then(({ data }) => setOrder(data)).catch(() => {});
         }
-    }, [state]);
+    }, [state.orderId, dispatch]);
 
     const handleDownload = async () => {
         if (!order) return;

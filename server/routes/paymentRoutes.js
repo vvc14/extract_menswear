@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { createOrder, verifyPayment, cancelPendingOrder } from "../controllers/paymentController.js";
+import { createOrder, verifyPayment, cancelPendingOrder, razorpayCallback } from "../controllers/paymentController.js";
 import { userAuth } from "../middleware/auth.js";
 
 const router = Router();
@@ -19,6 +19,8 @@ const checkoutLimiter = rateLimit({
 router.post("/razorpay/order", userAuth, checkoutLimiter, createOrder);
 router.post("/razorpay/verify", verifyPayment);
 router.post("/razorpay/cancel", userAuth, cancelPendingOrder);
+// Redirect-mode result from Razorpay (form POST from the browser; verified by signature, no session needed)
+router.post("/razorpay/callback", razorpayCallback);
 // The webhook is mounted in server.js with a raw body parser
 
 export default router;

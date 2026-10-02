@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity, clearCart, updateCartStocks, MAX_QTY_PER_LINE } from "../redux/cartSlice";
 import { showAlert } from "../redux/alertSlice";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { initiateRazorpayPayment } from "../services/razorpay";
 import API, { apiErrorMessage } from "../services/api";
 import { stockForSize } from "../utils/stock";
@@ -21,6 +21,18 @@ export default function Cart() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const confirm = useConfirm();
+    const location = useLocation();
+
+    // Back from the bank (redirect-mode payment on phones) after a failed or cancelled payment
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get("payment") !== "failed") return;
+        dispatch(showAlert({
+            title: "Payment not completed",
+            message: `${params.get("reason") || "The payment was not completed."} Your cart is still here, so you can try again.`,
+        }));
+        navigate("/cart", { replace: true });
+    }, [location.search, dispatch, navigate]);
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
