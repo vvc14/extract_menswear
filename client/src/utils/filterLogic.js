@@ -6,7 +6,8 @@ export const buildQueryString = (filters) => {
     if (filters.style?.length) params.set("style", filters.style.join(","));
     if (filters.size?.length) params.set("size", filters.size.join(","));
     if (filters.minPrice != null && filters.minPrice > 0) params.set("minPrice", filters.minPrice);
-    if (filters.maxPrice != null && filters.maxPrice >= 0) params.set("maxPrice", filters.maxPrice);
+    // 100000 is the sidebar's "no maximum" value; don't send it as a real limit
+    if (filters.maxPrice != null && filters.maxPrice >= 0 && filters.maxPrice < 100000) params.set("maxPrice", filters.maxPrice);
     if (filters.sort) params.set("sort", filters.sort);
 
     return params.toString();

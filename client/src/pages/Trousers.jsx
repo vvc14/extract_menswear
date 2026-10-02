@@ -28,8 +28,8 @@ export default function Trousers() {
         fabric: urlFabric ? [urlFabric] : [], 
         style: [], 
         size: [], 
-        minPrice: 0, 
-        maxPrice: 10000 
+        minPrice: 0,
+        maxPrice: null, // no price limit until the shopper picks one
     });
     const [sortBy, setSortBy] = useState("newest");
     const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -198,7 +198,7 @@ export default function Trousers() {
                 <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
                     {/* Filter sidebar */}
                     <div className={`${showMobileFilter ? "block" : "hidden"} lg:block w-full lg:w-[260px] shrink-0`}>
-                        <FilterSidebar category="trouser" onFilterChange={setFilters} />
+                        <FilterSidebar category="trouser" selectedFabric={urlFabric || ""} onFilterChange={setFilters} />
                     </div>
 
                     {/* Product grid */}

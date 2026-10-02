@@ -28,8 +28,13 @@ function FilterSection({ title, defaultOpen = false, children }) {
     );
 }
 
-export default function FilterSidebar({ category, onFilterChange }) {
-    const [selectedFabrics, setSelectedFabrics] = useState([]);
+export default function FilterSidebar({ category, selectedFabric = "", onFilterChange }) {
+    const [selectedFabrics, setSelectedFabrics] = useState(selectedFabric ? [selectedFabric] : []);
+
+    // Keep in sync when the fabric in the URL changes (links from the home page, fallback to all items)
+    useEffect(() => {
+        setSelectedFabrics(selectedFabric ? [selectedFabric] : []);
+    }, [selectedFabric]);
     const [selectedStyles, setSelectedStyles] = useState([]);
     const [selectedSizes, setSelectedSizes] = useState([]);
     const [priceRange, setPriceRange] = useState([0, 100000]); // Use a safe large default initially
