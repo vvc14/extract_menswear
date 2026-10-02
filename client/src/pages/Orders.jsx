@@ -5,6 +5,7 @@ import { HiOutlineClipboardList, HiOutlineDownload, HiOutlineRefresh, HiOutlineR
 import API, { apiErrorMessage } from "../services/api";
 import { stockForSize } from "../utils/stock";
 import { generateInvoicePDF } from "../utils/invoiceGenerator";
+import { usePrompt } from "../context/ConfirmContext";
 
 const STATUS_STYLES = {
     paid: { bg: "bg-emerald-50 dark:bg-emerald-900/30", text: "text-emerald-700 dark:text-emerald-400", label: "Paid" },
@@ -19,6 +20,7 @@ const STATUS_STYLES = {
 
 export default function Orders() {
     const navigate = useNavigate();
+    const prompt = usePrompt();
     const location = useLocation();
 
     // Back from the bank (redirect-mode payment on phones) with something to explain
@@ -88,7 +90,14 @@ export default function Orders() {
     };
 
     const handleCancelOrder = async (orderId) => {
-        const reason = window.prompt("Please enter a reason for cancellation (optional):");
+        const reason = await prompt({
+            title: "Cancel this order?",
+            message: "Your items will be released and a full refund will be sent to your original payment method.",
+            label: "Reason for cancelling (optional)",
+            placeholder: "e.g. Ordered the wrong size",
+            confirmLabel: "Cancel Order",
+            cancelLabel: "Keep Order",
+        });
         if (reason === null) return;
         setSubmitting(true);
         try {
