@@ -46,10 +46,42 @@ app.use(cors({
 //     registered before the JSON parser and sanitisers ───
 app.post("/api/payment/razorpay/webhook", express.raw({ type: "application/json", limit: "1mb" }), razorpayWebhook);
 
+// ─── Startup gate ───
+// server.js starts listening before MongoDB is connected (so the host and the dev proxy never
+// see "connection refused") and marks the app ready once the DB and startup migrations are done.
+// Until then API requests wait briefly instead of failing. Ready by default (e.g. in tests).
+export const startupGate = { ready: true, waiters: [] };
+export const markStarting = () => { startupGate.ready = false; };
+export const markReady = () => {
+    startupGate.ready = true;
+    startupGate.waiters.splice(0).forEach((resolve) => resolve(true));
+};
+const waitUntilReady = (ms) =>
+    startupGate.ready
+        ? Promise.resolve(true)
+        : new Promise((resolve) => {
+            startupGate.waiters.push(resolve);
+            setTimeout(() => resolve(false), ms).unref?.();
+        });
+
+// Health check (used by the host to decide when a new deploy can take traffic)
+app.get("/api/health", (_, res) => {
+    const dbReady = mongoose.connection.readyState === 1 && startupGate.ready;
+    res.status(dbReady ? 200 : 503).json({ status: dbReady ? "ok" : "starting", db: mongoose.connection.readyState === 1 ? "connected" : "disconnected" });
+});
+
+app.use("/api", async (req, res, next) => {
+    if (await waitUntilReady(20000)) return next();
+    res.status(503).set("Retry-After", "3").json({ message: "Server is starting, please retry in a moment." });
+});
+
+// Development (everything comes from one machine/IP) gets roomier limits; production is strict
+const isStrict = ["production", "test"].includes(process.env.NODE_ENV);
+
 // ─── Rate limiting — global ───
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 300,
+    limit: isStrict ? 300 : 3000,
     skip: (req) => req.method === "GET",
     standardHeaders: true,
     legacyHeaders: false,
@@ -58,7 +90,7 @@ app.use(rateLimit({
 // Looser limit for reads (search/list endpoints hit the database)
 app.use(rateLimit({
     windowMs: 60 * 1000,
-    limit: 600,
+    limit: isStrict ? 600 : 6000,
     skip: (req) => req.method !== "GET",
     standardHeaders: true,
     legacyHeaders: false,
@@ -82,12 +114,6 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/coupons", couponRoutes);
-
-// Health check (used by the host to decide when a new deploy can take traffic)
-app.get("/api/health", (_, res) => {
-    const dbReady = mongoose.connection.readyState === 1;
-    res.status(dbReady ? 200 : 503).json({ status: dbReady ? "ok" : "starting", db: dbReady ? "connected" : "disconnected" });
-});
 
 app.use("/api", (req, res) => res.status(404).json({ message: "Not found" }));
 

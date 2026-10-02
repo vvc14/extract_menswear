@@ -20,7 +20,7 @@ if (isProduction && !process.env.CLIENT_URL?.startsWith("https://")) {
 }
 
 // Load the app only after the environment has been validated (static imports would run first)
-const { default: app } = await import("./app.js");
+const { default: app, markStarting, markReady } = await import("./app.js");
 const { default: connectDB } = await import("./config/db.js");
 const { default: mongoose } = await import("mongoose");
 const { expireStaleOrders } = await import("./services/orderService.js");
@@ -53,10 +53,14 @@ const shutdown = (signal, exitCode = 0) => {
     }, 25_000);
     forceExit.unref();
 
-    const closeDb = () =>
-        mongoose.connection.close(false)
+    const closeDb = () => {
+        // A deliberate close isn't a connection problem: don't log it as "disconnected"
+        mongoose.connection.removeAllListeners("disconnected");
+        console.log("Closing MongoDB connection");
+        return mongoose.connection.close(false)
             .catch((err) => console.error("Error closing MongoDB connection:", err.message))
             .finally(() => process.exit(exitCode));
+    };
 
     if (server) {
         server.close(() => closeDb());
@@ -69,22 +73,34 @@ const shutdown = (signal, exitCode = 0) => {
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
-// An unhandled rejection means a bug; log it and restart cleanly instead of running in an unknown state
+// An unhandled rejection means a bug. In production, log it and restart cleanly (the host
+// restarts the process). In development, only log: under `node --watch` an exit would leave the
+// server down until a file changes.
 process.on("unhandledRejection", (reason) => {
     console.error("Unhandled promise rejection:", reason);
-    shutdown("unhandledRejection", 1);
+    if (isProduction) shutdown("unhandledRejection", 1);
 });
+
+// Start listening right away so the host's health check and the dev proxy get an answer
+// ("starting") instead of "connection refused"; API requests wait until the DB is ready.
+markStarting();
+server = app.listen(PORT, HOST, () => console.log(`Server listening on http://${HOST}:${PORT} (connecting to MongoDB…)`));
+server.on("error", (err) => {
+    console.error(err.code === "EADDRINUSE" ? `Port ${PORT} is already in use — is another copy of the server running?` : `Server error: ${err.message}`);
+    process.exit(1);
+});
+// Keep-alive longer than typical load-balancer idle timeouts to avoid 502s on reused sockets
+server.keepAliveTimeout = 65_000;
+server.headersTimeout = 66_000;
 
 connectDB()
     .then(async () => {
         await runStartupMigrations();
+        markReady();
+        console.log("Server ready");
         // Release stock held by unpaid orders whose payment window has passed
         expiryTimer = setInterval(() => expireStaleOrders().catch((err) => console.error("Order expiry job error:", err.message)), 60 * 1000);
         expireStaleOrders().catch((err) => console.error("Order expiry job error:", err.message));
-        server = app.listen(PORT, HOST, () => console.log(`Server running on http://${HOST}:${PORT}`));
-        // Keep-alive longer than typical load-balancer idle timeouts to avoid 502s on reused sockets
-        server.keepAliveTimeout = 65_000;
-        server.headersTimeout = 66_000;
     })
     .catch((err) => {
         console.error("Startup failed:", err);

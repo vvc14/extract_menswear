@@ -19,7 +19,7 @@ delete process.env.MAILJET_API_KEY;
 const mongo = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
 await mongoose.connect(mongo.getUri());
 
-const { default: app } = await imp("app.js");
+const { default: app, markStarting, markReady } = await imp("app.js");
 const { runStartupMigrations } = await imp("utils/startupMigrations.js");
 const { expireStaleOrders, failUnpaidOrder } = await imp("services/orderService.js");
 const { signUserToken, signAdminToken, signOtpToken } = await imp("utils/tokens.js");
@@ -167,6 +167,18 @@ await test("health check reports database readiness", async () => {
     const r = await request(app).get("/api/health");
     assert.equal(r.status, 200);
     assert.equal(r.body.db, "connected");
+});
+
+await test("requests during startup wait for the database instead of failing", async () => {
+    markStarting();
+    const pending = request(app).get("/api/products").query({ limit: 1 });
+    const health = await request(app).get("/api/health");
+    assert.equal(health.status, 503);
+    assert.equal(health.body.status, "starting");
+    setTimeout(markReady, 300);
+    const res = await pending;
+    assert.equal(res.status, 200);
+    assert.equal((await request(app).get("/api/health")).status, 200);
 });
 
 console.log("\nCheckout validation");

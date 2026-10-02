@@ -38,15 +38,15 @@ API.interceptors.response.use(
     async (error) => {
         const config = error.config || {};
 
-        // Retry once on network errors / 502 — but only for idempotent reads.
-        // Replaying a POST (e.g. checkout or payment verification) could duplicate it.
-        if (
-            !config._retried &&
-            SAFE_METHODS.includes((config.method || "get").toLowerCase()) &&
-            (error.message === "Network Error" || error.response?.status === 502)
-        ) {
-            config._retried = true;
-            await new Promise((r) => setTimeout(r, 1000));
+        // While the server is starting (503) or briefly unreachable (network error / 502 from a proxy),
+        // retry reads up to 3 times with a growing delay instead of showing an error.
+        // Only idempotent reads: replaying a POST (e.g. checkout or payment verification) could duplicate it.
+        const status = error.response?.status;
+        const transient = error.message === "Network Error" || status === 502 || status === 503 || status === 504;
+        config._retries = config._retries || 0;
+        if (transient && config._retries < 3 && SAFE_METHODS.includes((config.method || "get").toLowerCase())) {
+            config._retries += 1;
+            await new Promise((r) => setTimeout(r, 1000 * config._retries));
             return API(config);
         }
 
