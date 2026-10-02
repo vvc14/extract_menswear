@@ -23,9 +23,8 @@ export default function AdminProducts() {
     const [bulkShipping, setBulkShipping] = useState("");
     const [bulkUpdating, setBulkUpdating] = useState(false);
     const [catOptions, setCatOptions] = useState({ shirt: { fabrics: [], styles: [], sizes: [] }, trouser: { fabrics: [], styles: [], sizes: [] } });
-    const [newFabric, setNewFabric] = useState("");
-    const [newStyle, setNewStyle] = useState("");
-    const [newSize, setNewSize] = useState("");
+    // Text boxes of the "Manage options" panel, keyed "shirt:fabrics", "trouser:sizes", ...
+    const [optionInputs, setOptionInputs] = useState({});
     const [customSizeInput, setCustomSizeInput] = useState("");
     const [showManage, setShowManage] = useState(false);
     const [objectUrls, setObjectUrls] = useState([]);
@@ -210,11 +209,39 @@ export default function AdminProducts() {
         if (!(await confirm("Delete this product?"))) return;
         try {
             await API.delete(`/admin/products/${id}`);
+            setSelectedIds((prev) => prev.filter((x) => x !== id));
             fetchProducts();
         } catch (err) {
-            console.error("Failed to delete:", err);
+            dispatch(showAlert({ title: "Could not delete product", message: apiErrorMessage(err) }));
         }
     };
+
+    // Add/remove a fabric, style or size for a category
+    const saveCategoryOption = async (cat, field, values) => {
+        try {
+            await API.put("/admin/category-options", { category: cat, [field]: values });
+            await fetchCatOptions();
+            return true;
+        } catch (err) {
+            dispatch(showAlert({ title: "Could not save option", message: apiErrorMessage(err) }));
+            return false;
+        }
+    };
+    const addCategoryOption = async (cat, field) => {
+        const key = `${cat}:${field}`;
+        const value = (optionInputs[key] || "").trim();
+        if (!value) return;
+        const current = catOptions[cat]?.[field] || [];
+        if (current.some((v) => v.toLowerCase() === value.toLowerCase())) {
+            dispatch(showAlert({ title: "Already added", message: `"${value}" is already in the list.` }));
+            return;
+        }
+        if (await saveCategoryOption(cat, field, [...current, value])) {
+            setOptionInputs((prev) => ({ ...prev, [key]: "" }));
+        }
+    };
+    const removeCategoryOption = (cat, field, value) =>
+        saveCategoryOption(cat, field, (catOptions[cat]?.[field] || []).filter((v) => v !== value));
 
     const toggleSelect = (id) => {
         setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
@@ -232,7 +259,7 @@ export default function AdminProducts() {
             setBulkShipping("");
             fetchProducts();
         } catch (err) {
-            console.error("Bulk shipping update failed:", err);
+            dispatch(showAlert({ title: "Could not update shipping", message: apiErrorMessage(err) }));
         }
         setBulkUpdating(false);
     };
@@ -545,86 +572,31 @@ export default function AdminProducts() {
                                     <div key={cat} style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
                                         <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0f172a", textTransform: "capitalize", borderBottom: "1px solid #f1f5f9", paddingBottom: "16px", margin: 0 }}>{cat} Options</h3>
 
-                                        {/* Fabrics */}
-                                        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                                            <p style={{ fontSize: "13px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>Fabrics</p>
-                                            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                                                {(catOptions[cat]?.fabrics || []).map((f) => (
-                                                    <span key={f} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#f1f5f9", color: "#334155", fontSize: "14px", fontWeight: 500, padding: "8px 16px", borderRadius: "12px" }}>
-                                                        {f}
-                                                        <button onClick={async () => {
-                                                            const updated = catOptions[cat].fabrics.filter((x) => x !== f);
-                                                            await API.put("/admin/category-options", { category: cat, fabrics: updated });
-                                                            fetchCatOptions();
-                                                        }} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "16px", padding: "0 2px", lineHeight: 1 }}>×</button>
-                                                    </span>
-                                                ))}
+                                        {[["fabrics", "Fabrics", "New fabric..."], ["styles", "Styles / Types", "New style..."], ["sizes", "Sizes", "New size..."]].map(([field, label, placeholder]) => (
+                                            <div key={field} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                                <p style={{ fontSize: "13px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>{label}</p>
+                                                <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                                                    {(catOptions[cat]?.[field] || []).map((v) => (
+                                                        <span key={v} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#f1f5f9", color: "#334155", fontSize: "14px", fontWeight: 500, padding: "8px 16px", borderRadius: "12px" }}>
+                                                            {v}
+                                                            <button type="button" onClick={() => removeCategoryOption(cat, field, v)} aria-label={`Remove ${v}`} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "16px", padding: "0 2px", lineHeight: 1 }}>×</button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                                <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
+                                                    <input
+                                                        type="text"
+                                                        placeholder={placeholder}
+                                                        value={optionInputs[`${cat}:${field}`] || ""}
+                                                        onChange={(e) => setOptionInputs((prev) => ({ ...prev, [`${cat}:${field}`]: e.target.value }))}
+                                                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCategoryOption(cat, field); } }}
+                                                        className="min-w-0"
+                                                        style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px 16px", fontSize: "15px", borderRadius: "12px", outline: "none" }}
+                                                    />
+                                                    <button type="button" onClick={() => addCategoryOption(cat, field)} style={{ background: "#0f172a", color: "#fff", fontSize: "15px", fontWeight: 700, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer", flexShrink: 0 }}>Add</button>
+                                                </div>
                                             </div>
-                                            <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
-                                                <input type="text" placeholder="New fabric..." value={cat === form.category ? newFabric : ""} onChange={(e) => { setForm(f => ({...f, category: cat})); setNewFabric(e.target.value); }} style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px 16px", fontSize: "15px", borderRadius: "12px", outline: "none" }} />
-                                                <button onClick={async () => {
-                                                    if (!newFabric.trim()) return;
-                                                    const updated = [...(catOptions[cat]?.fabrics || []), newFabric.trim()];
-                                                    await API.put("/admin/category-options", { category: cat, fabrics: updated });
-                                                    setNewFabric("");
-                                                    fetchCatOptions();
-                                                }} style={{ background: "#0f172a", color: "#fff", fontSize: "15px", fontWeight: 700, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer" }}>Add</button>
-                                            </div>
-                                        </div>
-
-                                        {/* Styles */}
-                                        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                                            <p style={{ fontSize: "13px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>Styles / Types</p>
-                                            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                                                {(catOptions[cat]?.styles || []).map((s) => (
-                                                    <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#f1f5f9", color: "#334155", fontSize: "14px", fontWeight: 500, padding: "8px 16px", borderRadius: "12px" }}>
-                                                        {s}
-                                                        <button onClick={async () => {
-                                                            const updated = catOptions[cat].styles.filter((x) => x !== s);
-                                                            await API.put("/admin/category-options", { category: cat, styles: updated });
-                                                            fetchCatOptions();
-                                                        }} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "16px", padding: "0 2px", lineHeight: 1 }}>×</button>
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
-                                                <input type="text" placeholder="New style..." value={cat === form.category ? newStyle : ""} onChange={(e) => { setForm(f => ({...f, category: cat})); setNewStyle(e.target.value); }} style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px 16px", fontSize: "15px", borderRadius: "12px", outline: "none" }} />
-                                                <button onClick={async () => {
-                                                    if (!newStyle.trim()) return;
-                                                    const updated = [...(catOptions[cat]?.styles || []), newStyle.trim()];
-                                                    await API.put("/admin/category-options", { category: cat, styles: updated });
-                                                    setNewStyle("");
-                                                    fetchCatOptions();
-                                                }} style={{ background: "#0f172a", color: "#fff", fontSize: "15px", fontWeight: 700, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer" }}>Add</button>
-                                            </div>
-                                        </div>
-
-                                        {/* Sizes */}
-                                        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                                            <p style={{ fontSize: "13px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>Sizes</p>
-                                            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                                                {(catOptions[cat]?.sizes || []).map((sz) => (
-                                                    <span key={sz} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#f1f5f9", color: "#334155", fontSize: "14px", fontWeight: 500, padding: "8px 16px", borderRadius: "12px" }}>
-                                                        {sz}
-                                                        <button onClick={async () => {
-                                                            const updated = (catOptions[cat]?.sizes || []).filter((x) => x !== sz);
-                                                            await API.put("/admin/category-options", { category: cat, sizes: updated });
-                                                            fetchCatOptions();
-                                                        }} style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "16px", padding: "0 2px", lineHeight: 1 }}>×</button>
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
-                                                <input type="text" placeholder="New size..." value={cat === form.category ? newSize : ""} onChange={(e) => { setForm(f => ({...f, category: cat})); setNewSize(e.target.value); }} style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", padding: "12px 16px", fontSize: "15px", borderRadius: "12px", outline: "none" }} />
-                                                <button onClick={async () => {
-                                                    if (!newSize.trim()) return;
-                                                    const updated = [...(catOptions[cat]?.sizes || []), newSize.trim()];
-                                                    await API.put("/admin/category-options", { category: cat, sizes: updated });
-                                                    setNewSize("");
-                                                    fetchCatOptions();
-                                                }} style={{ background: "#0f172a", color: "#fff", fontSize: "15px", fontWeight: 700, padding: "12px 24px", borderRadius: "12px", border: "none", cursor: "pointer" }}>Add</button>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 ))}
                             </div>

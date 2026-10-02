@@ -40,8 +40,7 @@ export default function AdminSettings() {
             setMessage("Settings saved successfully!");
             setTimeout(() => setMessage(""), 3000);
         } catch (err) {
-            console.error("Failed to save settings:", err);
-            dispatch(showAlert({ title: "Settings Error", message: "Failed to save settings. Please try again." }));
+            dispatch(showAlert({ title: "Settings Error", message: err.response?.data?.message || "Failed to save settings. Please try again." }));
         } finally {
             setSaving(false);
         }
