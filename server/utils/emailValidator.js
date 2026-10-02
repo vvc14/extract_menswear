@@ -85,13 +85,25 @@ function isDisposableDomain(domain) {
  * Verify domain has valid MX (mail exchange) records via DNS lookup.
  * This confirms the domain can actually receive email.
  */
+// Short timeouts so a slow DNS server can't stall sign-up
+const resolver = new dns.Resolver({ timeout: 4000, tries: 2 });
+
 async function hasMxRecords(domain) {
     try {
-        const records = await dns.resolveMx(domain);
-        return records && records.length > 0;
-    } catch {
-        // ENOTFOUND = domain doesn't exist, ENODATA = no MX records
-        return false;
+        const records = await resolver.resolveMx(domain);
+        if (records && records.length > 0) return true;
+    } catch (err) {
+        // The domain definitely doesn't exist
+        if (err.code === "ENOTFOUND") return false;
+        // Any other DNS problem (timeout, server failure) is ours, not the customer's: don't block sign-up
+        if (err.code !== "ENODATA") return true;
+    }
+    // No MX record: mail can still be delivered to the domain's address record (RFC 5321 implicit MX)
+    try {
+        const a = await resolver.resolve4(domain);
+        return a.length > 0;
+    } catch (err) {
+        return !["ENOTFOUND", "ENODATA"].includes(err.code);
     }
 }
 
