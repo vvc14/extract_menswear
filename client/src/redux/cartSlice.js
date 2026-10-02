@@ -161,15 +161,17 @@ const cartSlice = createSlice({
             if (!Array.isArray(action.payload)) return;
             // Refresh server-owned fields (price, stock, name) without touching quantities
             // the user may have changed while the request was in flight
+            // Only assign values that actually changed: assigning a new (even identical) array
+            // would create a new state object, re-trigger the sync effect and loop forever.
             const fresh = new Map(action.payload.map((i) => { const l = fromServer(i); return [lineKey(l), l]; }));
             state.items.forEach((item) => {
                 const f = fresh.get(lineKey(item));
                 if (!f) return;
-                item.price = f.price;
-                item.stock = f.stock;
-                item.name = f.name;
-                item.shippingCost = f.shippingCost;
-                item.sizes = f.sizes;
+                if (item.price !== f.price) item.price = f.price;
+                if (item.stock !== f.stock) item.stock = f.stock;
+                if (item.name !== f.name) item.name = f.name;
+                if (item.shippingCost !== f.shippingCost) item.shippingCost = f.shippingCost;
+                if ((item.sizes || []).join("|") !== (f.sizes || []).join("|")) item.sizes = f.sizes;
             });
         });
     },

@@ -86,7 +86,13 @@ export default function ProductDetail() {
             if (document.hidden) return;
             try {
                 const { data } = await API.get(`/products/${id}`);
-                setProduct((prev) => (prev ? { ...prev, stock: data.stock, sizeStock: data.sizeStock, price: data.price } : data));
+                setProduct((prev) => {
+                    if (!prev) return data;
+                    const same = prev.stock === data.stock && prev.price === data.price
+                        && JSON.stringify(prev.sizeStock || []) === JSON.stringify(data.sizeStock || []);
+                    // Keep the same object when nothing changed so the page doesn't re-render
+                    return same ? prev : { ...prev, stock: data.stock, sizeStock: data.sizeStock, price: data.price };
+                });
             } catch {
                 // ignore transient polling errors
             }

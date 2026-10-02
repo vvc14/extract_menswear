@@ -2,7 +2,9 @@ import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchWishlist, syncWishlistToDB, removeFromWishlist } from "../redux/wishlistSlice";
 
-// Hook: fetch wishlist on login, sync to DB on every wishlist change
+const wishlistSignature = (items) => items.map((i) => i._id).sort().join(",");
+
+// Hook: fetch wishlist on login, save it to the DB when its contents change
 export default function useWishlistSync() {
     const dispatch = useDispatch();
     const user = useSelector((s) => s.auth.user);
@@ -11,10 +13,12 @@ export default function useWishlistSync() {
     const cartItems = useSelector((s) => s.cart.items);
     const prevUser = useRef(null);
     const syncTimeout = useRef(null);
+    const lastSaved = useRef(null);
 
     // Fetch wishlist from DB when user logs in
     useEffect(() => {
         if (user && user.id !== prevUser.current) {
+            lastSaved.current = null;
             dispatch(fetchWishlist());
         }
         prevUser.current = user?.id || null;
@@ -31,15 +35,23 @@ export default function useWishlistSync() {
         });
     }, [items, cartItems, dispatch]);
 
-    // Debounced sync to DB on wishlist changes (after initial fetch)
+    const signature = wishlistSignature(items);
+
+    // Debounced save, only when the set of products actually changed
     useEffect(() => {
         if (!user || !synced) return;
+        if (lastSaved.current === null) {
+            lastSaved.current = signature;
+            return;
+        }
+        if (signature === lastSaved.current) return;
 
         if (syncTimeout.current) clearTimeout(syncTimeout.current);
         syncTimeout.current = setTimeout(() => {
+            lastSaved.current = signature;
             dispatch(syncWishlistToDB());
         }, 500);
 
         return () => { if (syncTimeout.current) clearTimeout(syncTimeout.current); };
-    }, [items, user, synced, dispatch]);
+    }, [signature, user, synced, dispatch]);
 }
