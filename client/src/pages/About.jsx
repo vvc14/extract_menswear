@@ -117,7 +117,7 @@ export default function About() {
                         >
                             <div className="rounded-2xl overflow-hidden" style={{ aspectRatio: "4/5" }}>
                                 <img
-                                    src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80"
+                                    src="/images/site/about-workshop.jpg"
                                     alt="Extract Menswear workshop"
                                     className="w-full h-full object-cover"
                                 />

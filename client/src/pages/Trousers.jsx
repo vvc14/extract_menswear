@@ -136,7 +136,7 @@ export default function Trousers() {
             {/* Hero Banner */}
             <section style={{ background: "#1a2744" }} className="relative overflow-hidden">
                 <div className="absolute inset-0">
-                    <img src="https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=1920&q=60" alt="" className="w-full h-full object-cover" style={{ opacity: 0.1 }} />
+                    <img src="/images/site/trousers-hero.jpg" alt="" className="w-full h-full object-cover" style={{ opacity: 0.1 }} />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(100deg,rgba(26,39,68,0.98) 30%,rgba(26,39,68,0.7) 100%)" }} />
                 </div>
                 <div className="relative page-wrap py-16 sm:py-24">

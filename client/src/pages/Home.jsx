@@ -9,22 +9,22 @@ const CATEGORIES = [
     {
         name: "Shirts",
         to: "/shirts",
-        image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80",
+        image: "/images/site/category-shirts.jpg",
         desc: "Linen, Oxford, Twill & more",
     },
     {
         name: "Trousers",
         to: "/trousers",
-        image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80",
+        image: "/images/site/category-trousers.jpg",
         desc: "Formal, Casual & Slim Fit",
     },
 ];
 
 const FABRICS = [
-    { name: "Linen", desc: "Breathable luxury for warm days", image: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80" },
-    { name: "Oxford", desc: "Classic weave, versatile appeal", image: "https://images.unsplash.com/photo-1589310243389-96a5483213a8?w=600&q=80" },
-    { name: "Twill", desc: "Rich texture, refined drape", image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80" },
-    { name: "Satin", desc: "Smooth finish, evening elegance", image: "https://images.unsplash.com/photo-1607345366928-199ea26cfe3e?w=600&q=80" },
+    { name: "Linen", desc: "Breathable luxury for warm days", image: "/images/site/fabric-linen.jpg" },
+    { name: "Oxford", desc: "Classic weave, versatile appeal", image: "/images/site/fabric-oxford.jpg" },
+    { name: "Twill", desc: "Rich texture, refined drape", image: "/images/site/fabric-twill.jpg" },
+    { name: "Satin", desc: "Smooth finish, evening elegance", image: "/images/site/fabric-satin.jpg" },
 ];
 
 const TRUST = [
@@ -103,7 +103,7 @@ export default function Home() {
                 {/* Background image + overlays */}
                 <div className="absolute inset-0">
                     <img
-                        src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80&w=1920"
+                        src="/images/site/home-hero.jpg"
                         alt=""
                         className="w-full h-full object-cover object-center"
                     />
