@@ -191,7 +191,7 @@ export default function Orders() {
                     </ol>
                 </nav>
 
-                <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight" style={{ marginBottom: "8px" }}>My Orders</h1>
+                <h1 className="display text-[40px] sm:text-[60px] text-slate-900 dark:text-white" style={{ marginBottom: "8px" }}>My Orders</h1>
                 <p className="text-[16px] text-slate-500 dark:text-slate-400" style={{ marginBottom: "40px" }}>{orders.length} order{orders.length !== 1 ? "s" : ""}</p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -214,7 +214,7 @@ export default function Orders() {
                                     <div className="flex flex-wrap items-center gap-4">
                                         <div>
                                             <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider">Invoice</p>
-                                            <p className="text-[15px] font-bold text-slate-900 dark:text-white">{order.invoiceNumber || "—"}</p>
+                                            <p className="text-[15px] font-bold text-slate-900 dark:text-white">{order.invoiceNumber || "Pending"}</p>
                                         </div>
                                         <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
                                         <div>
@@ -348,7 +348,7 @@ export default function Orders() {
                                         <p className="text-[13px] text-amber-600 dark:text-amber-400 font-semibold">Your request is being processed</p>
                                     )}
                                     {order.status === "cancelled" && (
-                                        <p className="text-[13px] text-rose-500 font-semibold">This order has been cancelled{order.cancelReason ? ` — ${order.cancelReason}` : ""}</p>
+                                        <p className="text-[13px] text-rose-500 font-semibold">This order has been cancelled{order.cancelReason ? `: ${order.cancelReason}` : ""}</p>
                                     )}
                                     {order.refund?.status && (
                                         <p className={`text-[13px] font-semibold ${order.refund.status === "processed" ? "text-emerald" : order.refund.status === "failed" ? "text-rose-500" : "text-amber-600"}`}>

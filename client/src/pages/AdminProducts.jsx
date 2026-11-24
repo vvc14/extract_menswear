@@ -660,7 +660,7 @@ export default function AdminProducts() {
                                 <td className="px-6 py-4 hidden md:table-cell">
                                     <span className="text-[13px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg capitalize">{p.category}</span>
                                 </td>
-                                <td className="px-6 py-4 text-slate-500 hidden lg:table-cell text-[15px]">{p.fabric || "—"}</td>
+                                <td className="px-6 py-4 text-slate-500 hidden lg:table-cell text-[15px]">{p.fabric || "Not set"}</td>
                                 <td className="px-6 py-4 hidden lg:table-cell">
                                     <span className={`text-[14px] font-bold px-2.5 py-1 rounded-lg ${(p.stock || 0) > 10 ? "text-emerald-700 bg-emerald-50" : (p.stock || 0) > 0 ? "text-amber-700 bg-amber-50" : "text-rose-700 bg-rose-50"
                                         }`}>

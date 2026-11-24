@@ -417,13 +417,13 @@ export default function Cart() {
                     <ol className="flex items-center gap-2 text-[15px]">
                         <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
                         <li className="text-slate-300 dark:text-slate-600">/</li>
-                        <li className="text-slate-900 dark:text-white font-semibold">Shopping Cart</li>
+                        <li className="text-slate-900 dark:text-white font-semibold">Your bag</li>
                     </ol>
                 </nav>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{ marginBottom: "40px" }}>
                     <div>
-                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight">Shopping Cart</h1>
+                        <h1 className="display text-[40px] sm:text-[60px] text-slate-900 dark:text-white">Your bag</h1>
                         <p className="text-[16px] text-slate-500 dark:text-slate-400 mt-1">{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -503,12 +503,12 @@ export default function Cart() {
                                             </p>
                                             {item.stock !== undefined && item.stock === 0 ? (
                                                 <p className="text-[13px] font-bold text-white mt-1.5 flex items-center gap-1.5 bg-rose-500 px-3 py-1.5 rounded-lg w-fit">
-                                                    ✕ Out of Stock
+                                                    Out of stock
                                                 </p>
                                             ) : item.stock !== undefined && item.quantity > item.stock ? (
                                                 <p className="text-[13px] font-bold text-rose-500 mt-1.5 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 rounded-lg w-fit">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                                                    Only {item.stock} available — reduce quantity
+                                                    Only {item.stock} left: lower the quantity
                                                 </p>
                                             ) : item.stock !== undefined && item.stock <= 5 ? (
                                                 <p className="text-[12px] font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1.5">
@@ -825,7 +825,7 @@ export default function Cart() {
                                         <button
                                             type="button"
                                             onClick={() => setShowCoupons(!showCoupons)}
-                                            className="text-[13px] font-bold text-primary dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                                            className="text-[13px] font-bold text-primary dark:text-sign hover:underline flex items-center gap-1 cursor-pointer"
                                         >
                                             {showCoupons ? "Hide Available Coupons" : "View Available Coupons"}
                                         </button>
@@ -901,7 +901,7 @@ export default function Cart() {
 
                             {hasStockIssues && (
                                 <p className="text-[13px] text-rose-500 font-semibold text-center mb-4 bg-rose-50 dark:bg-rose-500/10 rounded-lg px-4 py-2.5">
-                                    ⚠️ Some items are out of stock or exceed available quantity. Please remove or adjust them.
+                                    Some items are out of stock or exceed available quantity. Please remove or adjust them.
                                 </p>
                             )}
 

@@ -37,6 +37,7 @@ const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const AdminSettings = lazy(() => import("./pages/AdminSettings"));
 const AdminCoupons = lazy(() => import("./pages/AdminCoupons"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+import { MotionConfig } from "framer-motion";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ConfirmProvider } from "./context/ConfirmContext";
 import { preloadRazorpay } from "./services/razorpay";
@@ -64,8 +65,9 @@ function AppRoutes() {
     <>
     <ScrollToTop />
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[60vh] bg-transparent">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-primary rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center gap-3 min-h-[60vh] bg-transparent" role="status">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-primary dark:border-t-sign rounded-full animate-spin" aria-hidden="true" />
+        <p className="text-[14px] font-bold text-slate-500 dark:text-slate-400">Loading page...</p>
       </div>
     }>
       <Routes>
@@ -129,10 +131,12 @@ export default function App() {
       <Provider store={store}>
         <ThemeProvider>
           <ConfirmProvider>
-            <BrowserRouter>
-              <AppRoutes />
-              <ModalAlert />
-            </BrowserRouter>
+            <MotionConfig reducedMotion="user">
+              <BrowserRouter>
+                <AppRoutes />
+                <ModalAlert />
+              </BrowserRouter>
+            </MotionConfig>
           </ConfirmProvider>
         </ThemeProvider>
       </Provider>

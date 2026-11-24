@@ -1,7 +1,8 @@
+import PageHero from "../components/PageHero";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { HiOutlineScale, HiOutlineInformationCircle, HiOutlineArrowLeft } from "react-icons/hi";
+import { HiOutlineInformationCircle } from "react-icons/hi";
 
 const SHIRT_SIZES = [
     { size: "S", chest: "36", body: "26", shoulder: "16.5", sleeve: "24" },
@@ -27,7 +28,7 @@ const MEASURE_TIPS = [
     },
     {
         title: "Waist",
-        description: "Measure around your natural waistline — the narrowest part of your torso, just above your navel.",
+        description: "Measure around your natural waistline, the narrowest part of your torso, just above your navel.",
     },
     {
         title: "Shoulder",
@@ -40,43 +41,16 @@ const MEASURE_TIPS = [
 ];
 
 export default function SizeGuide() {
-    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("shirts");
 
     return (
         <main id="main-content">
-            {/* Breadcrumb bar */}
-            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
-                <div className="page-wrap py-4">
-                    <nav aria-label="Breadcrumb" className="flex items-center gap-4">
-                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
-                            <HiOutlineArrowLeft className="w-4 h-4" /> Back
-                        </button>
-                        <span className="text-slate-300 dark:text-slate-600">|</span>
-                        <ol className="flex items-center gap-2 text-[15px]">
-                            <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
-                            <li className="text-slate-300 dark:text-slate-600">/</li>
-                            <li className="text-slate-900 dark:text-white font-semibold">Size Guide</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+            <PageHero title="Size guide">
+                All measurements are in inches. Between two sizes? Go one up for a relaxed fit.
+            </PageHero>
 
-            <div className="page-wrap" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+            <div className="page-wrap" style={{ paddingTop: "56px", paddingBottom: "80px" }}>
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "40px" }}>
-
-                    {/* Header */}
-                    <div className="flex flex-col items-center text-center w-full">
-                        <div className="w-16 h-16 mx-auto mb-6 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
-                            <HiOutlineScale className="w-8 h-8 text-slate-500 dark:text-slate-400" />
-                        </div>
-                        <h1 className="text-[30px] sm:text-[38px] lg:text-[44px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
-                            Size Guide
-                        </h1>
-                        <p className="text-[16px] sm:text-[17px] text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-[1.7]">
-                            Find the perfect fit. All measurements are in inches. If you're between sizes, we recommend sizing up for a relaxed fit.
-                        </p>
-                    </div>
 
                     {/* Tab switcher */}
                     <div className="flex justify-center w-full">
@@ -93,7 +67,7 @@ export default function SizeGuide() {
                                             ? "text-white shadow-md"
                                             : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                                     }`}
-                                    style={activeTab === tab.key ? { background: "linear-gradient(135deg,#1a2744 0%,#2a3f6e 100%)" } : {}}
+                                    style={activeTab === tab.key ? { background: "var(--blue)" } : {}}
                                 >
                                     {tab.label}
                                 </button>
@@ -193,7 +167,7 @@ export default function SizeGuide() {
                     {/* Help note */}
                     <div className="w-full max-w-4xl">
                         <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.12)" }}>
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--accent-soft)" }}>
                                 <HiOutlineInformationCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
                             </div>
                             <div>

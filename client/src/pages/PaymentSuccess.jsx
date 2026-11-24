@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearCart } from "../redux/cartSlice";
-import { motion } from "framer-motion";
-import { HiOutlineCheckCircle, HiOutlineDownload, HiOutlineClipboardList } from "react-icons/hi";
+import { HiOutlineCheck, HiOutlineDownload, HiOutlineClipboardList } from "react-icons/hi";
 import API from "../services/api";
 import { generateInvoicePDF } from "../utils/invoiceGenerator";
 
@@ -18,6 +17,7 @@ export default function PaymentSuccess() {
     };
     const [order, setOrder] = useState(null);
     const [downloading, setDownloading] = useState(false);
+    const [downloadError, setDownloadError] = useState(false);
 
     useEffect(() => {
         if (state.orderId) {
@@ -29,70 +29,61 @@ export default function PaymentSuccess() {
     const handleDownload = async () => {
         if (!order) return;
         setDownloading(true);
+        setDownloadError(false);
         try {
             await generateInvoicePDF(order);
         } catch (err) {
             console.error("Invoice download error:", err);
+            setDownloadError(true);
         }
         setTimeout(() => setDownloading(false), 1000);
     };
 
+    const invoice = state?.invoiceNumber || order?.invoiceNumber;
+
     return (
-        <main id="main-content" className="min-h-[80vh] flex items-center justify-center px-4" style={{ background: "linear-gradient(180deg, #f0fdf4 0%, #f8fafc 60%)" }}>
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }} className="text-center max-w-lg w-full" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "40px" }}>
-                
-                <div className="flex flex-col items-center gap-4">
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                        className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center"
-                    >
-                        <HiOutlineCheckCircle className="w-14 h-14 text-emerald-500" />
-                    </motion.div>
-                    <h1 className="text-[34px] sm:text-[40px] font-extrabold tracking-tight text-slate-900">Payment Successful</h1>
-                    <p className="text-[18px] text-slate-500 leading-relaxed px-2">
-                        Thank you for your purchase! Your order has been confirmed and will be shipped shortly.
+        <main id="main-content" className="bg-white dark:bg-night">
+            <section className="bg-sign text-ink border-b-2 border-ink">
+                <div className="page-wrap py-14 sm:py-20">
+                    <span className="inline-flex items-center justify-center w-16 h-16 bg-ink text-sign border-2 border-ink mb-6" aria-hidden="true">
+                        <HiOutlineCheck className="w-10 h-10" />
+                    </span>
+                    <h1 className="display text-[48px] sm:text-[84px]">Paid. Packing it now.</h1>
+                    <p className="mt-5 max-w-xl text-[17px] sm:text-[19px] font-medium">
+                        Your order is confirmed. We will email you when it leaves the shop.
                     </p>
                 </div>
+            </section>
 
-                {(state?.invoiceNumber || order?.invoiceNumber) && (
-                    <div className="bg-white border border-slate-200 rounded-xl px-10 py-6 mx-auto shadow-sm">
-                        <p className="text-[13px] text-slate-400 font-semibold uppercase tracking-wider mb-2">Invoice No.</p>
-                        <p className="text-[22px] font-extrabold text-slate-900 tracking-wide">{state?.invoiceNumber || order?.invoiceNumber}</p>
+            <div className="page-wrap py-12 sm:py-16 flex flex-col gap-8 max-w-3xl">
+                {invoice && (
+                    <div className="border-2 border-ink dark:border-slate-600 p-6 inline-block self-start">
+                        <p className="text-[13px] font-black uppercase text-slate-500 dark:text-slate-400 mb-1">Invoice number</p>
+                        <p className="text-[26px] font-black tabular-nums text-slate-900 dark:text-white">{invoice}</p>
                     </div>
                 )}
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8 w-full px-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <Link to="/orders" className="btn-primary text-[16px]">
+                        <HiOutlineClipboardList className="w-5 h-5" aria-hidden="true" />
+                        Track my order
+                    </Link>
                     {order && (
-                        <button
-                            onClick={handleDownload}
-                            disabled={downloading}
-                            className="inline-flex items-center justify-center gap-2 bg-slate-900 text-white text-[15px] font-bold px-8 py-4 rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-60 w-full sm:w-auto"
-                        >
-                            <HiOutlineDownload className="w-5 h-5" />
-                            {downloading ? "Generating..." : "Download Invoice"}
+                        <button type="button" onClick={handleDownload} disabled={downloading} className="btn-outline text-[16px]">
+                            <HiOutlineDownload className="w-5 h-5" aria-hidden="true" />
+                            {downloading ? "Preparing PDF..." : "Download invoice"}
                         </button>
                     )}
-                    <Link
-                        to="/orders"
-                        className="inline-flex items-center justify-center gap-2 bg-primary text-white text-[15px] font-bold px-8 py-4 rounded-xl hover:bg-primary-dark transition-colors w-full sm:w-auto shadow-md"
-                    >
-                        <HiOutlineClipboardList className="w-5 h-5" />
-                        View My Orders
-                    </Link>
                 </div>
+                {downloadError && (
+                    <p role="alert" className="text-[15px] font-semibold text-rose-600 dark:text-rose-400">The invoice could not be generated. It is also attached to your confirmation email.</p>
+                )}
 
-                <div className="flex flex-col items-center gap-4">
-                    <Link
-                        to="/"
-                        className="inline-flex items-center gap-2 text-[15px] font-semibold text-slate-500 hover:text-primary transition-colors"
-                    >
-                        ← Continue Shopping
-                    </Link>
-                    <p className="text-[13px] text-slate-400">A confirmation email with your invoice has been sent to your email address.</p>
-                </div>
-            </motion.div>
+                <p className="text-[15px] text-slate-600 dark:text-slate-400">
+                    A confirmation email with your invoice is on its way.{" "}
+                    <Link to="/" className="font-bold text-primary dark:text-sign underline underline-offset-4">Keep shopping</Link>
+                </p>
+            </div>
         </main>
     );
 }

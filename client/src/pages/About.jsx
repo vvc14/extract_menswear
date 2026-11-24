@@ -1,191 +1,107 @@
-import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-import { HiOutlineArrowRight, HiOutlineSparkles, HiOutlineScissors, HiOutlineShieldCheck, HiOutlineTruck, HiOutlineArrowLeft } from "react-icons/hi";
+import { Link } from "react-router-dom";
+import { HiOutlinePhone, HiOutlineLocationMarker, HiOutlineExternalLink } from "react-icons/hi";
+import { Eagle } from "../components/brand/Logo";
 
-const fadeUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.09, duration: 0.42 } }),
-};
+const ADDRESS = "H.No. 5-360, NTR Road, 2nd Om Jend, Suraram Colony, Hyderabad 500055";
+const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Extract Men's Wear, NTR Road, Suraram Colony, Hyderabad")}`;
+const PHONES = ["8184836764", "7337526629"];
 
-const VALUES = [
-    {
-        Icon: HiOutlineSparkles,
-        title: "Premium Fabrics",
-        desc: "Sourced from the world's finest mills — Linen, Oxford, Twill, and Satin."
-    },
-    {
-        Icon: HiOutlineScissors,
-        title: "Modern Tailoring",
-        desc: "Every piece is precision-cut for a fit that flatters and feels natural."
-    },
-    {
-        Icon: HiOutlineShieldCheck,
-        title: "Quality Guaranteed",
-        desc: "Crafted to last. We stand behind every stitch with confidence."
-    },
-    {
-        Icon: HiOutlineTruck,
-        title: "Fast Delivery",
-        desc: "Free shipping across India on orders above ₹999."
-    },
-];
-
-const STATS = [
-    { value: "4", label: "Premium Fabrics" },
-    { value: "500+", label: "Happy Customers" },
-    { value: "100%", label: "Quality Guaranteed" },
-    { value: "2", label: "Core Categories" },
+// Each promise links to the page that defines it.
+const PROMISES = [
+    { title: "Free delivery above ₹999", body: "Anywhere in India. Below that, a flat charge by zone.", to: "/shipping", link: "Shipping rates" },
+    { title: "7 days to change your mind", body: "Return or exchange from your Orders page within a week of delivery.", to: "/returns", link: "Returns policy" },
+    { title: "Pay the way you like", body: "UPI, cards and wallets through Razorpay checkout.", to: "/faq", link: "Payment questions" },
 ];
 
 export default function About() {
-    const navigate = useNavigate();
     return (
         <main id="main-content">
-            {/* Back bar */}
-            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
-                <div className="page-wrap py-4">
-                    <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
-                        <HiOutlineArrowLeft className="w-4 h-4" /> Back
-                    </button>
+            {/* Hero */}
+            <section className="board relative overflow-hidden border-b-2 border-ink">
+                <Eagle className="pointer-events-none absolute -right-20 -bottom-24 h-[420px] w-auto text-white opacity-[0.07]" />
+                <div className="page-wrap relative py-16 sm:py-24">
+                    <nav aria-label="Breadcrumb" className="mb-8 text-[14px] font-semibold text-white/80">
+                        <Link to="/" className="hover:text-sign underline-offset-4 hover:underline">Home</Link>
+                        <span className="mx-2" aria-hidden="true">/</span>
+                        <span aria-current="page" className="text-white">Our shop</span>
+                    </nav>
+                    <h1 className="display text-[44px] sm:text-[76px] lg:text-[92px] max-w-5xl">
+                        <span className="block text-white">A shop on NTR Road.</span>
+                        <span className="block sign-type mt-1">Now on your phone.</span>
+                    </h1>
+                    <p className="mt-7 max-w-2xl text-[17px] sm:text-[19px] leading-relaxed text-white/90">
+                        Extract Men's Wear is a menswear store in Suraram Colony, Hyderabad. We sell shirts and trousers over the counter, in bulk to other shops, and now through this website.
+                    </p>
                 </div>
-            </div>
+            </section>
 
-            {/* ── Hero ── */}
-            <section style={{ background: "#1a2744" }} className="py-24 md:py-32">
-                <div className="page-wrap">
-                    <motion.div
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55 }}
-                        className="max-w-2xl"
-                    >
-                        <span className="inline-block text-[12px] font-bold tracking-[0.15em] uppercase px-4 py-1.5 rounded-full mb-8"
-                            style={{ background: "rgba(201,168,76,0.15)", color: "var(--gold)" }}>
-                            Our Story
-                        </span>
-                        <h1 className="text-[34px] sm:text-[50px] font-extrabold text-white leading-tight tracking-tight mb-7">
-                            Redefining Men's Fashion<br />Through Premium Fabrics
-                        </h1>
-                        <p className="text-[17px] leading-[1.85]" style={{ color: "rgba(255,255,255,0.65)" }}>
-                            Extract Menswear was born from a simple belief — every man deserves clothing
-                            that fits impeccably and feels extraordinary against the skin.
+            {/* Retail / Wholesale split */}
+            <section aria-labelledby="sell-heading" className="bg-white dark:bg-night">
+                <h2 id="sell-heading" className="sr-only">How we sell</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 border-b-2 border-ink dark:border-slate-700">
+                    <div className="px-4 sm:px-8 lg:px-12 xl:px-16 py-14 sm:py-20 md:border-r-2 border-ink dark:border-slate-700 border-b-2 md:border-b-0">
+                        <p className="section-label">One piece at a time</p>
+                        <h3 className="display text-[40px] sm:text-[56px] text-slate-900 dark:text-white">Retail</h3>
+                        <p className="mt-5 max-w-md text-[16px] leading-relaxed text-slate-600 dark:text-slate-400">
+                            Walk in and try things on, or order here and we ship it. Same racks, same prices, whichever way you buy.
                         </p>
-                    </motion.div>
+                        <Link to="/shirts" className="btn-primary mt-8">Browse the racks</Link>
+                    </div>
+                    <div className="px-4 sm:px-8 lg:px-12 xl:px-16 py-14 sm:py-20 bg-sign text-ink">
+                        <p className="inline-block text-[13px] font-extrabold uppercase bg-ink text-sign px-2 py-0.5 mb-4 -rotate-1">By the bundle</p>
+                        <h3 className="display text-[40px] sm:text-[56px]">Wholesale</h3>
+                        <p className="mt-5 max-w-md text-[16px] leading-relaxed font-medium">
+                            Running a store, dressing a wedding party or ordering for a team? We sell in bulk. Rates depend on quantity and fabric, so call and tell us what you need.
+                        </p>
+                        <div className="mt-8 flex flex-wrap gap-3">
+                            {PHONES.map((p) => (
+                                <a key={p} href={`tel:+91${p}`} className="inline-flex items-center gap-2 min-h-[48px] px-5 bg-primary text-white border-2 border-ink shadow-[4px_4px_0_#12123a] font-black tabular-nums text-[17px] hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-transform">
+                                    <HiOutlinePhone className="w-5 h-5 text-sign" aria-hidden="true" />
+                                    {p.slice(0, 5)} {p.slice(5)}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* ── Values ── */}
-            <section className="bg-white dark:bg-[#0d1321] border-b border-slate-100 dark:border-slate-800">
-                <div className="page-wrap py-20 sm:py-28">
-                    <div style={{ marginBottom: "56px" }}>
-                        <p className="section-label">What We Stand For</p>
-                        <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight">
-                            Our Core Values
-                        </h2>
+            {/* What you get */}
+            <section aria-labelledby="promise-heading" className="bg-slate-50 dark:bg-[#111238]">
+                <div className="page-wrap py-16 sm:py-24 grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <div className="lg:col-span-4">
+                        <p className="section-label">Buying online</p>
+                        <h2 id="promise-heading" className="display text-[40px] sm:text-[54px] text-slate-900 dark:text-white">What you can count on</h2>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {VALUES.map(({ Icon, title, desc }, i) => (
-                            <motion.div
-                                key={title}
-                                custom={i}
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={fadeUp}
-                                className="card-hover group bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-8"
-                            >
-                                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-[#f0f4fd] dark:bg-slate-700">
-                                    <Icon className="w-5 h-5 text-[#1a2744] dark:text-gold" />
+                    <ol className="lg:col-span-8 flex flex-col gap-4">
+                        {PROMISES.map((p, i) => (
+                            <li key={p.title} className={`flex gap-5 sm:gap-8 items-start bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-700 p-5 sm:p-7 ${i === 1 ? "lg:ml-10" : i === 2 ? "lg:ml-20" : ""}`}>
+                                <span className="display text-[40px] sm:text-[52px] text-primary dark:text-sign leading-none">{i + 1}</span>
+                                <div>
+                                    <h3 className="text-[19px] sm:text-[22px] font-black text-slate-900 dark:text-white">{p.title}</h3>
+                                    <p className="mt-1.5 text-[15px] text-slate-600 dark:text-slate-400">{p.body}</p>
+                                    <Link to={p.to} className="inline-block mt-3 text-[14px] font-bold text-primary dark:text-sign underline underline-offset-4 hover:no-underline">{p.link}</Link>
                                 </div>
-                                <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mb-3">{title}</h3>
-                                <p className="text-[15px] text-slate-500 dark:text-slate-400 leading-[1.75]">{desc}</p>
-                            </motion.div>
+                            </li>
                         ))}
-                    </div>
+                    </ol>
                 </div>
             </section>
 
-            {/* ── Story section ── */}
-            <section className="bg-slate-50 dark:bg-[#0a0f1a] border-b border-slate-100 dark:border-slate-800">
-                <div className="page-wrap py-20 sm:py-28">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <div className="rounded-2xl overflow-hidden" style={{ aspectRatio: "4/5" }}>
-                                <img
-                                    src="/images/site/about-workshop.jpg"
-                                    alt="Extract Menswear workshop"
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                        >
-                            <p className="section-label">The Story</p>
-                            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">
-                                Craftsmanship Meets<br />Modern Design
-                            </h2>
-                            <div className="space-y-5 text-[16px] text-slate-600 dark:text-slate-400 leading-[1.85]">
-                                <p>
-                                    We source the finest Linen, Oxford, Twill, and Satin fabrics from trusted mills
-                                    to create shirts that look and feel premium. Our trousers blend formal elegance
-                                    with casual comfort, designed for every setting in a modern man's life.
-                                </p>
-                                <p>
-                                    Every stitch, every seam, every button placement is considered with intention.
-                                    We don't follow fast fashion — we craft lasting wardrobe staples that elevate your everyday style.
-                                </p>
-                            </div>
-                            <Link
-                                to="/shirts"
-                                className="btn-primary inline-flex mt-10"
-                            >
-                                View Collection
-                                <HiOutlineArrowRight className="w-4 h-4" />
-                            </Link>
-                        </motion.div>
+            {/* Find us */}
+            <section aria-labelledby="visit-heading" className="bg-white dark:bg-night border-t-2 border-ink dark:border-slate-700">
+                <div className="page-wrap py-16 sm:py-20 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+                    <div>
+                        <h2 id="visit-heading" className="display text-[40px] sm:text-[56px] text-slate-900 dark:text-white">Come see the racks</h2>
+                        <p className="mt-5 flex gap-3 max-w-md text-[17px] leading-relaxed text-slate-700 dark:text-slate-300">
+                            <HiOutlineLocationMarker className="w-6 h-6 shrink-0 text-primary dark:text-sign mt-0.5" aria-hidden="true" />
+                            {ADDRESS}
+                        </p>
                     </div>
-                </div>
-            </section>
-
-            {/* ── Stats ── */}
-            <section className="bg-white dark:bg-[#0d1321]">
-                <div className="page-wrap py-20 sm:py-28">
-                    <div style={{ marginBottom: "56px" }} className="text-center">
-                        <p className="section-label justify-center">By the Numbers</p>
-                        <h2 className="text-[28px] sm:text-[36px] font-extrabold text-slate-900 dark:text-white tracking-tight">
-                            Extract Menswear at a Glance
-                        </h2>
-                    </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-                        {STATS.map((stat, i) => (
-                            <motion.div
-                                key={stat.label}
-                                custom={i}
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={fadeUp}
-                                className="rounded-2xl border border-slate-200 dark:border-slate-700 py-10 px-6"
-                            >
-                                <p className="text-[40px] sm:text-[48px] font-extrabold mb-2 text-primary dark:text-gold">
-                                    {stat.value}
-                                </p>
-                                <p className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">
-                                    {stat.label}
-                                </p>
-                            </motion.div>
-                        ))}
-                    </div>
+                    <a href={MAP_URL} target="_blank" rel="noopener noreferrer" className="btn-buy text-[16px] self-start md:self-auto">
+                        Open in Google Maps
+                        <HiOutlineExternalLink className="w-5 h-5" aria-hidden="true" />
+                        <span className="sr-only">(opens in a new tab)</span>
+                    </a>
                 </div>
             </section>
         </main>

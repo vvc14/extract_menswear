@@ -1,7 +1,8 @@
+import PageHero from "../components/PageHero";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { HiOutlineArrowLeft, HiOutlineQuestionMarkCircle, HiOutlineChevronDown } from "react-icons/hi";
+import { HiOutlineQuestionMarkCircle, HiOutlineChevronDown } from "react-icons/hi";
 
 const FAQS = [
     {
@@ -34,7 +35,7 @@ const FAQS = [
     {
         category: "Products & Care",
         items: [
-            { q: "What fabrics do you use?", a: "We use premium fabrics including Cotton, Linen, Silk, and carefully crafted blends. Each product page lists the specific fabric used." },
+            { q: "What fabrics do you use?", a: "Each product page names its fabric, and you can filter the Shirts and Trousers racks by fabric to see everything we have in a given cloth." },
             { q: "How should I care for my garments?", a: "Always check the care label inside the garment. Generally, we recommend gentle machine wash or dry clean for premium fabrics. Avoid bleach and high-heat drying." },
             { q: "Are the colors shown accurate?", a: "We strive for accurate color representation, but slight variations may occur due to screen settings and lighting during photography." },
         ],
@@ -82,36 +83,14 @@ function FaqItem({ item }) {
 }
 
 export default function FAQ() {
-    const navigate = useNavigate();
     return (
         <main id="main-content">
-            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
-                <div className="page-wrap py-4">
-                    <nav aria-label="Breadcrumb" className="flex items-center gap-4">
-                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
-                            <HiOutlineArrowLeft className="w-4 h-4" /> Back
-                        </button>
-                        <span className="text-slate-300 dark:text-slate-600">|</span>
-                        <ol className="flex items-center gap-2 text-[15px]">
-                            <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
-                            <li className="text-slate-300 dark:text-slate-600">/</li>
-                            <li className="text-slate-900 dark:text-white font-semibold">FAQs</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+            <PageHero title="Questions, answered" crumb="FAQ">
+                Orders, delivery, returns, sizing and payments. If yours is not here, call the shop.
+            </PageHero>
 
-            <div className="page-wrap" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+            <div className="page-wrap" style={{ paddingTop: "56px", paddingBottom: "80px" }}>
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", flexDirection: "column", gap: "48px", maxWidth: "800px", margin: "0 auto" }}>
-                    <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-6 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
-                            <HiOutlineQuestionMarkCircle className="w-8 h-8 text-slate-500 dark:text-slate-400" />
-                        </div>
-                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">Frequently Asked Questions</h1>
-                        <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-[1.7]">
-                            Find quick answers to common questions about orders, shipping, returns, sizing, and more.
-                        </p>
-                    </div>
 
                     {FAQS.map((category) => (
                         <div key={category.category}>
@@ -125,7 +104,7 @@ export default function FAQ() {
                     ))}
 
                     <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.12)" }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--accent-soft)" }}>
                             <HiOutlineQuestionMarkCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
                         </div>
                         <div>

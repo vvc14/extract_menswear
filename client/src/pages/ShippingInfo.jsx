@@ -1,6 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
+import PageHero from "../components/PageHero";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { HiOutlineTruck, HiOutlineClock, HiOutlineShieldCheck, HiOutlineGlobe, HiOutlineArrowLeft, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineTruck, HiOutlineClock, HiOutlineShieldCheck, HiOutlineInformationCircle } from "react-icons/hi";
 
 const SHIPPING_ZONES = [
     { zone: "Metro Cities", area: "Delhi NCR, Mumbai, Bangalore, Chennai, Hyderabad, Kolkata", days: "2-4", cost: "Free above ₹999 / ₹49" },
@@ -9,43 +10,21 @@ const SHIPPING_ZONES = [
 ];
 
 export default function ShippingInfo() {
-    const navigate = useNavigate();
     return (
         <main id="main-content">
-            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
-                <div className="page-wrap py-4">
-                    <nav aria-label="Breadcrumb" className="flex items-center gap-4">
-                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
-                            <HiOutlineArrowLeft className="w-4 h-4" /> Back
-                        </button>
-                        <span className="text-slate-300 dark:text-slate-600">|</span>
-                        <ol className="flex items-center gap-2 text-[15px]">
-                            <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
-                            <li className="text-slate-300 dark:text-slate-600">/</li>
-                            <li className="text-slate-900 dark:text-white font-semibold">Shipping Information</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+            <PageHero title="Shipping">
+                Where we deliver, how long it takes and what it costs.
+            </PageHero>
 
-            <div className="page-wrap" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+            <div className="page-wrap" style={{ paddingTop: "56px", paddingBottom: "80px" }}>
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", flexDirection: "column", gap: "48px", maxWidth: "900px", margin: "0 auto" }}>
-                    <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-6 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
-                            <HiOutlineTruck className="w-8 h-8 text-slate-500 dark:text-slate-400" />
-                        </div>
-                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">Shipping Information</h1>
-                        <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-[1.7]">
-                            We deliver across India with trusted logistics partners. Here's everything you need to know about our shipping.
-                        </p>
-                    </div>
 
                     {/* Quick highlights */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         {[
-                            { icon: HiOutlineTruck, title: "Pan-India Delivery", desc: "We ship to 19,000+ pin codes across India" },
+                            { icon: HiOutlineTruck, title: "Pan-India delivery", desc: "We ship to any pin code our courier partners serve" },
                             { icon: HiOutlineClock, title: "Fast Dispatch", desc: "Orders dispatched within 24 hours of placement" },
-                            { icon: HiOutlineShieldCheck, title: "Secure Packaging", desc: "Premium packaging to ensure your order arrives safely" },
+                            { icon: HiOutlineShieldCheck, title: "Secure Packaging", desc: "Every order is packed and sealed at the shop" },
                         ].map((item) => (
                             <div key={item.title} className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-7 text-center">
                                 <item.icon className="w-7 h-7 mx-auto mb-3" style={{ color: "var(--gold)" }} />
@@ -101,7 +80,7 @@ export default function ShippingInfo() {
 
                     {/* Help note */}
                     <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.12)" }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--accent-soft)" }}>
                             <HiOutlineInformationCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
                         </div>
                         <div>

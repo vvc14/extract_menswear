@@ -100,14 +100,14 @@ export default function Wishlist() {
 
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", marginBottom: "40px" }}>
                     <div>
-                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight" style={{ marginBottom: "8px" }}>My Wishlist</h1>
+                        <h1 className="display text-[40px] sm:text-[60px] text-slate-900 dark:text-white" style={{ marginBottom: "8px" }}>My Wishlist</h1>
                         <p className="text-[16px] text-slate-500 dark:text-slate-400">{items.length} item{items.length !== 1 ? "s" : ""} saved</p>
                     </div>
                     <div className="flex gap-3">
                         <button
                             onClick={handleMoveAllToCart}
                             className="flex items-center gap-2 text-[14px] font-bold px-5 py-3 rounded-xl transition-all duration-300 text-white hover:opacity-90"
-                            style={{ background: "linear-gradient(135deg,#1a2744 0%,#2a3f6e 100%)" }}
+                            style={{ background: "var(--blue)" }}
                         >
                             <HiOutlineShoppingCart className="w-4 h-4" />
                             Move All to Cart
@@ -141,19 +141,19 @@ export default function Wishlist() {
                                 >
                                     <Link to={`/product/${item._id}`} className="block">
                                         {/* Image */}
-                                        <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900" style={{ aspectRatio: "3/4" }}>
+                                        <div className="relative overflow-hidden bg-slate-100 dark:bg-slate-800" style={{ aspectRatio: "3/4" }}>
                                             <img
                                                 src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl}
                                                 alt={item.name}
                                                 loading="lazy"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+                                            
 
                                             {/* Badges */}
                                             <div className="absolute top-3.5 left-3.5 flex flex-col gap-2 z-10">
                                                 {item.fabric && (
-                                                    <span className="text-[11px] font-bold text-white backdrop-blur-md px-3 py-1.5 rounded-lg"
+                                                    <span className="text-[11px] font-bold text-white px-3 py-1.5 rounded-lg"
                                                         style={{ background: "rgba(26,39,68,0.8)" }}>
                                                         {item.fabric}
                                                     </span>
@@ -162,9 +162,8 @@ export default function Wishlist() {
 
                                             {discount > 0 && (
                                                 <div className="absolute top-3.5 right-3.5 z-10">
-                                                    <span className="text-[11px] font-extrabold text-white px-3 py-1.5 rounded-lg"
-                                                        style={{ background: "#10b981" }}>
-                                                        {discount}% OFF
+                                                    <span className="stamp text-[12px]">
+                                                        {discount}% off
                                                     </span>
                                                 </div>
                                             )}
@@ -172,7 +171,7 @@ export default function Wishlist() {
 
                                         {/* Body */}
                                         <div className="p-5 sm:p-6">
-                                            <p className="text-[11px] font-bold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--gold)" }}>
+                                            <p className="text-[11px] font-bold uppercase mb-2 text-slate-500 dark:text-slate-400">
                                                 {item.category === "shirt" ? "Shirt" : "Trouser"}
                                             </p>
                                             <h3 className="text-[15px] sm:text-[16px] font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-3">
@@ -221,11 +220,11 @@ export default function Wishlist() {
                                             style={{
                                                 background: isAdded
                                                     ? "#10b981"
-                                                    : "linear-gradient(135deg,#1a2744 0%,#2a3f6e 100%)"
+                                                    : "var(--blue)"
                                             }}
                                         >
                                             {isAdded ? (
-                                                <>✓ Added</>
+                                                <>Added</>
                                             ) : (
                                                 <>
                                                     <HiOutlineShoppingCart className="w-4 h-4" />

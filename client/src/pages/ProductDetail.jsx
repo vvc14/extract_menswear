@@ -210,7 +210,7 @@ export default function ProductDetail() {
         return (
             <div className="page-wrap py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
-                    <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl" />
+                    <div className="aspect-square bg-slate-100 dark:bg-slate-800 rounded-2xl" />
                     <div className="space-y-5 py-4">
                         <div className="h-4 bg-slate-100 dark:bg-slate-700 rounded-full w-1/4" />
                         <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded-full w-3/4" />
@@ -226,7 +226,7 @@ export default function ProductDetail() {
     if (!product) {
         return (
             <div className="page-wrap py-28 text-center">
-                <div className="text-[56px] mb-4">😞</div>
+                
                 <h2 className="text-[28px] font-extrabold text-slate-900 dark:text-white mb-3">Product not found</h2>
                 <Link to="/" className="text-primary dark:text-gold font-bold hover:underline">Back to Home</Link>
             </div>
@@ -242,7 +242,7 @@ export default function ProductDetail() {
     return (
         <main id="main-content">
             {/* Breadcrumb bar */}
-            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
+            <div className="bg-slate-50 dark:bg-night border-b border-slate-200 dark:border-slate-800">
                 <div className="page-wrap py-4">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
@@ -278,7 +278,7 @@ export default function ProductDetail() {
                             return (
                                 <>
                                     <div 
-                                        className="aspect-square overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 relative flex items-center justify-center bg-black cursor-pointer"
+                                        className="aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 relative flex items-center justify-center bg-black cursor-pointer"
                                         onClick={() => !isCurrentVideo && setLightboxImg(currentMedia)}
                                     >
                                         {isCurrentVideo ? (
@@ -317,7 +317,7 @@ export default function ProductDetail() {
                                                         e.stopPropagation();
                                                         setActiveImg((prev) => (prev - 1 + allMedia.length) % allMedia.length);
                                                     }} 
-                                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
+                                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
                                                     aria-label="Previous item"
                                                 >
                                                     <HiOutlineChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -327,7 +327,7 @@ export default function ProductDetail() {
                                                         e.stopPropagation();
                                                         setActiveImg((prev) => (prev + 1) % allMedia.length);
                                                     }} 
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
                                                     aria-label="Next item"
                                                 >
                                                     <HiOutlineChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -359,7 +359,7 @@ export default function ProductDetail() {
                         })()}
                         <div className="absolute top-4 left-4 flex gap-2 z-10">
                             {discount > 0 && (
-                                <span className="text-[12px] font-extrabold text-white bg-emerald px-3 py-1.5 rounded-lg shadow-md">{discount}% OFF</span>
+                                <span className="stamp text-[14px]">{discount}% off</span>
                             )}
                             {product.stock <= 5 && product.stock > 0 && (
                                 <span className="text-[12px] font-bold text-white bg-rose px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5">
@@ -384,7 +384,7 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Name */}
-                        <h1 className="text-[26px] sm:text-[32px] lg:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-2.5">
+                        <h1 className="text-[26px] sm:text-[32px] lg:text-[36px] font-black text-slate-900 dark:text-white leading-tight mb-3">
                             {product.name}
                         </h1>
 
@@ -395,7 +395,7 @@ export default function ProductDetail() {
                                     const element = document.getElementById("reviews-section");
                                     if (element) element.scrollIntoView({ behavior: "smooth" });
                                 }}
-                                className="flex items-center gap-1 bg-emerald text-white text-[15px] font-bold px-3 py-1.5 rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                                className="flex items-center gap-1 bg-primary text-white dark:bg-sign dark:text-ink border-2 border-ink text-[15px] font-black px-3 min-h-[40px] cursor-pointer"
                             >
                                 {product.ratings ? product.ratings.toFixed(1) : "0.0"} <HiStar className="w-3.5 h-3.5" />
                             </button>
@@ -412,7 +412,7 @@ export default function ProductDetail() {
                                         return (
                                             <HiStar
                                                 key={i}
-                                                className={`w-4 h-4 ${i < Math.round(ratingVal) ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
+                                                className={`w-4 h-4 ${i < Math.round(ratingVal) ? "text-primary dark:text-sign" : "text-slate-200 dark:text-slate-700"}`}
                                             />
                                         );
                                     })}
@@ -424,14 +424,14 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Price */}
-                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 sm:p-6 mb-4">
-                            <div className="flex items-baseline gap-3 mb-2">
-                                <span className="text-[36px] sm:text-[44px] font-extrabold text-slate-900 dark:text-white">₹{product.price.toLocaleString("en-IN")}</span>
+                        <div className="mb-5">
+                            <div className="flex flex-wrap items-center gap-3 mb-2">
+                                <span className="price-tag text-[32px] sm:text-[40px]">₹{product.price.toLocaleString("en-IN")}</span>
                                 {originalPrice > 0 && (
-                                    <span className="text-[20px] text-slate-400 line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
+                                    <span className="text-[20px] text-slate-500 dark:text-slate-400 line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
                                 )}
                                 {discount > 0 && (
-                                    <span className="text-[17px] font-bold text-emerald">{discount}% off</span>
+                                    <span className="stamp text-[15px]">{discount}% off</span>
                                 )}
                             </div>
                             <p className="text-[15px] text-slate-500 dark:text-slate-400">Inclusive of all taxes</p>
@@ -442,13 +442,13 @@ export default function ProductDetail() {
                             <p className="text-[15px] font-bold text-rose mb-4">Out of Stock</p>
                         ) : selectedStock === null ? (
                             <p className="text-[15px] font-bold text-emerald mb-4 flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block animate-pulse"></span>
-                                In Stock — select a size to see availability
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block" aria-hidden="true"></span>
+                                In stock: pick a size to see how many
                             </p>
                         ) : selectedStock > 0 ? (
                             <p className="text-[15px] font-bold text-emerald mb-4 flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block animate-pulse"></span>
-                                In Stock — {selectedStock} available{isSized ? ` in size ${selectedSize}` : ""}
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block" aria-hidden="true"></span>
+                                In stock: {selectedStock} left{isSized ? ` in size ${selectedSize}` : ""}
                             </p>
                         ) : (
                             <p className="text-[15px] font-bold text-rose mb-4">Size {selectedSize} is out of stock</p>
@@ -458,8 +458,8 @@ export default function ProductDetail() {
                         {product.sizes && product.sizes.length > 0 && (
                             <div className="mb-6">
                                 <div className="flex items-center justify-between mb-2.5">
-                                    <label className="text-[15px] font-bold text-slate-700 dark:text-slate-300">Select Size:</label>
-                                    <Link to="/size-guide" className="text-[13px] font-semibold text-primary dark:text-blue-400 hover:underline">Size Guide</Link>
+                                    <p className="text-[15px] font-black text-slate-900 dark:text-white">Pick a size</p>
+                                    <Link to="/size-guide" className="min-h-[44px] inline-flex items-center text-[14px] font-bold text-primary dark:text-sign underline underline-offset-4">Size guide</Link>
                                 </div>
                                 <div className="flex flex-wrap gap-2.5">
                                     {product.sizes.map((s) => (
@@ -468,10 +468,11 @@ export default function ProductDetail() {
                                             type="button"
                                             onClick={() => { setSelectedSize(s); setQty(1); }}
                                             title={stockForSize(product, s) <= 0 ? "Out of stock" : undefined}
-                                            className={`min-w-[46px] h-[46px] px-3 rounded-xl text-[14px] font-bold border transition-all cursor-pointer ${stockForSize(product, s) <= 0 ? "line-through opacity-50 " : ""}${
+                                            aria-pressed={selectedSize === s}
+                                            className={`min-w-[52px] h-[48px] px-3 text-[15px] font-black border-2 transition-colors cursor-pointer ${stockForSize(product, s) <= 0 ? "line-through opacity-50 " : ""}${
                                                 selectedSize === s
-                                                    ? "bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-md scale-[1.02]"
-                                                    : "bg-white border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500"
+                                                    ? "bg-primary border-ink text-white dark:bg-sign dark:border-black dark:text-ink shadow-[3px_3px_0_#12123a] dark:shadow-[3px_3px_0_#000]"
+                                                    : "bg-white border-slate-300 text-slate-900 dark:bg-slate-900 dark:border-slate-600 dark:text-white hover:border-ink dark:hover:border-sign"
                                             }`}
                                         >
                                             {s}
@@ -484,21 +485,21 @@ export default function ProductDetail() {
                         {/* Quantity */}
                         {selectedStock > 0 && (
                             <div className="flex items-center gap-4 mb-4">
-                                <label className="text-[15px] font-bold text-slate-700 dark:text-slate-300">Quantity:</label>
-                                <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
+                                <p className="text-[15px] font-black text-slate-900 dark:text-white" id="qty-label">Quantity</p>
+                                <div className="flex items-center border-2 border-ink dark:border-slate-600 bg-white dark:bg-slate-900" role="group" aria-labelledby="qty-label">
                                     <button
                                         disabled={qty <= 1}
                                         onClick={() => setQty(Math.max(1, qty - 1))}
-                                        className="px-4 py-2 text-[15px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                        className="w-11 h-11 text-[18px] font-black text-slate-900 dark:text-white dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                                         aria-label="Decrease quantity"
                                     >−</button>
-                                    <span className="px-6 py-2 text-[14px] font-extrabold text-slate-900 dark:text-white border-x border-slate-200 dark:border-slate-700 min-w-[48px] text-center bg-white dark:bg-transparent">
+                                    <span className="px-5 leading-[44px] text-[16px] font-black tabular-nums text-slate-900 dark:text-white border-x-2 border-ink dark:border-slate-600 min-w-[52px] text-center" aria-live="polite">
                                         {qty}
                                     </span>
                                     <button
                                         disabled={qty >= maxQty}
                                         onClick={() => setQty(Math.min(maxQty, qty + 1))}
-                                        className="px-4 py-2 text-[15px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                        className="w-11 h-11 text-[18px] font-black text-slate-900 dark:text-white dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                                         aria-label="Increase quantity"
                                     >+</button>
                                 </div>
@@ -510,26 +511,23 @@ export default function ProductDetail() {
                             <button
                                 onClick={handleAdd}
                                 disabled={product.stock === 0}
-                                className={`flex-1 flex items-center justify-center gap-2.5 text-[15px] font-bold py-4 rounded-xl transition-all duration-300 cursor-pointer ${added
-                                    ? "bg-emerald text-white scale-[0.98]"
-                                    : "bg-slate-900 text-white hover:bg-primary active:scale-[0.97]"
-                                    } disabled:opacity-40 disabled:cursor-not-allowed`}
+                                className={`btn-primary flex-1 text-[16px] py-4 ${added ? "!bg-emerald !text-white dark:!text-ink" : ""}`}
                                 aria-label={`Add ${product.name} to cart`}
                             >
-                                {added ? "✓ Added to Cart" : (
+                                {added ? "Added to bag" : (
                                     <>
                                         <HiOutlineShoppingCart className="w-5 h-5" />
-                                        Add to Cart
+                                        Add to bag
                                     </>
                                 )}
                             </button>
                             <button
                                 onClick={handleBuyNow}
                                 disabled={product.stock === 0}
-                                className="flex-1 flex items-center justify-center gap-2.5 text-[15px] font-bold py-4 rounded-xl transition-all duration-300 cursor-pointer bg-amber-600 hover:bg-amber-700 text-white active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="btn-buy flex-1 text-[16px] py-4"
                                 aria-label={`Buy ${product.name} now`}
                             >
-                                Buy Now
+                                Buy now
                             </button>
                             <button
                                 onClick={() => {
@@ -539,10 +537,8 @@ export default function ProductDetail() {
                                     }
                                     dispatch(toggleWishlist(product));
                                 }}
-                                className={`flex items-center justify-center py-4 px-5 rounded-xl border-2 transition-colors cursor-pointer ${isWishlisted
-                                    ? "border-rose-400 text-rose-500 bg-rose-50 dark:bg-rose-500/10 dark:border-rose-500"
-                                    : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-rose-400 hover:text-rose-500 dark:hover:border-rose-400 dark:hover:text-rose-500"
-                                    }`}
+                                aria-pressed={isWishlisted}
+                                className={`flex items-center justify-center min-h-[52px] px-5 border-2 border-ink dark:border-slate-600 transition-colors cursor-pointer ${isWishlisted ? "bg-hot text-white" : "bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:bg-sign hover:text-ink"}`}
                                 aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                             >
                                 {isWishlisted ? <HiHeart className="w-5.5 h-5.5" /> : <HiOutlineHeart className="w-5.5 h-5.5" />}
@@ -550,7 +546,7 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Trust features */}
-                        <div className="border border-slate-200 dark:border-slate-700 rounded-2xl divide-y divide-slate-100 dark:divide-slate-700">
+                        <div className="border-2 border-ink dark:border-slate-700 divide-y-2 divide-slate-200 dark:divide-slate-700">
                             {[
                                 { icon: HiOutlineTruck, text: "Standard & Express Delivery", sub: "Shipping dynamically calculated at checkout" },
                                 { icon: HiOutlineRefresh, text: "7-day easy return & exchange", sub: "No questions asked" },
@@ -574,12 +570,12 @@ export default function ProductDetail() {
                 {similarProducts.length > 0 && (
                     <div className="mt-16 border-t border-slate-200 dark:border-slate-700 pt-12">
                         {product.stock <= 0 && (
-                            <div className="flex items-center gap-3 mb-6 bg-amber-50 dark:bg-amber-900/20 p-4.5 rounded-xl border border-amber-200/50">
-                                <HiOutlineExclamation className="w-5 h-5 text-amber-500 shrink-0" />
-                                <p className="text-[14px] font-bold text-amber-600 dark:text-amber-400">This product is currently out of stock, but you might like these similar items.</p>
+                            <div className="flex items-center gap-3 mb-6 bg-sign text-ink p-4 border-2 border-ink">
+                                <HiOutlineExclamation className="w-5 h-5 shrink-0" aria-hidden="true" />
+                                <p className="text-[15px] font-bold">This product is currently out of stock, but you might like these similar items.</p>
                             </div>
                         )}
-                        <h2 className="text-[24px] sm:text-[30px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">
+                        <h2 className="display text-[34px] sm:text-[48px] text-slate-900 dark:text-white mb-8">
                             You Might Also Like
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -593,7 +589,7 @@ export default function ProductDetail() {
                 {/* ════════════════════ RATINGS & REVIEWS ════════════════════ */}
                 {showReviews && (
                     <div id="reviews-section" className="mt-16 border-t border-slate-200 dark:border-slate-700 pt-12">
-                        <h2 className="text-[24px] sm:text-[30px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">
+                        <h2 className="display text-[34px] sm:text-[48px] text-slate-900 dark:text-white mb-8">
                             Customer Ratings & Reviews
                         </h2>
 
@@ -610,7 +606,7 @@ export default function ProductDetail() {
                                             return (
                                                 <HiStar
                                                     key={i}
-                                                    className={`w-5 h-5 ${i < Math.floor(ratingVal) ? "text-[#8a6616]" : "text-slate-200 dark:text-slate-700"}`}
+                                                    className={`w-5 h-5 ${i < Math.floor(ratingVal) ? "text-[var(--accent)]" : "text-slate-200 dark:text-slate-700"}`}
                                                 />
                                             );
                                         })}
@@ -628,9 +624,9 @@ export default function ProductDetail() {
                                         return (
                                             <div key={stars} className="flex items-center gap-3 text-[14px]">
                                                 <span className="font-semibold text-slate-600 dark:text-slate-400 w-3">{stars}</span>
-                                                <HiStar className="w-4 h-4 text-[#8a6616] shrink-0" />
+                                                <HiStar className="w-4 h-4 text-[var(--accent)] shrink-0" />
                                                 <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-[#8a6616] rounded-full" style={{ width: `${percent}%` }} />
+                                                    <div className="h-full bg-[var(--accent)] rounded-full" style={{ width: `${percent}%` }} />
                                                 </div>
                                                 <span className="font-bold text-slate-500 w-6 text-right">{count}</span>
                                             </div>
@@ -649,7 +645,7 @@ export default function ProductDetail() {
                                     </button>
                                 ) : (
                                     <div className="text-center pt-4 border-t border-slate-200 dark:border-slate-700">
-                                        <Link to={`/login?redirect=/product/${id}`} className="text-[14px] font-bold text-[#8a6616] hover:underline">
+                                        <Link to={`/login?redirect=/product/${id}`} className="text-[14px] font-bold text-[var(--accent)] hover:underline">
                                             Sign in to rate this product
                                         </Link>
                                     </div>
@@ -677,7 +673,7 @@ export default function ProductDetail() {
                                                             className="p-1 cursor-pointer focus:outline-none transition-transform hover:scale-110"
                                                         >
                                                             <HiStar
-                                                                className={`w-8 h-8 ${star <= reviewRating ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
+                                                                className={`w-8 h-8 ${star <= reviewRating ? "text-primary dark:text-sign" : "text-slate-200 dark:text-slate-700"}`}
                                                             />
                                                         </button>
                                                     ))}
@@ -691,7 +687,7 @@ export default function ProductDetail() {
                                                     required
                                                     rows={4}
                                                     placeholder="Share your thoughts about this product's style, fabric, or fit..."
-                                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-[15px] text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[#8a6616]/20"
+                                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-[15px] text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
                                                 />
                                             </div>
                                             
@@ -728,7 +724,7 @@ export default function ProductDetail() {
                                             </div>
 
                                             {reviewSuccess && (
-                                                <p className="text-[14px] font-semibold text-emerald">✓ Rating submitted successfully!</p>
+                                                <p className="text-[14px] font-semibold text-emerald">Thanks, your rating is in.</p>
                                             )}
                                             <button
                                                 type="submit"
@@ -761,7 +757,7 @@ export default function ProductDetail() {
                                                             {[...Array(5)].map((_, i) => (
                                                                 <HiStar
                                                                     key={i}
-                                                                    className={`w-4 h-4 ${i < review.rating ? "text-amber-500" : "text-slate-200 dark:text-slate-700"}`}
+                                                                    className={`w-4 h-4 ${i < review.rating ? "text-primary dark:text-sign" : "text-slate-200 dark:text-slate-700"}`}
                                                                 />
                                                             ))}
                                                         </div>
@@ -773,7 +769,7 @@ export default function ProductDetail() {
                                                     </div>
                                                 </div>
                                                 {review.verifiedPurchase && (
-                                                    <p className="text-[12px] font-bold text-emerald -mt-2 mb-2">✓ Verified purchase</p>
+                                                    <p className="text-[12px] font-bold text-emerald -mt-2 mb-2">Verified purchase</p>
                                                 )}
                                                 <p className="text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed">
                                                     {review.comment}
@@ -798,7 +794,7 @@ export default function ProductDetail() {
                                             {user && !showReviewForm && (
                                                 <button
                                                     onClick={() => setShowReviewForm(true)}
-                                                    className="mt-4 text-[14px] font-bold text-[#8a6616] hover:underline cursor-pointer"
+                                                    className="mt-4 text-[14px] font-bold text-[var(--accent)] hover:underline cursor-pointer"
                                                 >
                                                     Write a Review Now
                                                 </button>
@@ -845,7 +841,7 @@ export default function ProductDetail() {
                                     setLightboxImg("");
                                     setLightboxZoomed(false);
                                 }}
-                                className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 rounded-full transition-colors cursor-pointer shadow-md z-10"
+                                className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors cursor-pointer shadow-md z-10"
                                 aria-label="Close image"
                             >
                                 <HiOutlineX className="w-5 h-5" />

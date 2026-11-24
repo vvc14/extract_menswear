@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
+import PageHero from "../components/PageHero";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { HiOutlineRefresh, HiOutlineArrowLeft, HiOutlineShieldCheck, HiOutlineClock, HiOutlineCreditCard, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineShieldCheck, HiOutlineClock, HiOutlineCreditCard, HiOutlineInformationCircle } from "react-icons/hi";
 
 const RETURN_STEPS = [
     { step: 1, title: "Initiate Request", desc: "Go to your Orders page and click 'Request Return' within 7 days of delivery." },
-    { step: 2, title: "Provide Reason", desc: "Share a brief reason for the return — size issue, defect, wrong item, etc." },
+    { step: 2, title: "Provide Reason", desc: "Share a brief reason for the return: size issue, defect, wrong item, etc." },
     { step: 3, title: "Pickup Scheduled", desc: "Our logistics partner will pick up the item from your doorstep within 3-5 business days." },
     { step: 4, title: "Refund Processed", desc: "Once we receive and inspect the item, your refund is processed within 5-7 business days." },
 ];
@@ -17,43 +18,21 @@ const EXCHANGE_STEPS = [
 ];
 
 export default function ReturnsExchange() {
-    const navigate = useNavigate();
     return (
         <main id="main-content">
-            <div className="bg-slate-50 dark:bg-[#0d1321] border-b border-slate-200 dark:border-slate-800">
-                <div className="page-wrap py-4">
-                    <nav aria-label="Breadcrumb" className="flex items-center gap-4">
-                        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
-                            <HiOutlineArrowLeft className="w-4 h-4" /> Back
-                        </button>
-                        <span className="text-slate-300 dark:text-slate-600">|</span>
-                        <ol className="flex items-center gap-2 text-[15px]">
-                            <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
-                            <li className="text-slate-300 dark:text-slate-600">/</li>
-                            <li className="text-slate-900 dark:text-white font-semibold">Returns & Exchange</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+            <PageHero title="Returns & exchanges">
+                Changed your mind or need a different size? You have 7 days from delivery.
+            </PageHero>
 
-            <div className="page-wrap" style={{ paddingTop: "48px", paddingBottom: "80px" }}>
+            <div className="page-wrap" style={{ paddingTop: "56px", paddingBottom: "80px" }}>
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", flexDirection: "column", gap: "48px", maxWidth: "900px", margin: "0 auto" }}>
-                    <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-6 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
-                            <HiOutlineRefresh className="w-8 h-8 text-slate-500 dark:text-slate-400" />
-                        </div>
-                        <h1 className="text-[30px] sm:text-[38px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">Returns & Exchange</h1>
-                        <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-[1.7]">
-                            Not satisfied? No worries. We offer hassle-free returns and exchanges within 7 days of delivery.
-                        </p>
-                    </div>
 
                     {/* Quick highlights */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         {[
                             { icon: HiOutlineClock, title: "7-Day Window", desc: "Request returns or exchanges within 7 days of delivery" },
                             { icon: HiOutlineCreditCard, title: "Full Refund", desc: "Get a complete refund to your original payment method" },
-                            { icon: HiOutlineShieldCheck, title: "Free Pickup", desc: "We arrange doorstep pickup — no extra charges" },
+                            { icon: HiOutlineShieldCheck, title: "Free Pickup", desc: "We arrange doorstep pickup, no extra charges" },
                         ].map((item) => (
                             <div key={item.title} className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-7 text-center">
                                 <item.icon className="w-7 h-7 mx-auto mb-3" style={{ color: "var(--gold)" }} />
@@ -72,7 +51,7 @@ export default function ReturnsExchange() {
                             <div className="space-y-6">
                                 {RETURN_STEPS.map((step) => (
                                     <div key={step.step} className="flex gap-5">
-                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-[14px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#1a2744 0%,#2a3f6e 100%)" }}>
+                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-[14px] font-extrabold text-white" style={{ background: "var(--blue)" }}>
                                             {step.step}
                                         </div>
                                         <div>
@@ -87,7 +66,7 @@ export default function ReturnsExchange() {
 
                     {/* Exchange steps */}
                     <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                        <div className="px-8 py-6 border-b border-slate-200 dark:border-slate-700" style={{ background: "rgba(201,168,76,0.06)" }}>
+                        <div className="px-8 py-6 border-b border-slate-200 dark:border-slate-700" style={{ background: "var(--accent-soft)" }}>
                             <h2 className="text-[20px] font-extrabold text-slate-900 dark:text-white">How to Exchange</h2>
                         </div>
                         <div className="p-8">
@@ -124,7 +103,7 @@ export default function ReturnsExchange() {
 
                     {/* Help note */}
                     <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(201,168,76,0.12)" }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--accent-soft)" }}>
                             <HiOutlineInformationCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
                         </div>
                         <div>

@@ -191,7 +191,7 @@ export default function AdminOrders() {
                     {updating === order._id ? "..." : "Retry refund"}
                 </button>
             )}
-            {actions.length === 0 && !(["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed")) && <span className="text-[12px] text-slate-400">—</span>}
+            {actions.length === 0 && !(["cancelled", "returned"].includes(order.status) && order.razorpayPaymentId && (!order.refund?.status || order.refund.status === "failed")) && <span className="text-[12px] text-slate-400">No actions</span>}
         </div>
     );
 
@@ -227,7 +227,7 @@ export default function AdminOrders() {
                 ].map((c) => (
                     <div key={c.label} className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 relative">
                         {c.alert && <span className="absolute top-4 right-4 w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse" />}
-                        <div className={`w-10 h-10 bg-gradient-to-br ${c.grad} rounded-xl flex items-center justify-center mb-4`}>
+                        <div className={`w-10 h-10 bg-primary border-2 border-ink flex items-center justify-center mb-4`}>
                             <c.icon className="w-5 h-5 text-white" />
                         </div>
                         <p className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-1">{c.label}</p>
@@ -285,10 +285,10 @@ export default function AdminOrders() {
                                     <td className="px-5 py-4">
                                         <button onClick={() => setExpandedId(isExpanded ? null : order._id)} className="text-left group">
                                             <p className="text-[14px] font-bold text-slate-900 group-hover:text-primary transition-colors flex items-center gap-1.5">
-                                                {order.invoiceNumber || "—"}
+                                                {order.invoiceNumber || "Pending"}
                                                 <HiOutlineChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                                             </p>
-                                            <p className="text-[12px] text-slate-400 md:hidden">{order.userName || "—"}</p>
+                                            <p className="text-[12px] text-slate-400 md:hidden">{order.userName || "Guest"}</p>
                                         </button>
                                         <div className="md:hidden mt-2.5 space-y-2.5">
                                             <div className="flex items-center justify-between gap-2">
@@ -299,8 +299,8 @@ export default function AdminOrders() {
                                         </div>
                                     </td>
                                     <td className="px-5 py-4 hidden md:table-cell">
-                                        <p className="text-[14px] font-semibold text-slate-900">{order.userName || "—"}</p>
-                                        <p className="text-[12px] text-slate-400 truncate max-w-[180px]">{order.userEmail || "—"}</p>
+                                        <p className="text-[14px] font-semibold text-slate-900">{order.userName || "Guest"}</p>
+                                        <p className="text-[12px] text-slate-400 truncate max-w-[180px]">{order.userEmail || "No email"}</p>
                                     </td>
                                     <td className="px-5 py-4 hidden lg:table-cell text-[14px] text-slate-500">
                                         {new Date(order.paidAt || order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
@@ -359,7 +359,7 @@ export default function AdminOrders() {
                                                             <div className="p-2.5 bg-orange-50 rounded-lg border border-orange-200 text-[13px] text-orange-800">
                                                                 <p className="text-[11px] font-bold uppercase tracking-wider mb-0.5">Size exchange{order.status === "exchange-requested" ? " (replacement reserved)" : ""}</p>
                                                                 {order.exchangeItems.map((x, i) => (
-                                                                    <p key={i}>{x.name} × {x.quantity}: {x.fromSize || "—"} → {x.toSize}</p>
+                                                                    <p key={i}>{x.name} × {x.quantity}: {x.fromSize || "no size"} → {x.toSize}</p>
                                                                 ))}
                                                             </div>
                                                         )}

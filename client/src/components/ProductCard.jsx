@@ -2,11 +2,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toggleWishlist } from "../redux/wishlistSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { HiOutlineShoppingCart, HiStar, HiOutlineHeart, HiHeart, HiOutlineEye } from "react-icons/hi";
+import { HiStar, HiOutlineHeart, HiHeart } from "react-icons/hi";
 import { useState } from "react";
 
-export default function ProductCard({ product, compact = false }) {
+export default function ProductCard({ product, compact = false, eager = false }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [added, setAdded] = useState(false);
@@ -14,24 +13,28 @@ export default function ProductCard({ product, compact = false }) {
     const wishlistItems = useSelector((s) => s.wishlist.items);
     const isWishlisted = wishlistItems.some((i) => i._id === product._id);
 
+    const hasSizes = product.sizes && product.sizes.length > 0;
+    const outOfStock = product.stock <= 0;
+    const discount = product.discount || 0;
+    const originalPrice = product.originalPrice || 0;
+    const rating = product.ratings || 0;
+    const reviewCount = product.numOfReviews || 0;
+    const image = product.images && product.images.length > 0 ? product.images[0] : product.imageUrl;
+
     const handleAddClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (product.stock <= 0) return;
+        if (outOfStock) return;
 
-        if (product.sizes && product.sizes.length > 0) {
-            // Sized products require size selection, so redirect directly without adding to cart
+        if (hasSizes) {
+            // Sized products need a size, so the button opens the product page
             navigate(`/product/${product._id}`);
             return;
         }
 
-        // Immediately add 1 piece to cart
         dispatch(addToCart(product));
         setAdded(true);
-        // Navigate to product page after a brief confirmation flash
-        setTimeout(() => {
-            navigate(`/product/${product._id}`);
-        }, 600);
+        setTimeout(() => navigate(`/product/${product._id}`), 600);
         setTimeout(() => setAdded(false), 2000);
     };
 
@@ -45,186 +48,98 @@ export default function ProductCard({ product, compact = false }) {
         dispatch(toggleWishlist(product));
     };
 
-    const handleQuickView = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigate(`/product/${product._id}`);
-    };
-
-    const discount = product.discount || 0;
-    const originalPrice = product.originalPrice || 0;
-    const rating = product.ratings || 0;
-
     return (
-        <motion.article
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            className={`group relative bg-white dark:bg-slate-800/60 overflow-hidden border border-slate-200 dark:border-slate-700 card-hover flex flex-col h-full ${
-                compact ? "rounded-xl" : "rounded-2xl"
-            }`}
-        >
-            <Link to={`/product/${product._id}`} className="flex flex-col flex-1" aria-label={`View ${product.name}`}>
+        <article className="group relative flex flex-col h-full bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-700 card-hover">
+            <Link to={`/product/${product._id}`} className="flex flex-col flex-1" aria-label={`${product.name}, ₹${product.price.toLocaleString("en-IN")}`}>
 
-                {/* ── Image ── */}
-                <div className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900" style={{ aspectRatio: "3/4" }}>
+                {/* Image */}
+                <div className="relative overflow-hidden bg-slate-100 dark:bg-slate-800 border-b-2 border-ink dark:border-slate-700" style={{ aspectRatio: "3/4" }}>
                     <img
-                        src={product.images && product.images.length > 0 ? product.images[0] : product.imageUrl}
-                        alt={product.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                        style={{ scale: "1" }}
-                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.08)"}
-                        onMouseLeave={e => e.currentTarget.style.transform = ""}
+                        src={image}
+                        alt=""
+                        width="600"
+                        height="800"
+                        loading={eager ? "eager" : "lazy"}
+                        className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] ${outOfStock ? "grayscale opacity-60" : ""}`}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
 
-                    {/* Badges (hidden on phone-width cards so they don't collide with the discount badge) */}
-                    <div className="absolute top-3.5 left-3.5 hidden sm:flex flex-col gap-2 z-10">
-                        {product.fabric && (
-                            <span className="text-[11px] font-bold text-white backdrop-blur-md px-3 py-1.5 rounded-lg"
-                                style={{ background: "rgba(26,39,68,0.8)" }}>
-                                {product.fabric}
-                            </span>
-                        )}
-                        {product.style && (
-                            <span className="text-[11px] font-bold text-white backdrop-blur-md px-3 py-1.5 rounded-lg"
-                                style={{ background: "rgba(201,168,76,0.85)" }}>
-                                {product.style}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Discount */}
-                    {discount > 0 && (
-                        <div className="absolute top-3.5 right-3.5 z-10">
-                            <span className="text-[11px] font-extrabold text-white px-3 py-1.5 rounded-lg"
-                                style={{ background: "#10b981" }}>
-                                {discount}% OFF
-                            </span>
-                        </div>
+                    {discount > 0 && !outOfStock && (
+                        <span className={`stamp absolute top-3 left-3 ${compact ? "text-[11px]" : "text-[12px] sm:text-[13px]"}`}>
+                            {discount}% off
+                        </span>
                     )}
 
-                    {/* Stock urgency */}
-                    {product.stock <= 0 ? (
-                        <>
-                            <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 z-[5]" />
-                            <div className="absolute bottom-3 left-3 z-10">
-                                <span className="text-[11px] font-extrabold text-white backdrop-blur-sm px-3 py-1.5 rounded-lg"
-                                    style={{ background: "rgba(100,116,139,0.9)" }}>
-                                    Out of Stock
-                                </span>
-                            </div>
-                        </>
+                    {outOfStock ? (
+                        <span className="absolute bottom-3 left-3 bg-ink text-white text-[12px] font-extrabold uppercase px-2 py-1">
+                            Sold out
+                        </span>
                     ) : product.stock <= 5 ? (
-                        <div className="absolute bottom-3 left-3 z-10">
-                            <span className="text-[10px] font-bold text-white backdrop-blur-sm px-2.5 py-1 rounded-lg flex items-center gap-1.5"
-                                style={{ background: "rgba(244,63,94,0.88)" }}>
-                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                Only {product.stock} left
-                            </span>
-                        </div>
+                        <span className="absolute bottom-3 left-3 bg-white text-hot border-2 border-hot text-[11px] sm:text-[12px] font-extrabold uppercase px-2 py-0.5">
+                            Only {product.stock} left
+                        </span>
                     ) : null}
-
-                    {/* Quick actions */}
-                    <div className="absolute bottom-4 right-4 z-10 flex gap-2.5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <button
-                            className={`w-9 h-9 backdrop-blur-sm rounded-xl flex items-center justify-center transition-colors shadow-lg cursor-pointer ${
-                                isWishlisted
-                                    ? "bg-rose-500/90 text-white"
-                                    : "bg-white/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 hover:text-rose-500"
-                            }`}
-                            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                            onClick={handleWishlistToggle}
-                        >
-                            {isWishlisted ? <HiHeart className="w-4 h-4" /> : <HiOutlineHeart className="w-4 h-4" />}
-                        </button>
-                        <button
-                            className="w-9 h-9 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-gold transition-colors shadow-lg cursor-pointer"
-                            aria-label="Quick view"
-                            onClick={handleQuickView}
-                        >
-                            <HiOutlineEye className="w-4 h-4" />
-                        </button>
-                    </div>
                 </div>
 
-                {/* ── Body ── */}
-                <div className={`${compact ? "p-3 sm:p-4" : "p-3.5 sm:p-6"} flex-1 flex flex-col`}>
-                    <p className={`${compact ? "text-[9px]" : "text-[10px] sm:text-[11px]"} font-bold uppercase tracking-[0.12em] mb-1 sm:mb-1.5`} style={{ color: "var(--gold)" }}>
-                        {product.category === "shirt" ? "Shirt" : "Trouser"}
+                {/* Body */}
+                <div className={`${compact ? "p-3" : "p-3 sm:p-4"} flex-1 flex flex-col`}>
+                    <p className="text-[11px] sm:text-[12px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">
+                        {product.category === "shirt" ? "Shirt" : "Trouser"}{product.fabric ? ` · ${product.fabric}` : ""}
                     </p>
-                    <h3 className={`${compact ? "text-[12px] sm:text-[14px]" : "text-[13px] sm:text-[16px]"} font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-1.5 sm:mb-2 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300`}>
+                    <h3 className={`${compact ? "text-[13px] sm:text-[14px]" : "text-[14px] sm:text-[16px]"} font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-2`} style={{ fontStretch: "100%", letterSpacing: 0 }}>
                         {product.name}
                     </h3>
 
-                    <div className="mt-auto">
-                        {/* Rating */}
-                        {!compact && (
-                            <div className="flex items-center gap-1.5 mb-2 sm:mb-4">
-                                <div className="flex items-center gap-0.5">
-                                    {[...Array(5)].map((_, i) => (
-                                        <HiStar key={i} className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${i < Math.floor(rating) ? "" : "text-slate-200 dark:text-slate-600"}`}
-                                            style={i < Math.floor(rating) ? { color: "var(--gold)" } : {}} />
-                                    ))}
-                                </div>
-                                <span className="text-[10px] sm:text-[12px] font-semibold text-slate-400">({rating})</span>
-                            </div>
-                        )}
-
-                        {/* Price */}
-                        <div className="flex items-baseline gap-1.5">
-                            <span className={`${compact ? "text-[15px] sm:text-[18px]" : "text-[16px] sm:text-[22px]"} font-extrabold text-slate-900 dark:text-white`}>
-                                ₹{product.price.toLocaleString("en-IN")}
+                    <div className="mt-auto flex flex-wrap items-end gap-x-2 gap-y-1">
+                        <span className={`price-tag ${compact ? "text-[15px]" : "text-[16px] sm:text-[19px]"}`}>
+                            ₹{product.price.toLocaleString("en-IN")}
+                        </span>
+                        {originalPrice > product.price && (
+                            <span className="text-[12px] sm:text-[13px] text-slate-500 dark:text-slate-400 line-through">
+                                ₹{originalPrice.toLocaleString("en-IN")}
                             </span>
-                            {originalPrice > 0 && (
-                                <span className={`${compact ? "text-[10px]" : "text-[11px] sm:text-[13px]"} text-slate-400 line-through`}>
-                                    ₹{originalPrice.toLocaleString("en-IN")}
-                                </span>
-                            )}
-                        </div>
+                        )}
+                        {!compact && reviewCount > 0 && (
+                            <span className="ml-auto flex items-center gap-0.5 text-[12px] font-bold text-slate-700 dark:text-slate-300" aria-label={`Rated ${rating} out of 5 from ${reviewCount} reviews`}>
+                                <HiStar className="w-3.5 h-3.5 text-primary dark:text-sign" aria-hidden="true" />
+                                {rating} <span className="font-medium text-slate-500 dark:text-slate-400">({reviewCount})</span>
+                            </span>
+                        )}
                     </div>
                 </div>
             </Link>
 
-            {/* ── Add to Cart ── */}
-            <div className={`${compact ? "px-3 sm:px-4 pb-3 sm:pb-4" : "px-3.5 sm:px-6 pb-3.5 sm:pb-6"}`}>
-                {product.stock <= 0 ? (
-                    <div
-                        className={`w-full flex items-center justify-center gap-2 font-bold rounded-xl text-slate-400 dark:text-slate-500 cursor-not-allowed ${
-                            compact ? "text-[12px] py-2" : "text-[13px] sm:text-[14px] py-2.5 sm:py-3.5"
-                        }`}
-                        style={{ background: "#f1f5f9" }}
-                    >
-                        Out of Stock
-                    </div>
+            {/* Wishlist: always visible, phones have no hover */}
+            <button
+                type="button"
+                className={`absolute top-2.5 right-2.5 z-10 w-10 h-10 flex items-center justify-center border-2 border-ink transition-colors ${isWishlisted ? "bg-hot text-white" : "bg-white text-ink hover:bg-sign"}`}
+                aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
+                aria-pressed={isWishlisted}
+                onClick={handleWishlistToggle}
+            >
+                {isWishlisted ? <HiHeart className="w-5 h-5" aria-hidden="true" /> : <HiOutlineHeart className="w-5 h-5" aria-hidden="true" />}
+            </button>
+
+            {/* Buy */}
+            <div className={compact ? "px-3 pb-3" : "px-3 pb-3 sm:px-4 sm:pb-4"}>
+                {outOfStock ? (
+                    <button type="button" disabled className="w-full min-h-[44px] text-[13px] sm:text-[14px] font-bold border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400">
+                        Sold out
+                    </button>
                 ) : (
                     <button
+                        type="button"
                         onClick={handleAddClick}
-                        aria-label={`Add ${product.name} to cart`}
-                        className={`w-full flex items-center justify-center gap-1.5 sm:gap-2.5 font-bold rounded-xl transition-all duration-300 cursor-pointer ${
-                            compact ? "text-[12px] py-2" : "text-[13px] sm:text-[14px] py-2.5 sm:py-3.5"
-                        } ${added
-                            ? "text-white scale-[0.99]"
-                            : "text-white hover:opacity-90 active:scale-[0.98]"
+                        aria-label={hasSizes ? `Choose a size for ${product.name}` : `Add ${product.name} to bag`}
+                        className={`w-full min-h-[44px] text-[13px] sm:text-[14px] font-extrabold border-2 border-ink dark:border-black transition-colors ${added
+                            ? "bg-emerald text-white dark:text-ink"
+                            : "bg-primary text-white hover:bg-primary-dark dark:bg-sign dark:text-ink dark:hover:bg-[#ebdf00]"
                             }`}
-                        style={{
-                            background: added
-                                ? "#10b981"
-                                : "linear-gradient(135deg,#1a2744 0%,#2a3f6e 100%)"
-                        }}
+                        style={{ fontStretch: "110%" }}
                     >
-                        {added ? (
-                            <>{compact ? "✓ Added" : "✓ Added — Opening..."}</>
-                        ) : (
-                            <>
-                                <HiOutlineShoppingCart className={compact ? "w-3.5 h-3.5" : "w-4 h-4"} />
-                                Buy Now
-                            </>
-                        )}
+                        {added ? "Added to bag" : hasSizes ? "Choose size" : "Add to bag"}
                     </button>
                 )}
             </div>
-        </motion.article>
+        </article>
     );
 }

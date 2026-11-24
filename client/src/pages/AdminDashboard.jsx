@@ -105,7 +105,7 @@ export default function AdminDashboard() {
                         className="group bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-7 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
                     >
                         <div className="flex items-start justify-between mb-5">
-                            <div className={`w-13 h-13 bg-gradient-to-br ${card.grad} rounded-xl flex items-center justify-center shadow-lg`} style={{ width: 52, height: 52 }}>
+                            <div className={`w-13 h-13 bg-primary border-2 border-ink flex items-center justify-center`} style={{ width: 52, height: 52 }}>
                                 <card.icon className="w-6 h-6 text-white" />
                             </div>
                             <HiOutlineArrowRight className="w-5 h-5 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
@@ -138,8 +138,8 @@ export default function AdminDashboard() {
                             <tbody>
                                 {ordersStats.recentOrders.map((o) => (
                                     <tr key={o._id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
-                                        <td className="px-3 sm:px-5 py-3 font-bold text-slate-900 whitespace-nowrap text-[13px] sm:text-[14px]">{o.invoiceNumber || "—"}</td>
-                                        <td className="px-5 py-3 text-slate-600 hidden sm:table-cell">{o.userName || "—"}</td>
+                                        <td className="px-3 sm:px-5 py-3 font-bold text-slate-900 whitespace-nowrap text-[13px] sm:text-[14px]">{o.invoiceNumber || "Pending"}</td>
+                                        <td className="px-5 py-3 text-slate-600 hidden sm:table-cell">{o.userName || "Guest"}</td>
                                         <td className="px-1 sm:px-5 py-3 text-center">
                                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${STATUS_BADGES[o.status] || "bg-slate-100"}`}>
                                                 {o.status}

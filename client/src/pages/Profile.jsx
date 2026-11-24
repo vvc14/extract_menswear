@@ -207,7 +207,7 @@ export default function Profile() {
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
                 {/* Header */}
                 <div className="mb-10 text-center md:text-left">
-                    <h1 className="text-[32px] md:text-[40px] font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">My Profile</h1>
+                    <h1 className="display text-[40px] sm:text-[60px] text-slate-900 dark:text-white mb-2">My Profile</h1>
                     <p className="text-[16px] text-slate-500 dark:text-slate-400">Manage your personal info and delivery addresses.</p>
                 </div>
 
@@ -236,7 +236,7 @@ export default function Profile() {
                             <form onSubmit={handleProfileSubmit}>
                                 <div className="flex flex-col items-center text-center mb-6">
                                     <div className="w-20 h-20 rounded-full flex items-center justify-center text-[28px] font-extrabold text-white mb-4"
-                                        style={{ background: "linear-gradient(135deg, var(--color-primary), #2563eb)" }}>
+                                        style={{ background: "var(--blue)" }}>
                                         {name?.charAt(0).toUpperCase() || "U"}
                                     </div>
                                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">{name}</h3>

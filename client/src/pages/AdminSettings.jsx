@@ -65,7 +65,7 @@ export default function AdminSettings() {
             <div className="max-w-2xl bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
                 <form onSubmit={handleSave} className="space-y-6">
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "20px" }}>
-                        <div style={{ width: 40, height: 40, background: "rgba(201,168,76,0.1)", borderRadius: 10, display: "flex", alignItems: "center", justify: "center" }}>
+                        <div style={{ width: 40, height: 40, background: "var(--accent-soft)", borderRadius: 10, display: "flex", alignItems: "center", justify: "center" }}>
                             <HiOutlineClock className="w-5 h-5" style={{ color: "var(--gold)" }} />
                         </div>
                         <div>

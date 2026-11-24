@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
@@ -6,155 +6,157 @@ import { ADMIN_PATH } from "../config/adminPath";
 import {
     HiOutlineViewGrid, HiOutlineCollection, HiOutlineUsers,
     HiOutlineLogout, HiOutlineExternalLink, HiOutlineMenu, HiOutlineX,
-    HiOutlineChevronRight, HiOutlineClipboardList, HiOutlineAdjustments, HiOutlineTag
+    HiOutlineClipboardList, HiOutlineAdjustments, HiOutlineTag
 } from "react-icons/hi";
+import Logo from "./brand/Logo";
 
-const SIDEBAR_W = 230;
-
-const NAV = [
-    { to: `/${ADMIN_PATH}/dashboard`, label: "Dashboard", icon: HiOutlineViewGrid },
-    { to: `/${ADMIN_PATH}/products`, label: "Products", icon: HiOutlineCollection },
-    { to: `/${ADMIN_PATH}/orders`, label: "Orders", icon: HiOutlineClipboardList },
-    { to: `/${ADMIN_PATH}/users`, label: "Users", icon: HiOutlineUsers },
-    { to: `/${ADMIN_PATH}/coupons`, label: "Coupons", icon: HiOutlineTag },
-    { to: `/${ADMIN_PATH}/settings`, label: "Settings", icon: HiOutlineAdjustments },
+// Grouped by the job: running the shop day to day, then customers, then setup.
+const NAV_GROUPS = [
+    {
+        label: "Shop",
+        items: [
+            { to: `/${ADMIN_PATH}/dashboard`, label: "Dashboard", icon: HiOutlineViewGrid },
+            { to: `/${ADMIN_PATH}/orders`, label: "Orders", icon: HiOutlineClipboardList },
+            { to: `/${ADMIN_PATH}/products`, label: "Products", icon: HiOutlineCollection },
+        ],
+    },
+    {
+        label: "Customers",
+        items: [
+            { to: `/${ADMIN_PATH}/users`, label: "Users", icon: HiOutlineUsers },
+            { to: `/${ADMIN_PATH}/coupons`, label: "Coupons", icon: HiOutlineTag },
+        ],
+    },
+    {
+        label: "Setup",
+        items: [{ to: `/${ADMIN_PATH}/settings`, label: "Settings", icon: HiOutlineAdjustments }],
+    },
 ];
+const ALL_NAV = NAV_GROUPS.flatMap((g) => g.items);
 
 export default function AdminLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const toggleRef = useRef(null);
     const admin = useSelector((s) => s.auth.admin);
     const user = useSelector((s) => s.auth.user);
     const authAdmin = admin || (user?.role === "admin" ? user : null);
     const displayName = authAdmin?.username || authAdmin?.name || "Admin";
 
     const handleLogout = () => { dispatch(logout()); navigate("/login"); };
-    const pageTitle = NAV.find((n) => pathname.startsWith(n.to))?.label || "Admin";
+    const pageTitle = ALL_NAV.find((n) => pathname.startsWith(n.to))?.label || "Admin";
+
+    // Admin screens are light-only (dense tables and forms); lift the dark theme while here and put it back on exit
+    useEffect(() => {
+        const root = document.documentElement;
+        const wasDark = root.classList.contains("dark");
+        root.classList.remove("dark");
+        return () => { if (wasDark) root.classList.add("dark"); };
+    }, []);
+
+    useEffect(() => { setSidebarOpen(false); }, [pathname]);
+    useEffect(() => {
+        if (!sidebarOpen) return;
+        const onKey = (e) => {
+            if (e.key === "Escape") { setSidebarOpen(false); toggleRef.current?.focus(); }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, [sidebarOpen]);
 
     return (
-        <div style={{ minHeight: "100vh", background: "#f8f9fc" }}>
-            {/* Backdrop for mobile */}
+        <div className="min-h-screen bg-slate-50 text-slate-900">
             {sidebarOpen && (
-                <div 
-                    className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
+                <div className="fixed inset-0 bg-ink/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
             )}
 
-            {/* Sidebar — collapsible on mobile, always visible on desktop */}
-            <aside 
-                className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-[#0f172a] overflow-y-auto transition-transform duration-300 lg:translate-x-0 ${
-                    sidebarOpen ? "translate-x-0" : "-translate-x-full"
-                }`}
-                style={{ width: SIDEBAR_W }}
+            {/* Sidebar: always visible on desktop, a sheet on phones */}
+            <aside
+                id="admin-sidebar"
+                className={`board fixed top-0 bottom-0 left-0 z-50 w-[240px] flex flex-col border-r-2 border-ink overflow-y-auto transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
             >
-                {/* Brand */}
-                <div style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-                        <div style={{ width: 36, height: 36, background: "linear-gradient(135deg, var(--color-primary), #2563eb)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ color: "#fff", fontSize: 14, fontWeight: 800 }}>E</span>
-                        </div>
-                        <div style={{ lineHeight: 1.1 }}>
-                            <span style={{ color: "#fff", fontSize: 17, fontWeight: 800, letterSpacing: "-0.02em", display: "block" }}>EXTRACT</span>
-                            <span style={{ color: "#64748b", fontSize: 9, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase" }}>Admin Panel</span>
-                        </div>
+                <div className="h-[72px] flex items-center justify-between px-4 border-b-2 border-ink">
+                    <Link to={`/${ADMIN_PATH}/dashboard`} aria-label="Admin dashboard">
+                        <Logo size="sm" />
                     </Link>
                     <button
+                        type="button"
                         onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 cursor-pointer"
-                        aria-label="Close sidebar"
+                        className="lg:hidden w-11 h-11 flex items-center justify-center text-white hover:bg-white/10"
+                        aria-label="Close menu"
                     >
-                        <HiOutlineX className="w-5 h-5" />
+                        <HiOutlineX className="w-6 h-6" aria-hidden="true" />
                     </button>
                 </div>
 
-                {/* Nav */}
-                <nav style={{ flex: 1, padding: "20px 12px" }} aria-label="Admin navigation">
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: "0.12em", padding: "0 12px", marginBottom: 12 }}>Menu</p>
-                    {NAV.map(({ to, label, icon: Icon }) => {
-                        const active = pathname === to;
-                        return (
-                            <Link
-                                key={to}
-                                to={to}
-                                onClick={() => setSidebarOpen(false)}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: 12,
-                                    padding: "12px 14px", borderRadius: 12, fontSize: 16, fontWeight: 600,
-                                    textDecoration: "none", marginBottom: 4,
-                                    color: active ? "#ffffff" : "#94a3b8",
-                                    background: active ? "#2563eb" : "transparent",
-                                    transition: "all 0.2s",
-                                    cursor: "pointer",
-                                }}
-                                onMouseEnter={(e) => { if (!active) { e.currentTarget.style.color = "#e2e8f0"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
-                                onMouseLeave={(e) => { if (!active) { e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.background = "transparent"; } }}
-                            >
-                                <Icon style={{ width: 20, height: 20 }} />
-                                {label}
-                                {active && <HiOutlineChevronRight style={{ width: 16, height: 16, marginLeft: "auto", opacity: 0.6 }} />}
-                            </Link>
-                        );
-                    })}
+                <nav className="flex-1 px-3 py-4" aria-label="Admin navigation">
+                    {NAV_GROUPS.map((group) => (
+                        <div key={group.label} className="mb-5">
+                            <p className="px-3 mb-1.5 text-[12px] font-black uppercase text-white/60">{group.label}</p>
+                            <ul>
+                                {group.items.map(({ to, label, icon: Icon }) => {
+                                    const active = pathname.startsWith(to);
+                                    return (
+                                        <li key={to}>
+                                            <Link
+                                                to={to}
+                                                aria-current={active ? "page" : undefined}
+                                                className={`flex items-center gap-3 min-h-[44px] px-3 text-[15px] font-extrabold border-2 transition-colors ${active
+                                                    ? "bg-sign text-ink border-ink shadow-[3px_3px_0_#12123a]"
+                                                    : "text-white border-transparent hover:bg-white/10"
+                                                    }`}
+                                            >
+                                                <Icon className="w-5 h-5 shrink-0" aria-hidden="true" />
+                                                {label}
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+                    ))}
                 </nav>
 
-                {/* Bottom */}
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "16px 12px" }}>
+                <div className="border-t-2 border-ink px-3 py-4">
                     {authAdmin && (
-                        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", marginBottom: 8 }}>
-                            <div style={{ width: 36, height: 36, borderRadius: 8, background: "linear-gradient(135deg, #475569, #334155)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <span style={{ color: "#fff", fontSize: 14, fontWeight: 800 }}>{displayName.charAt(0).toUpperCase()}</span>
-                            </div>
-                            <div style={{ minWidth: 0 }}>
-                                <p style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayName}</p>
-                                <p style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em" }}>Administrator</p>
+                        <div className="flex items-center gap-3 px-3 mb-2">
+                            <span className="w-9 h-9 flex items-center justify-center bg-white text-primary border-2 border-ink font-black" aria-hidden="true">
+                                {displayName.charAt(0).toUpperCase()}
+                            </span>
+                            <div className="min-w-0">
+                                <p className="text-[15px] font-bold text-white truncate">{displayName}</p>
+                                <p className="text-[12px] font-semibold text-white/70">Administrator</p>
                             </div>
                         </div>
                     )}
-                    <Link
-                        to="/"
-                        style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 8, fontSize: 14, fontWeight: 600, color: "#64748b", textDecoration: "none", transition: "all 0.2s", cursor: "pointer" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = "#e2e8f0"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = "#64748b"; }}
-                    >
-                        <HiOutlineExternalLink style={{ width: 18, height: 18 }} />
-                        View Storefront
+                    <Link to="/" className="flex items-center gap-3 min-h-[44px] px-3 text-[14px] font-bold text-white/85 hover:text-sign">
+                        <HiOutlineExternalLink className="w-5 h-5" aria-hidden="true" /> View storefront
                     </Link>
-                    <button
-                        onClick={handleLogout}
-                        style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "10px 14px", borderRadius: 8, fontSize: 14, fontWeight: 600, color: "#64748b", background: "none", border: "none", cursor: "pointer", textAlign: "left", transition: "all 0.2s" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = "#f43f5e"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = "#64748b"; }}
-                    >
-                        <HiOutlineLogout style={{ width: 18, height: 18 }} />
-                        Sign Out
+                    <button type="button" onClick={handleLogout} className="flex items-center gap-3 w-full min-h-[44px] px-3 text-[14px] font-bold text-white/85 hover:text-sign text-left">
+                        <HiOutlineLogout className="w-5 h-5" aria-hidden="true" /> Sign out
                     </button>
                 </div>
             </aside>
 
-            {/* Main content — responsive padding instead of left margin */}
-            <div className="flex flex-col min-h-screen transition-all duration-300 lg:pl-[230px]">
-                {/* Top bar */}
-                <header style={{
-                    position: "sticky", top: 0, zIndex: 30,
-                    background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
-                    borderBottom: "1px solid rgba(226,232,240,0.7)",
-                    height: 64, display: "flex", alignItems: "center", padding: "0 24px"
-                }}>
+            <div className="flex flex-col min-h-screen lg:pl-[240px]">
+                <header className="sticky top-0 z-30 h-[72px] flex items-center gap-3 px-4 sm:px-6 bg-white border-b-2 border-ink">
                     <button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg mr-3 cursor-pointer"
-                        aria-label="Toggle sidebar"
+                        ref={toggleRef}
+                        type="button"
+                        onClick={() => setSidebarOpen(true)}
+                        className="lg:hidden w-11 h-11 flex items-center justify-center border-2 border-ink text-ink hover:bg-sign"
+                        aria-label="Open admin menu"
+                        aria-expanded={sidebarOpen}
+                        aria-controls="admin-sidebar"
                     >
-                        <HiOutlineMenu className="w-6 h-6" />
+                        <HiOutlineMenu className="w-6 h-6" aria-hidden="true" />
                     </button>
-                    <h2 style={{ fontSize: 20, fontWeight: 700, color: "#1e293b" }}>{pageTitle}</h2>
+                    <h1 className="display text-[26px] sm:text-[32px] text-ink">{pageTitle}</h1>
                 </header>
 
-                {/* Page content */}
-                <main style={{ flex: 1, padding: "24px" }} className="sm:p-10">
+                <main id="main-content" className="flex-1 p-4 sm:p-8 lg:p-10">
                     <Outlet />
                 </main>
             </div>
