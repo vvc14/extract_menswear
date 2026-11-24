@@ -10,6 +10,7 @@ import {HiOutlineShoppingBag, HiOutlineMenu, HiOutlineX, HiOutlineUser, HiOutlin
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
 import Logo, { Eagle } from "./brand/Logo";
+import useShopStock, { deliveryLine } from "../hooks/useShopStock";
 
 const NAV_LINKS = [
     { to: "/shirts", label: "Shirts" },
@@ -18,9 +19,9 @@ const NAV_LINKS = [
     { to: "/contact", label: "Contact" },
 ];
 
-// Each line is a real policy from the Shipping / Returns pages or the shop banner.
+// Each line is a real policy (Orders page enforces the 7-day window) or from the shop banner.
+// The delivery line is added from live stock in the component, never hard-coded.
 const TICKER = [
-    "Free delivery above ₹999",
     "7-day returns and exchanges",
     "Wholesale and retail",
     "Pay by UPI, cards or wallets",
@@ -31,6 +32,9 @@ export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [tickerPaused, setTickerPaused] = useState(false);
+    const { products: stockList } = useShopStock();
+    const delivery = deliveryLine(stockList);
+    const tickerLines = delivery ? [delivery.text, ...TICKER] : TICKER;
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -122,7 +126,7 @@ export default function Navbar() {
                             <div className="marquee-track">
                                 {[0, 1].map((copy) => (
                                     <ul key={copy} className="flex items-center shrink-0" aria-hidden={copy === 1 ? true : undefined}>
-                                        {TICKER.map((line) => (
+                                        {tickerLines.map((line) => (
                                             <li key={line} className="flex items-center gap-4 pr-4 text-[13px] font-extrabold uppercase whitespace-nowrap" style={{ fontStretch: "112%" }}>
                                                 {line}
                                                 <Eagle className="h-3.5 w-auto text-primary" />

@@ -623,6 +623,206 @@ html.dark .btn-primary:hover {
   transform: scale(0.94);
 }
 
+/* ═════════════════════════════════════════════════════
+   SHOP-FLOOR MOTIFS
+   Every page borrows one object from the real counter on NTR Road, so the site
+   reads as this shop and not a template: swing tags (prices), the clothing rail
+   (stock), the printed bill (money), the rolling shutter (closed / missing),
+   the tailor's tape (sizes). React wrappers live in components/brand/.
+   ═════════════════════════════════════════════════════ */
+
+/* Swing tag: card with clipped top corners and a punched eyelet.
+   The outline and hard shadow come from drop-shadow on the wrapper, because a
+   clip-path would cut a normal border off the angled corners. */
+.hang-tag-wrap {
+  --tag-line: var(--ink);
+  /* string length; raise it (style={{ "--string": "80px" }}) to hang a tag lower off the same rail */
+  --string: 40px;
+  position: relative;
+  display: block;
+  padding-top: calc(var(--string) - 14px);
+  filter:
+    drop-shadow(2px 0 0 var(--tag-line)) drop-shadow(-2px 0 0 var(--tag-line))
+    drop-shadow(0 2px 0 var(--tag-line)) drop-shadow(0 -2px 0 var(--tag-line))
+    drop-shadow(5px 5px 0 var(--hard-shadow));
+  transform-origin: 50% 0;
+  transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.dark .hang-tag-wrap {
+  --tag-line: #000;
+}
+
+/* the string the tag hangs from */
+.hang-tag-wrap::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: var(--string);
+  margin-left: -1px;
+  background: var(--tag-line);
+  z-index: 2;
+}
+
+.hang-tag {
+  position: relative;
+  clip-path: polygon(26% 0, 74% 0, 100% 34px, 100% 100%, 0 100%, 0 34px);
+  padding: 44px 1.25rem 1.25rem;
+}
+
+/* eyelet */
+.hang-tag::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 999px;
+  /* set --tag-hole to whatever the tag hangs in front of */
+  background: var(--tag-hole, var(--page));
+  box-shadow: inset 0 0 0 3px var(--tag-line, var(--ink));
+}
+
+a.hang-tag-wrap:hover,
+.hang-tag-wrap.swing:hover {
+  transform: rotate(-3deg);
+}
+
+a.hang-tag-wrap:active {
+  transform: rotate(1deg) translateY(2px);
+}
+
+/* Clothing rail: a chrome rod with ink ends, products hang off it */
+.rail-rod {
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff 0%, #c9cbe0 45%, #8c8fb3 100%);
+  box-shadow: 0 4px 0 rgb(18 18 58 / 0.35);
+}
+
+.dark .rail-rod {
+  border-color: #000;
+}
+
+/* Printed bill: zigzag tear on top and bottom (mask), paper stays readable in both themes */
+/* outline traced with drop-shadows so it follows the torn edge (a border would be masked away) */
+.receipt-wrap {
+  --paper-line: var(--ink);
+  filter:
+    drop-shadow(1.5px 0 0 var(--paper-line)) drop-shadow(-1.5px 0 0 var(--paper-line))
+    drop-shadow(0 1.5px 0 var(--paper-line)) drop-shadow(0 -1.5px 0 var(--paper-line))
+    drop-shadow(5px 5px 0 var(--hard-shadow));
+}
+
+.dark .receipt-wrap {
+  --paper-line: #000;
+}
+
+.receipt {
+  --z: 9px;
+  background: var(--surface);
+  padding: calc(var(--z) + 1.5rem) 1.5rem calc(var(--z) + 1.5rem);
+  -webkit-mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(2 * var(--z)) 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--z)) 51% repeat-x;
+  mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(2 * var(--z)) 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--z)) 51% repeat-x;
+}
+
+/* dotted rule between bill lines */
+.receipt-rule {
+  border: 0;
+  border-top: 2px dashed var(--color-slate-300);
+  margin: 0.9rem 0;
+}
+
+/* Rolling shutter: the shop is shut on pages that do not exist */
+.shutter {
+  background:
+    repeating-linear-gradient(180deg,
+      #c4c6dc 0 14px,
+      #9a9dbd 14px 16px,
+      #e3e4f0 16px 18px);
+  border-left: 10px solid #5c5f8c;
+  border-right: 10px solid #5c5f8c;
+}
+
+/* colour of a slat, for tags hung in front of the shutter (their eyelet shows it) */
+:root {
+  --shutter-slat: #c4c6dc;
+}
+
+.dark {
+  --shutter-slat: #3a3c78;
+}
+
+.dark .shutter {
+  background:
+    repeating-linear-gradient(180deg,
+      #3a3c78 0 14px,
+      #23245a 14px 16px,
+      #4a4c8c 16px 18px);
+  border-color: #1a1b4a;
+}
+
+/* Tailor's tape: yellow band with inch ticks, used on the size guide */
+.tape {
+  height: 44px;
+  background-color: var(--yellow);
+  background-image:
+    repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 48px),
+    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 12px);
+  background-size: 100% 20px, 100% 11px;
+  background-repeat: repeat-x;
+  background-position: 0 0, 0 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+
+/* Bolted sign frame: four screw heads in the corners of a board panel */
+.bolted {
+  position: relative;
+}
+
+.bolted::before,
+.bolted::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #ffffff, #9a9dbd 60%, #5c5f8c);
+  box-shadow: 0 0 0 1.5px var(--ink);
+}
+
+.bolted::before {
+  left: 10px;
+}
+
+.bolted::after {
+  right: 10px;
+}
+
+/* gentle settle-in swing for things that hang (MOTION 2: draws the eye once, then stops) */
+@keyframes hang-settle {
+  0% { transform: rotate(7deg); }
+  35% { transform: rotate(-4deg); }
+  65% { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.hang-settle {
+  transform-origin: 50% 0;
+  animation: hang-settle 1.1s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
 }
 
 /* ─── Interaction affordances (R-39) ─── */

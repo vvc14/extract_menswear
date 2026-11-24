@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { HiOutlineMail, HiOutlineClock, HiOutlinePhone, HiOutlineLocationMarker, HiOutlineCheck } from "react-icons/hi";
 import API from "../services/api";
+import { Eagle } from "../components/brand/Logo";
 
 const PHONES = ["8184836764", "7337526629"];
 const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Extract Men's Wear, NTR Road, Suraram Colony, Hyderabad")}`;
@@ -62,48 +63,53 @@ export default function Contact() {
             <section className="bg-slate-50 dark:bg-[#111238]">
                 <div className="page-wrap py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
 
-                    {/* Direct lines */}
-                    <div className="lg:col-span-5 flex flex-col gap-8">
-                        <div>
-                            <h2 className="flex items-center gap-2 text-[14px] font-black uppercase text-slate-500 dark:text-slate-400 mb-3">
-                                <HiOutlinePhone className="w-5 h-5" aria-hidden="true" /> Phone
-                            </h2>
-                            <ul className="flex flex-col gap-3">
+                    {/* The shop's visiting card: everything needed to reach the counter */}
+                    <div className="lg:col-span-5">
+                        <h2 className="sr-only">Shop details</h2>
+                        <div className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#fff200] dark:shadow-[10px_10px_0_#000] lg:-rotate-2 px-5 pt-9 pb-6 sm:px-8">
+                            <div className="flex items-center gap-3 pb-5 border-b-2 border-white/25">
+                                <Eagle className="w-14 h-auto text-white shrink-0" />
+                                <div className="leading-none">
+                                    <p className="logo-word text-[34px]">EXTRACT</p>
+                                    <p className="logo-tag text-[10.5px]">MENSWEAR</p>
+                                </div>
+                            </div>
+
+                            <ul className="mt-5 flex flex-col gap-3">
                                 {PHONES.map((p) => (
                                     <li key={p}>
-                                        <a href={`tel:+91${p}`} className="inline-flex items-center min-h-[56px] px-5 bg-sign text-ink border-2 border-ink shadow-[4px_4px_0_#12123a] dark:shadow-[4px_4px_0_#000] text-[26px] sm:text-[30px] font-black tabular-nums hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-transform" style={{ fontStretch: "112%" }}>
+                                        <a href={`tel:+91${p}`} className="flex items-center gap-3 min-h-[56px] px-4 bg-sign text-ink border-2 border-ink shadow-[4px_4px_0_#12123a] text-[24px] sm:text-[28px] font-black tabular-nums hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-transform" style={{ fontStretch: "112%" }}>
+                                            <HiOutlinePhone className="w-6 h-6 shrink-0" aria-hidden="true" />
                                             {p.slice(0, 5)} {p.slice(5)}
                                         </a>
                                     </li>
                                 ))}
                             </ul>
-                        </div>
 
-                        <div>
-                            <h2 className="flex items-center gap-2 text-[14px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2">
-                                <HiOutlineClock className="w-5 h-5" aria-hidden="true" /> Shop hours
-                            </h2>
-                            <p className="text-[18px] font-bold text-slate-900 dark:text-white">Monday to Saturday, 9 AM to 7 PM</p>
-                        </div>
-
-                        <div>
-                            <h2 className="flex items-center gap-2 text-[14px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2">
-                                <HiOutlineMail className="w-5 h-5" aria-hidden="true" /> Email
-                            </h2>
-                            <a href="mailto:support@extractmenswear.com" className="text-[18px] font-bold text-primary dark:text-sign underline underline-offset-4 break-all">support@extractmenswear.com</a>
-                            <p className="mt-1 text-[14px] text-slate-600 dark:text-slate-400">Replies within one working day.</p>
-                        </div>
-
-                        <div>
-                            <h2 className="flex items-center gap-2 text-[14px] font-black uppercase text-slate-500 dark:text-slate-400 mb-2">
-                                <HiOutlineLocationMarker className="w-5 h-5" aria-hidden="true" /> Shop
-                            </h2>
-                            <address className="not-italic text-[17px] leading-relaxed text-slate-900 dark:text-white">
-                                H.No. 5-360, NTR Road<br />2nd Om Jend, Suraram Colony<br />Hyderabad 500055
-                            </address>
-                            <a href={MAP_URL} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-[15px] font-bold text-primary dark:text-sign underline underline-offset-4">
-                                Directions in Google Maps<span className="sr-only"> (opens in a new tab)</span>
-                            </a>
+                            <dl className="mt-6 grid grid-cols-1 gap-5 text-white">
+                                <div className="flex gap-3">
+                                    <dt><HiOutlineClock className="w-5 h-5 text-sign mt-0.5" aria-hidden="true" /><span className="sr-only">Shop hours</span></dt>
+                                    <dd className="text-[16px] font-bold">Monday to Saturday, 9 AM to 7 PM</dd>
+                                </div>
+                                <div className="flex gap-3">
+                                    <dt><HiOutlineLocationMarker className="w-5 h-5 text-sign mt-0.5" aria-hidden="true" /><span className="sr-only">Address</span></dt>
+                                    <dd>
+                                        <address className="not-italic text-[16px] leading-relaxed">
+                                            H.No. 5-360, NTR Road<br />2nd Om Jend, Suraram Colony<br />Hyderabad 500055
+                                        </address>
+                                        <a href={MAP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center text-[15px] font-bold text-sign underline underline-offset-4 hover:no-underline">
+                                            Directions in Google Maps<span className="sr-only"> (opens in a new tab)</span>
+                                        </a>
+                                    </dd>
+                                </div>
+                                <div className="flex gap-3">
+                                    <dt><HiOutlineMail className="w-5 h-5 text-sign mt-0.5" aria-hidden="true" /><span className="sr-only">Email</span></dt>
+                                    <dd>
+                                        <a href="mailto:support@extractmenswear.com" className="text-[16px] font-bold underline underline-offset-4 break-all hover:text-sign">support@extractmenswear.com</a>
+                                        <p className="mt-1 text-[14px] text-white/85">Replies within one working day.</p>
+                                    </dd>
+                                </div>
+                            </dl>
                         </div>
                     </div>
 

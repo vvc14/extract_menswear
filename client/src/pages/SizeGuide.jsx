@@ -1,188 +1,121 @@
-import PageHero from "../components/PageHero";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { HiOutlineInformationCircle } from "react-icons/hi";
+import PageHero from "../components/PageHero";
 
-const SHIRT_SIZES = [
-    { size: "S", chest: "36", body: "26", shoulder: "16.5", sleeve: "24" },
-    { size: "M", chest: "38", body: "27", shoulder: "17", sleeve: "24.5" },
-    { size: "L", chest: "40", body: "28", shoulder: "17.5", sleeve: "25" },
-    { size: "XL", chest: "42", body: "29", shoulder: "18", sleeve: "25.5" },
-    { size: "XXL", chest: "44", body: "30", shoulder: "18.5", sleeve: "26" },
-];
-
-const TROUSER_SIZES = [
-    { size: "28", waist: "28", hip: "36", length: "40", inseam: "30" },
-    { size: "30", waist: "30", hip: "38", length: "41", inseam: "31" },
-    { size: "32", waist: "32", hip: "40", length: "42", inseam: "32" },
-    { size: "34", waist: "34", hip: "42", length: "42", inseam: "32" },
-    { size: "36", waist: "36", hip: "44", length: "43", inseam: "32" },
-    { size: "38", waist: "38", hip: "46", length: "43", inseam: "32" },
-];
+const CHARTS = {
+    shirts: {
+        label: "Shirts",
+        cols: [["chest", "Chest"], ["body", "Length"], ["shoulder", "Shoulder"], ["sleeve", "Sleeve"]],
+        rows: [
+            { size: "S", chest: "36", body: "26", shoulder: "16.5", sleeve: "24" },
+            { size: "M", chest: "38", body: "27", shoulder: "17", sleeve: "24.5" },
+            { size: "L", chest: "40", body: "28", shoulder: "17.5", sleeve: "25" },
+            { size: "XL", chest: "42", body: "29", shoulder: "18", sleeve: "25.5" },
+            { size: "XXL", chest: "44", body: "30", shoulder: "18.5", sleeve: "26" },
+        ],
+        rack: "/shirts",
+    },
+    trousers: {
+        label: "Trousers",
+        cols: [["waist", "Waist"], ["hip", "Hip"], ["length", "Length"], ["inseam", "Inseam"]],
+        rows: [
+            { size: "28", waist: "28", hip: "36", length: "40", inseam: "30" },
+            { size: "30", waist: "30", hip: "38", length: "41", inseam: "31" },
+            { size: "32", waist: "32", hip: "40", length: "42", inseam: "32" },
+            { size: "34", waist: "34", hip: "42", length: "42", inseam: "32" },
+            { size: "36", waist: "36", hip: "44", length: "43", inseam: "32" },
+            { size: "38", waist: "38", hip: "46", length: "43", inseam: "32" },
+        ],
+        rack: "/trousers",
+    },
+};
 
 const MEASURE_TIPS = [
-    {
-        title: "Chest",
-        description: "Measure around the fullest part of your chest, keeping the tape snug under your armpits.",
-    },
-    {
-        title: "Waist",
-        description: "Measure around your natural waistline, the narrowest part of your torso, just above your navel.",
-    },
-    {
-        title: "Shoulder",
-        description: "Measure from the edge of one shoulder to the other across the back, keeping the tape flat.",
-    },
-    {
-        title: "Hip",
-        description: "Measure around the fullest part of your hips, with feet together and tape parallel to the floor.",
-    },
+    { title: "Chest", body: "Around the fullest part of your chest, tape snug under the armpits." },
+    { title: "Waist", body: "Around your natural waist, the narrowest part, just above the navel." },
+    { title: "Shoulder", body: "Edge to edge across the back, keeping the tape flat." },
+    { title: "Hip", body: "Around the fullest part of the hips, feet together, tape level with the floor." },
 ];
 
 export default function SizeGuide() {
-    const [activeTab, setActiveTab] = useState("shirts");
+    const [active, setActive] = useState("shirts");
+    const chart = CHARTS[active];
 
     return (
         <main id="main-content">
-            <PageHero title="Size guide">
-                All measurements are in inches. Between two sizes? Go one up for a relaxed fit.
+            <PageHero title="Size guide" kicker="Measured in inches" footer={<div className="tape" aria-hidden="true" />}>
+                Between two sizes? Go one up for a relaxed fit, one down for a slim one.
             </PageHero>
 
-            <div className="page-wrap" style={{ paddingTop: "56px", paddingBottom: "80px" }}>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "40px" }}>
-
-                    {/* Tab switcher */}
-                    <div className="flex justify-center w-full">
-                        <div className="inline-flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1.5 gap-1">
-                            {[
-                                { key: "shirts", label: "Shirts" },
-                                { key: "trousers", label: "Trousers" },
-                            ].map((tab) => (
+            <div className="page-wrap py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <section aria-labelledby="chart-heading" className="lg:col-span-8">
+                    <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+                        <h2 id="chart-heading" className="display text-[34px] sm:text-[44px] text-slate-900 dark:text-white">{chart.label} chart</h2>
+                        <div className="inline-flex border-2 border-ink dark:border-slate-600" role="group" aria-label="Choose a chart">
+                            {Object.entries(CHARTS).map(([key, c]) => (
                                 <button
-                                    key={tab.key}
-                                    onClick={() => setActiveTab(tab.key)}
-                                    className={`relative px-8 py-3 text-[15px] font-bold rounded-lg transition-all duration-300 ${
-                                        activeTab === tab.key
-                                            ? "text-white shadow-md"
-                                            : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                                    }`}
-                                    style={activeTab === tab.key ? { background: "var(--blue)" } : {}}
+                                    key={key}
+                                    type="button"
+                                    onClick={() => setActive(key)}
+                                    aria-pressed={active === key}
+                                    className={`min-h-[44px] px-5 text-[15px] font-extrabold transition-colors ${active === key
+                                        ? "bg-primary text-white dark:bg-sign dark:text-ink"
+                                        : "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"}`}
+                                    style={{ fontStretch: "110%" }}
                                 >
-                                    {tab.label}
+                                    {c.label}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Size table */}
-                    <div className="w-full max-w-4xl">
-                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-                            {activeTab === "shirts" ? (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-center">
-                                        <thead>
-                                            <tr className="border-b border-slate-200 dark:border-slate-700" style={{ background: "rgba(26,39,68,0.04)" }}>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Size</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Chest</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Body Length</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Shoulder</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Sleeve</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {SHIRT_SIZES.map((row, i) => (
-                                                <tr
-                                                    key={row.size}
-                                                    className={`border-b border-slate-100 dark:border-slate-700/50 last:border-0 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 ${
-                                                        i % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-800/30"
-                                                    }`}
-                                                >
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] font-extrabold text-slate-900 dark:text-white">{row.size}</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.chest}"</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.body}"</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.shoulder}"</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.sleeve}"</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-center">
-                                        <thead>
-                                            <tr className="border-b border-slate-200 dark:border-slate-700" style={{ background: "rgba(26,39,68,0.04)" }}>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Size</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Waist</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Hip</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Length</th>
-                                                <th className="px-2 sm:px-8 py-4 sm:py-6 text-[11px] sm:text-[14px] font-bold uppercase tracking-normal sm:tracking-[0.1em] text-slate-500 dark:text-slate-400">Inseam</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {TROUSER_SIZES.map((row, i) => (
-                                                <tr
-                                                    key={row.size}
-                                                    className={`border-b border-slate-100 dark:border-slate-700/50 last:border-0 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 ${
-                                                        i % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-800/30"
-                                                    }`}
-                                                >
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] font-extrabold text-slate-900 dark:text-white">{row.size}</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.waist}"</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.hip}"</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.length}"</td>
-                                                    <td className="px-2 sm:px-8 py-4 sm:py-6 text-[14px] sm:text-[16px] text-slate-600 dark:text-slate-300 font-medium">{row.inseam}"</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
+                    <div className="border-2 border-ink dark:border-slate-600 bg-white dark:bg-slate-900 shadow-[6px_6px_0_var(--hard-shadow)] overflow-x-auto">
+                        <table className="w-full text-center min-w-[420px]">
+                            <caption className="sr-only">{chart.label} measurements in inches</caption>
+                            <thead>
+                                <tr className="bg-ink text-white">
+                                    <th scope="col" className="px-3 sm:px-6 py-4 text-[13px] sm:text-[14px] font-black uppercase">Size</th>
+                                    {chart.cols.map(([, label]) => (
+                                        <th key={label} scope="col" className="px-3 sm:px-6 py-4 text-[13px] sm:text-[14px] font-black uppercase">{label}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chart.rows.map((row) => (
+                                    <tr key={row.size} className="border-t-2 border-slate-200 dark:border-slate-700 hover:bg-sign/40 dark:hover:bg-slate-800">
+                                        <th scope="row" className="px-3 sm:px-6 py-4">
+                                            <span className="price-tag text-[16px] sm:text-[18px] min-w-[3rem] justify-center">{row.size}</span>
+                                        </th>
+                                        {chart.cols.map(([k]) => (
+                                            <td key={k} className="px-3 sm:px-6 py-4 text-[16px] sm:text-[18px] font-bold tabular-nums text-slate-800 dark:text-slate-200">{row[k]}"</td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
+                    <p className="mt-6 text-[15px] text-slate-600 dark:text-slate-400">
+                        Found your size? <Link to={chart.rack} className="font-bold text-primary dark:text-sign underline underline-offset-4">Shop {chart.label.toLowerCase()}</Link>
+                    </p>
+                </section>
 
-                    {/* How to measure */}
-                    <div className="w-full max-w-4xl" style={{ display: "flex", flexDirection: "column", gap: "48px" }}>
-                        <h2 className="text-[24px] sm:text-[28px] font-extrabold text-slate-900 dark:text-white tracking-tight text-center">
-                            How to Measure
-                        </h2>
-                        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-4 sm:gap-5">
-                            {MEASURE_TIPS.map((tip) => (
-                                <div
-                                    key={tip.title}
-                                    className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-10 text-center"
-                                >
-                                    <h3 className="text-[17px] font-bold text-slate-900 dark:text-white mb-2">
-                                        {tip.title}
-                                    </h3>
-                                    <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.7]">
-                                        {tip.description}
-                                    </p>
+                <section aria-labelledby="measure-heading" className="lg:col-span-4">
+                    <h2 id="measure-heading" className="display text-[30px] sm:text-[36px] text-slate-900 dark:text-white mb-6">How to measure</h2>
+                    <ol className="flex flex-col">
+                        {MEASURE_TIPS.map((tip, i) => (
+                            <li key={tip.title} className="grid grid-cols-[3rem_1fr] gap-3 py-4 border-t-2 border-ink dark:border-slate-600 last:border-b-2">
+                                <span className="h-10 flex items-center justify-center bg-sign text-ink border-2 border-ink text-[15px] font-black tabular-nums">{i + 1}</span>
+                                <div>
+                                    <h3 className="text-[17px] font-black text-slate-900 dark:text-white">{tip.title}</h3>
+                                    <p className="mt-1 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">{tip.body}</p>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Help note */}
-                    <div className="w-full max-w-4xl">
-                        <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--accent-soft)" }}>
-                                <HiOutlineInformationCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
-                            </div>
-                            <div>
-                                <p className="text-[16px] font-bold text-slate-900 dark:text-white mb-1.5">Need help finding your size?</p>
-                                <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.7]">
-                                    Our team is happy to help! Reach out to us at{" "}
-                                    <Link to="/contact" className="font-semibold hover:underline" style={{ color: "var(--gold)" }}>
-                                        our contact page
-                                    </Link>{" "}
-                                    and we'll assist you in finding the perfect fit.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
+                            </li>
+                        ))}
+                    </ol>
+                    <p className="mt-6 text-[15px] text-slate-700 dark:text-slate-300">
+                        Not sure? Call <a href="tel:+918184836764" className="font-black text-primary dark:text-sign underline underline-offset-4 whitespace-nowrap">81848 36764</a> and ask the counter.
+                    </p>
+                </section>
             </div>
         </main>
     );

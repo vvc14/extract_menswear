@@ -1,100 +1,122 @@
-import PageHero from "../components/PageHero";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { HiOutlineTruck, HiOutlineClock, HiOutlineShieldCheck, HiOutlineInformationCircle } from "react-icons/hi";
+import PageHero from "../components/PageHero";
+import HangTag from "../components/brand/HangTag";
+import { Eagle } from "../components/brand/Logo";
+import useShopStock, { deliveryLine } from "../hooks/useShopStock";
 
-const SHIPPING_ZONES = [
-    { zone: "Metro Cities", area: "Delhi NCR, Mumbai, Bangalore, Chennai, Hyderabad, Kolkata", days: "2-4", cost: "Free above ₹999 / ₹49" },
-    { zone: "Tier 1 Cities", area: "Pune, Ahmedabad, Jaipur, Lucknow, Chandigarh, Kochi", days: "3-5", cost: "Free above ₹999 / ₹79" },
-    { zone: "Tier 2 & 3 Cities", area: "All other serviceable pin codes across India", days: "5-7", cost: "Free above ₹1,499 / ₹99" },
+// The order states a customer actually sees on their Orders page (server/models/Order.js).
+const JOURNEY = [
+    { stamp: "Paid", what: "Your order is confirmed and the invoice is emailed. Until it ships you can cancel from your Orders page for a full refund." },
+    { stamp: "Shipped", what: "We pack it at the shop and hand it to the courier. You get an email with the courier name and tracking number, also shown on your Orders page." },
+    { stamp: "Delivered", what: "Marked delivered on your Orders page. From this day you have 7 days to ask for a return or a size exchange." },
 ];
 
 export default function ShippingInfo() {
+    const stock = useShopStock();
+    const delivery = deliveryLine(stock.products);
+
     return (
         <main id="main-content">
-            <PageHero title="Shipping">
-                Where we deliver, how long it takes and what it costs.
+            <PageHero title="Shipping" kicker="Parcels from NTR Road">
+                From our counter in Suraram Colony to any Indian pin code our couriers reach.
             </PageHero>
 
-            <div className="page-wrap" style={{ paddingTop: "56px", paddingBottom: "80px" }}>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", flexDirection: "column", gap: "48px", maxWidth: "900px", margin: "0 auto" }}>
+            <div className="page-wrap py-14 sm:py-20 flex flex-col gap-20">
+                {/* The parcel label */}
+                <section aria-labelledby="label-heading" className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    <div className="lg:col-span-5">
+                        <p className="section-label">What it costs</p>
+                        <h2 id="label-heading" className="display text-[40px] sm:text-[56px] text-slate-900 dark:text-white">
+                            {stock.status === "loading" ? "Checking the rack..." : delivery?.free ? "Delivery is free right now" : "Delivery charge, upfront"}
+                        </h2>
+                        <p className="mt-5 max-w-md text-[16px] leading-relaxed text-slate-600 dark:text-slate-400">
+                            Each piece carries its own delivery charge, set by the shop. It is shown on the product page and added up in your bag before you pay, so there is never a surprise at checkout.
+                            {delivery?.free && " Today every piece in stock ships at ₹0."}
+                        </p>
+                        {stock.status === "error" && (
+                            <p className="mt-4 text-[15px] font-bold text-slate-700 dark:text-slate-300">
+                                We could not check today's charges. <button type="button" onClick={stock.retry} className="min-h-[44px] underline underline-offset-4 text-primary dark:text-sign">Try again</button>
+                            </p>
+                        )}
+                    </div>
 
-                    {/* Quick highlights */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                        {[
-                            { icon: HiOutlineTruck, title: "Pan-India delivery", desc: "We ship to any pin code our courier partners serve" },
-                            { icon: HiOutlineClock, title: "Fast Dispatch", desc: "Orders dispatched within 24 hours of placement" },
-                            { icon: HiOutlineShieldCheck, title: "Secure Packaging", desc: "Every order is packed and sealed at the shop" },
-                        ].map((item) => (
-                            <div key={item.title} className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-7 text-center">
-                                <item.icon className="w-7 h-7 mx-auto mb-3" style={{ color: "var(--gold)" }} />
-                                <h3 className="text-[16px] font-bold text-slate-900 dark:text-white mb-1.5">{item.title}</h3>
-                                <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.6]">{item.desc}</p>
+                    <div className="lg:col-span-6 lg:col-start-7 w-full max-w-[560px] lg:rotate-1">
+                        <div className="bg-white text-ink border-[3px] border-ink shadow-[8px_8px_0_#12123a] dark:shadow-[8px_8px_0_#000]">
+                            <div className="flex items-center justify-between gap-3 bg-ink text-white px-5 py-3">
+                                <span className="flex items-center gap-2 text-[15px] font-black uppercase tracking-[0.08em]" style={{ fontStretch: "120%" }}>
+                                    <Eagle className="w-7 h-auto text-white" /> Parcel
+                                </span>
+                                <span className="text-[13px] font-extrabold uppercase text-sign">Handle with care</span>
                             </div>
-                        ))}
-                    </div>
-
-                    {/* Shipping zones table */}
-                    <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                        <div className="px-8 py-6 border-b border-slate-200 dark:border-slate-700" style={{ background: "rgba(26,39,68,0.04)" }}>
-                            <h2 className="text-[20px] font-extrabold text-slate-900 dark:text-white">Delivery Timelines & Charges</h2>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead>
-                                    <tr className="border-b border-slate-200 dark:border-slate-700">
-                                        <th className="px-8 py-5 text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Zone</th>
-                                        <th className="px-8 py-5 text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Areas</th>
-                                        <th className="px-8 py-5 text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Est. Days</th>
-                                        <th className="px-8 py-5 text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cost</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {SHIPPING_ZONES.map((zone, i) => (
-                                        <tr key={zone.zone} className={`border-b border-slate-100 dark:border-slate-700/50 last:border-0 ${i % 2 !== 0 ? "bg-slate-50/50 dark:bg-slate-800/30" : ""}`}>
-                                            <td className="px-8 py-5 text-[15px] font-bold text-slate-900 dark:text-white">{zone.zone}</td>
-                                            <td className="px-8 py-5 text-[14px] text-slate-600 dark:text-slate-300">{zone.area}</td>
-                                            <td className="px-8 py-5 text-[15px] font-semibold text-slate-700 dark:text-slate-300">{zone.days} days</td>
-                                            <td className="px-8 py-5 text-[14px] text-slate-600 dark:text-slate-300">{zone.cost}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* Additional info */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        {[
-                            { title: "Order Tracking", desc: "Once your order is shipped, you'll receive a tracking number via email and SMS. Track your order in real-time on our Orders page." },
-                            { title: "Dispatch Time", desc: "All orders placed before 2:00 PM IST are dispatched the same day. Orders placed after 2:00 PM are dispatched the next business day." },
-                            { title: "Delivery Exceptions", desc: "In rare cases of delays due to weather, strikes, or remote locations, we'll notify you proactively via email with updated timelines." },
-                            { title: "COD Availability", desc: "Cash on Delivery is available for orders under ₹5,000 in select pin codes. Prepaid orders enjoy priority processing." },
-                        ].map((item) => (
-                            <div key={item.title} className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-7">
-                                <h3 className="text-[16px] font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
-                                <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.7]">{item.desc}</p>
+                            <dl className="grid grid-cols-1 sm:grid-cols-2">
+                                <div className="p-5 border-b-2 sm:border-b-0 sm:border-r-2 border-dashed border-ink">
+                                    <dt className="text-[12px] font-black uppercase tracking-[0.1em] text-[#42436f]">From</dt>
+                                    <dd className="mt-1 text-[15px] leading-relaxed font-semibold">
+                                        <span className="block font-black text-[17px]">Extract Menswear</span>
+                                        H.No. 5-360, NTR Road<br />Suraram Colony, Hyderabad 500055
+                                    </dd>
+                                </div>
+                                <div className="p-5">
+                                    <dt className="text-[12px] font-black uppercase tracking-[0.1em] text-[#42436f]">To</dt>
+                                    <dd className="mt-1 text-[15px] leading-relaxed font-semibold">
+                                        <span className="block font-black text-[17px]">You</span>
+                                        The address you pick in your bag. Any 6-digit Indian pin code.
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div className="flex items-center justify-between gap-4 border-t-[3px] border-ink px-5 py-4 bg-sign">
+                                <span className="text-[14px] font-black uppercase" style={{ fontStretch: "115%" }}>Delivery</span>
+                                <span className="text-[22px] font-black tabular-nums" style={{ fontStretch: "112%" }}>
+                                    {stock.status === "loading" ? "..." : delivery?.free ? "₹0" : "Shown per piece"}
+                                </span>
                             </div>
-                        ))}
+                        </div>
                     </div>
+                </section>
 
-                    {/* Help note */}
-                    <div className="bg-slate-50 dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700 p-10 sm:p-14 flex flex-col items-center text-center gap-6">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--accent-soft)" }}>
-                            <HiOutlineInformationCircle className="w-5 h-5" style={{ color: "var(--gold)" }} />
+                {/* What happens after you pay: the real order states, hung on the rail */}
+                <section aria-labelledby="journey-heading">
+                    <p className="section-label">After you pay</p>
+                    <h2 id="journey-heading" className="display text-[40px] sm:text-[56px] text-slate-900 dark:text-white max-w-3xl">Three stamps on every order</h2>
+                    <div className="mt-12">
+                        <div className="rail-rod" aria-hidden="true" />
+                        {/* phones: the tags scroll along the rail instead of stacking off nothing */}
+                        <ol className="-mt-[7px] flex gap-5 overflow-x-auto snap-x snap-mandatory pb-6 pl-2 pr-6 md:grid md:grid-cols-3 md:gap-x-6 md:overflow-visible md:px-8">
+                            {JOURNEY.map((s, i) => (
+                                <li key={s.stamp} className={`hang-settle w-[min(300px,80vw)] shrink-0 snap-start md:w-full md:max-w-[400px] md:mx-auto ${i === 1 ? "md:[--drop:84px]" : ""}`} style={{ animationDelay: `${i * 0.12}s` }}>
+                                    <HangTag tone={["white", "yellow", "blue"][i]} className="swing" style={{ "--string": "var(--drop, 40px)" }}>
+                                        <p className={`text-[13px] font-black tabular-nums ${i === 2 ? "text-white/85" : "text-ink/75"}`}>Stage {i + 1}</p>
+                                        <h3 className="display text-[34px] mt-1">{s.stamp}</h3>
+                                        <p className={`mt-3 text-[15px] leading-relaxed ${i === 2 ? "text-white/90" : "text-ink/85"}`}>{s.what}</p>
+                                    </HangTag>
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                </section>
+
+                {/* Plain answers */}
+                <section aria-labelledby="notes-heading" className="grid grid-cols-1 lg:grid-cols-12 gap-10 border-t-2 border-ink dark:border-slate-700 pt-14">
+                    <h2 id="notes-heading" className="lg:col-span-4 display text-[34px] sm:text-[44px] text-slate-900 dark:text-white">Good to know</h2>
+                    <dl className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8">
+                        <div>
+                            <dt className="text-[18px] font-black text-slate-900 dark:text-white">India only, for now</dt>
+                            <dd className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">Checkout takes Indian addresses with a 6-digit pin code.</dd>
                         </div>
                         <div>
-                            <p className="text-[16px] font-bold text-slate-900 dark:text-white mb-1.5">Questions about shipping?</p>
-                            <p className="text-[14px] text-slate-500 dark:text-slate-400 leading-[1.7]">
-                                Reach out to us at{" "}
-                                <Link to="/contact" className="font-semibold hover:underline" style={{ color: "var(--gold)" }}>
-                                    our contact page
-                                </Link>{" "}
-                                and we'll help you right away.
-                            </p>
+                            <dt className="text-[18px] font-black text-slate-900 dark:text-white">Prepaid orders</dt>
+                            <dd className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">Pay online by UPI, card or wallet through Razorpay. Cash on delivery is not offered.</dd>
                         </div>
-                    </div>
-                </motion.div>
+                        <div>
+                            <dt className="text-[18px] font-black text-slate-900 dark:text-white">Changed your mind before it ships?</dt>
+                            <dd className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">Cancel from your <Link to="/orders" className="font-bold text-primary dark:text-sign underline underline-offset-4">Orders page</Link> while it says Paid. The full amount goes back to how you paid.</dd>
+                        </div>
+                        <div>
+                            <dt className="text-[18px] font-black text-slate-900 dark:text-white">Parcel running late?</dt>
+                            <dd className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">Call the shop on <a href="tel:+918184836764" className="font-bold text-primary dark:text-sign underline underline-offset-4 whitespace-nowrap">81848 36764</a> with your invoice number and we will chase the courier.</dd>
+                        </div>
+                    </dl>
+                </section>
             </div>
         </main>
     );

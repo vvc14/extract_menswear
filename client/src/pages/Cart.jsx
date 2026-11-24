@@ -7,11 +7,13 @@ import { initiateRazorpayPayment } from "../services/razorpay";
 import API, { apiErrorMessage } from "../services/api";
 import { stockForSize } from "../utils/stock";
 import { 
-    HiOutlineTrash, HiMinus, HiPlus, HiOutlineShoppingCart, 
-    HiOutlineShieldCheck, HiOutlineArrowLeft, HiOutlineHome, 
-    HiOutlinePhone, HiOutlineUser, HiOutlinePlus, HiOutlineCheck,
+    HiOutlineTrash, HiMinus, HiPlus,
+    HiOutlineShieldCheck, HiOutlineArrowLeft, HiOutlineHome,
+    HiOutlinePhone, HiOutlineUser, HiOutlinePlus,
     HiOutlinePencil
 } from "react-icons/hi";
+import Receipt, { ReceiptHead, ReceiptLine, ReceiptRule } from "../components/brand/Receipt";
+import Hanger from "../components/brand/Hanger";
 import { motion, AnimatePresence } from "framer-motion";
 import { useConfirm } from "../context/ConfirmContext";
 
@@ -378,539 +380,392 @@ export default function Cart() {
         }
     };
 
-    const inputClass = "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-[14px] rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all relative focus:z-10";
-    const labelClass = "block text-[12px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider";
+    const inputClass = "w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-[15px] px-4 py-2.5 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#30318d] dark:focus:shadow-[3px_3px_0_#fff200] transition-shadow";
+    const labelClass = "block text-[13px] font-extrabold text-slate-700 dark:text-slate-300 mb-1.5";
+    const hintClass = "text-[12px] text-slate-600 dark:text-slate-400 mt-1";
+    const inr = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+    const total = subtotal - actualDiscount + shipping;
 
     if (items.length === 0) {
         return (
-            <main id="main-content" className="page-wrap py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-8 lg:gap-10">
-                    <div className="w-28 h-28 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                        <HiOutlineShoppingCart className="w-12 h-12 text-slate-400" />
+            <main id="main-content" className="bg-slate-50 dark:bg-[#111238] min-h-[70vh]">
+                <div className="page-wrap py-20 sm:py-28 flex flex-col items-center text-center">
+                    {/* an empty rail: the bag is the customer's own rack */}
+                    <div className="w-full max-w-md" aria-hidden="true">
+                        <div className="rail-rod" />
+                        <div className="-mt-[22px] flex justify-around text-slate-400 dark:text-slate-500">
+                            <Hanger className="w-24 hang-settle" />
+                            <Hanger className="w-24 hang-settle [animation-delay:0.15s]" />
+                            <Hanger className="w-24 hang-settle [animation-delay:0.3s]" />
+                        </div>
                     </div>
-                    <h2 className="text-[30px] font-extrabold text-slate-900 dark:text-white">Your cart is empty</h2>
-                    <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-md text-center leading-[1.7]">
-                        Looks like you haven't added anything to your cart yet. Explore our collection and find something you love.
+                    <h1 className="mt-10 display text-[40px] sm:text-[60px] text-slate-900 dark:text-white">Your bag is empty</h1>
+                    <p className="mt-4 text-[17px] text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
+                        Nothing on your hangers yet. Both racks are open.
                     </p>
-                    <div className="flex flex-wrap items-center justify-center gap-4">
-                        <Link to="/shirts" className="btn-primary">
-                            Shop Shirts
-                        </Link>
-                        <Link to="/trousers" className="btn-outline">
-                            Shop Trousers
-                        </Link>
+                    <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
+                        <Link to="/shirts" className="btn-buy">Shop shirts</Link>
+                        <Link to="/trousers" className="btn-primary">Shop trousers</Link>
                     </div>
-                </motion.div>
+                </div>
             </main>
         );
     }
 
     return (
-        <main id="main-content" className="page-wrap py-10 sm:py-16">
+        <main id="main-content" className="page-wrap py-10 sm:py-14">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-                {/* Breadcrumb */}
-                <nav aria-label="Breadcrumb" style={{ marginBottom: "32px" }} className="flex items-center gap-4">
-                    <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
-                        <HiOutlineArrowLeft className="w-4 h-4" /> Back
+                <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-4">
+                    <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-1.5 min-h-[44px] text-[14px] font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                        <HiOutlineArrowLeft className="w-4 h-4" aria-hidden="true" /> Back
                     </button>
-                    <span className="text-slate-300 dark:text-slate-600">|</span>
+                    <span className="text-slate-300 dark:text-slate-600" aria-hidden="true">|</span>
                     <ol className="flex items-center gap-2 text-[15px]">
-                        <li><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
-                        <li className="text-slate-300 dark:text-slate-600">/</li>
-                        <li className="text-slate-900 dark:text-white font-semibold">Your bag</li>
+                        <li><Link to="/" className="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-sign transition-colors">Home</Link></li>
+                        <li className="text-slate-300 dark:text-slate-600" aria-hidden="true">/</li>
+                        <li className="text-slate-900 dark:text-white font-semibold" aria-current="page">Your bag</li>
                     </ol>
                 </nav>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{ marginBottom: "40px" }}>
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-10">
                     <div>
-                        <h1 className="display text-[40px] sm:text-[60px] text-slate-900 dark:text-white">Your bag</h1>
-                        <p className="text-[16px] text-slate-500 dark:text-slate-400 mt-1">{totalItems} item{totalItems !== 1 ? "s" : ""} in your cart</p>
+                        <h1 className="display text-[44px] sm:text-[68px] text-slate-900 dark:text-white">Your bag</h1>
+                        <p className="text-[16px] text-slate-600 dark:text-slate-400 mt-2">
+                            <span className="price-tag text-[15px] mr-2">{totalItems}</span>
+                            piece{totalItems !== 1 ? "s" : ""} ready to bill
+                        </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="relative" ref={addMenuRef}>
                             <button
+                                type="button"
                                 onClick={() => setAddDropdownOpen(!addDropdownOpen)}
-                                className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
+                                onKeyDown={(e) => e.key === "Escape" && setAddDropdownOpen(false)}
+                                className="flex items-center gap-2 min-h-[44px] px-4 border-2 border-ink dark:border-slate-500 text-slate-900 dark:text-white hover:bg-sign hover:text-ink text-[14px] font-extrabold transition-colors active:translate-y-px"
                                 aria-expanded={addDropdownOpen}
-                                aria-label="Add more items menu"
+                                aria-haspopup="true"
                             >
-                                <HiOutlinePlus className="w-4.5 h-4.5" /> Add More Items
+                                <HiOutlinePlus className="w-4 h-4" aria-hidden="true" /> Add more pieces
                             </button>
                             <AnimatePresence>
                                 {addDropdownOpen && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 8 }}
                                         transition={{ duration: 0.15 }}
-                                        className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden z-50"
+                                        className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-500 shadow-[4px_4px_0_var(--hard-shadow)] z-50"
                                     >
-                                        <div className="py-1">
-                                            <Link
-                                                to="/shirts"
-                                                className="block px-4.5 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                                                onClick={() => setAddDropdownOpen(false)}
-                                            >
-                                                Shirts
+                                        {[["/shirts", "Shirts rack"], ["/trousers", "Trousers rack"]].map(([to, label]) => (
+                                            <Link key={to} to={to} onClick={() => setAddDropdownOpen(false)} className="flex items-center min-h-[44px] px-4 text-[14px] font-bold text-slate-900 dark:text-white hover:bg-sign hover:text-ink">
+                                                {label}
                                             </Link>
-                                            <Link
-                                                to="/trousers"
-                                                className="block px-4.5 py-2.5 text-[14px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                                                onClick={() => setAddDropdownOpen(false)}
-                                            >
-                                                Trousers
-                                            </Link>
-                                        </div>
+                                        ))}
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
                         <button
+                            type="button"
                             onClick={async () => {
-                                if (await confirm("Are you sure you want to clear all items from your cart?")) {
-                                    dispatch(clearCart());
-                                }
+                                if (await confirm("Take every piece out of your bag?")) dispatch(clearCart());
                             }}
-                            className="w-fit flex items-center gap-2 px-4.5 py-2.5 rounded-xl border border-rose-500/20 text-rose-500 hover:bg-rose-500/25 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 text-[14px] font-bold transition-all cursor-pointer active:scale-[0.97]"
+                            className="flex items-center gap-2 min-h-[44px] px-4 border-2 border-hot text-hot dark:text-rose-400 dark:border-rose-400 hover:bg-hot hover:text-white dark:hover:text-white text-[14px] font-extrabold transition-colors active:translate-y-px"
                         >
-                            <HiOutlineTrash className="w-4.5 h-4.5" /> Clear Cart
+                            <HiOutlineTrash className="w-4 h-4" aria-hidden="true" /> Empty bag
                         </button>
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-10 md:gap-14">
-                    {/* Left Column: Cart items & Address Details */}
-                    <div className="flex-1 space-y-8">
-                        {/* Cart items */}
-                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+                <div className="flex flex-col lg:flex-row gap-10 lg:gap-14">
+                    <div className="flex-1 min-w-0 space-y-10">
+                        {/* Pieces */}
+                        <ul className="bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 divide-y-2 divide-slate-200 dark:divide-slate-700" aria-label="Pieces in your bag">
                             {items.map((item) => (
-                                <div key={`${item._id}-${item.size || ""}`} className="flex gap-3 sm:gap-5 p-3 sm:p-7">
-                                    {/* Image */}
-                                    <Link to={`/product/${item._id}`} className="shrink-0">
-                                        <div className="w-[85px] h-[110px] sm:w-[110px] sm:h-[140px] bg-slate-50 dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                                            <img src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                                        </div>
+                                <li key={`${item._id}-${item.size || ""}`} className="flex gap-3 sm:gap-5 p-3 sm:p-6">
+                                    <Link to={`/product/${item._id}`} className="shrink-0" tabIndex={-1} aria-hidden="true">
+                                        <img src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl} alt="" width="110" height="140" className="w-[85px] h-[110px] sm:w-[110px] sm:h-[140px] object-cover object-top border-2 border-ink dark:border-slate-600 bg-slate-50" />
                                     </Link>
 
-                                    {/* Info */}
-                                    <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                                    <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
                                         <div>
-                                            <Link to={`/product/${item._id}`} className="text-[16px] sm:text-[18px] font-semibold text-slate-900 dark:text-white hover:text-primary dark:hover:text-gold transition-colors line-clamp-2">
+                                            <Link to={`/product/${item._id}`} className="text-[15px] sm:text-[17px] font-bold text-slate-900 dark:text-white hover:text-primary dark:hover:text-sign transition-colors line-clamp-2">
                                                 {item.name}
                                             </Link>
-                                            <p className="text-[14px] text-slate-500 dark:text-slate-400 mt-1">
-                                                {item.fabric && item.fabric}{item.style && ` · ${item.style}`}{item.size && ` · Size: ${item.size}`}
+                                            <p className="mt-1.5 flex flex-wrap gap-1.5 text-[13px]">
+                                                {item.size && <span className="px-2 py-0.5 border-2 border-ink dark:border-slate-500 font-black text-slate-900 dark:text-white">Size {item.size}</span>}
+                                                {item.fabric && <span className="px-2 py-0.5 text-slate-600 dark:text-slate-400 font-semibold">{item.fabric}</span>}
+                                                {item.style && <span className="px-2 py-0.5 text-slate-600 dark:text-slate-400 font-semibold">{item.style}</span>}
                                             </p>
                                             {item.stock !== undefined && item.stock === 0 ? (
-                                                <p className="text-[13px] font-bold text-white mt-1.5 flex items-center gap-1.5 bg-rose-500 px-3 py-1.5 rounded-lg w-fit">
-                                                    Out of stock
-                                                </p>
+                                                <p className="mt-2 w-fit text-[12px] font-extrabold uppercase bg-hot text-white px-2 py-1">Sold out: remove it to pay</p>
                                             ) : item.stock !== undefined && item.quantity > item.stock ? (
-                                                <p className="text-[13px] font-bold text-rose-500 mt-1.5 flex items-center gap-1.5 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 rounded-lg w-fit">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                                                    Only {item.stock} left: lower the quantity
-                                                </p>
+                                                <p className="mt-2 w-fit text-[12px] font-extrabold uppercase border-2 border-hot text-hot dark:text-rose-400 dark:border-rose-400 px-2 py-0.5">Only {item.stock} left: lower the quantity</p>
                                             ) : item.stock !== undefined && item.stock <= 5 ? (
-                                                <p className="text-[12px] font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1.5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                                    Only {item.stock} left in stock
-                                                </p>
+                                                <p className="mt-2 w-fit text-[12px] font-extrabold uppercase text-hot dark:text-rose-400">Only {item.stock} left</p>
                                             ) : null}
                                         </div>
 
                                         <div className="flex flex-wrap items-center justify-between mt-3 sm:mt-4 gap-3">
-                                            {/* Quantity */}
-                                            <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800 h-9 sm:h-10">
+                                            <div className="flex items-center border-2 border-ink dark:border-slate-500 bg-white dark:bg-slate-900 h-11" role="group" aria-label={`Quantity of ${item.name}`}>
                                                 <button
+                                                    type="button"
                                                     onClick={() => {
-                                                        if (item.quantity === 1) {
-                                                            dispatch(removeFromCart({ id: item._id, size: item.size }));
-                                                        } else {
-                                                            dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity - 1 }));
-                                                        }
+                                                        if (item.quantity === 1) dispatch(removeFromCart({ id: item._id, size: item.size }));
+                                                        else dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity - 1 }));
                                                     }}
-                                                    className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer h-full"
-                                                    aria-label="Decrease quantity"
+                                                    className="w-11 h-full flex items-center justify-center text-slate-900 dark:text-white hover:bg-sign hover:text-ink transition-colors"
+                                                    aria-label={item.quantity === 1 ? "Remove from bag" : "Decrease quantity"}
                                                 >
-                                                    <HiMinus className="w-3.5 h-3.5" />
+                                                    <HiMinus className="w-4 h-4" aria-hidden="true" />
                                                 </button>
-                                                <span className="px-2 sm:px-3 py-1 sm:py-2 text-[14px] sm:text-[16px] font-bold text-slate-900 dark:text-white min-w-[32px] sm:min-w-[36px] text-center border-x border-slate-200 dark:border-slate-700 h-full flex items-center justify-center">
+                                                <span className="min-w-[40px] h-full flex items-center justify-center text-[16px] font-black tabular-nums text-slate-900 dark:text-white border-x-2 border-ink dark:border-slate-500" aria-live="polite">
                                                     {item.quantity}
                                                 </span>
                                                 <button
+                                                    type="button"
                                                     disabled={item.quantity >= Math.min(item.stock || 0, MAX_QTY_PER_LINE)}
                                                     onClick={() => dispatch(updateQuantity({ id: item._id, size: item.size, quantity: item.quantity + 1 }))}
-                                                    className="px-2.5 sm:px-3 py-1.5 sm:py-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer h-full"
+                                                    className="w-11 h-full flex items-center justify-center text-slate-900 dark:text-white hover:bg-sign hover:text-ink transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
                                                     aria-label="Increase quantity"
                                                 >
-                                                    <HiPlus className="w-3.5 h-3.5" />
+                                                    <HiPlus className="w-4 h-4" aria-hidden="true" />
                                                 </button>
                                             </div>
 
-                                            <div className="flex items-center gap-3 ml-auto">
-                                                {/* Price */}
-                                                <p className="text-[16px] sm:text-[20px] font-extrabold text-slate-900 dark:text-white">
-                                                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
-                                                </p>
-
-                                                {/* Delete */}
+                                            <div className="flex items-center gap-2 ml-auto">
+                                                <span className="price-tag text-[16px] sm:text-[19px]">{inr(item.price * item.quantity)}</span>
                                                 <button
+                                                    type="button"
                                                     onClick={() => dispatch(removeFromCart({ id: item._id, size: item.size }))}
-                                                    className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-colors shrink-0"
-                                                    aria-label={`Remove ${item.name} from cart`}
+                                                    className="w-11 h-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-white hover:bg-hot transition-colors shrink-0"
+                                                    aria-label={`Remove ${item.name} from bag`}
                                                 >
-                                                    <HiOutlineTrash className="w-5 h-5" />
+                                                    <HiOutlineTrash className="w-5 h-5" aria-hidden="true" />
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </li>
                             ))}
-                        </div>
+                        </ul>
 
-                        {/* Shipping Address Details Card */}
+                        {/* Delivery address */}
                         {user ? (
-                            <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-                                        <HiOutlineHome className="w-5.5 h-5.5 text-primary dark:text-gold" /> {editAddressIdx !== null ? "Edit Address" : "Delivery Address"}
+                            <section aria-labelledby="address-heading" className="bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 p-5 sm:p-8">
+                                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                                    <h2 id="address-heading" className="flex items-center gap-2.5 text-[22px] font-black text-slate-900 dark:text-white">
+                                        <HiOutlineHome className="w-6 h-6 text-primary dark:text-sign" aria-hidden="true" />
+                                        {editAddressIdx !== null ? "Edit address" : "Deliver to"}
                                     </h2>
                                     {!showForm && (
-                                        <button 
-                                            onClick={() => setShowForm(true)}
-                                            className="text-sm font-bold text-primary dark:text-gold hover:opacity-80 transition-all flex items-center gap-1.5 cursor-pointer bg-primary/5 dark:bg-gold/5 px-3 py-1.5 rounded-lg border border-primary/10 dark:border-gold/10"
-                                        >
-                                            <HiOutlinePlus className="w-4 h-4" /> Add Address
+                                        <button type="button" onClick={() => setShowForm(true)} className="flex items-center gap-1.5 min-h-[44px] px-3 border-2 border-ink dark:border-slate-500 text-[14px] font-extrabold text-slate-900 dark:text-white hover:bg-sign hover:text-ink active:translate-y-px">
+                                            <HiOutlinePlus className="w-4 h-4" aria-hidden="true" /> New address
                                         </button>
                                     )}
                                 </div>
 
                                 <AnimatePresence mode="wait">
                                     {showForm ? (
-                                        <motion.form 
+                                        <motion.form
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: "auto" }}
                                             exit={{ opacity: 0, height: 0 }}
-                                            onSubmit={handleAddAddress} 
+                                            onSubmit={handleAddAddress}
                                             className="space-y-4 overflow-hidden p-1"
                                         >
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className={labelClass}>Recipient Name</label>
-                                                    <input 
-                                                        type="text" 
-                                                        value={addressForm.name} 
-                                                        onChange={(e) => setAddressForm({...addressForm, name: e.target.value})}
-                                                        placeholder="Full Name"
-                                                        required
-                                                        className={inputClass}
-                                                    />
+                                                    <label htmlFor="addr-name" className={labelClass}>Recipient name</label>
+                                                    <input id="addr-name" type="text" autoComplete="name" value={addressForm.name} onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })} placeholder="Full name" required className={inputClass} />
                                                 </div>
                                                 <div>
-                                                    <label className={labelClass}>Phone Number</label>
-                                                    <input 
-                                                        type="tel" 
-                                                        value={addressForm.phone} 
-                                                        onChange={(e) => setAddressForm({...addressForm, phone: e.target.value})}
-                                                        placeholder="10-digit number"
-                                                        required
-                                                        className={inputClass}
-                                                    />
-                                                    <p className="text-[11px] text-slate-400 mt-1">Must be exactly 10 digits.</p>
+                                                    <label htmlFor="addr-phone" className={labelClass}>Phone number</label>
+                                                    <input id="addr-phone" type="tel" autoComplete="tel-national" inputMode="numeric" value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} placeholder="10-digit number" required className={inputClass} />
+                                                    <p className={hintClass}>Exactly 10 digits.</p>
                                                 </div>
                                             </div>
-
                                             <div>
-                                                <label className={labelClass}>Street Address</label>
-                                                <input 
-                                                    type="text" 
-                                                    value={addressForm.street} 
-                                                    onChange={(e) => setAddressForm({...addressForm, street: e.target.value})}
-                                                    placeholder="Flat/House No., Street, Area"
-                                                    required
-                                                    className={inputClass}
-                                                />
+                                                <label htmlFor="addr-street" className={labelClass}>Street address</label>
+                                                <input id="addr-street" type="text" autoComplete="street-address" value={addressForm.street} onChange={(e) => setAddressForm({ ...addressForm, street: e.target.value })} placeholder="Flat / house no., street, area" required className={inputClass} />
                                             </div>
-
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                                 <div>
-                                                    <label className={labelClass}>City</label>
-                                                    <input 
-                                                        type="text" 
-                                                        value={addressForm.city} 
-                                                        onChange={(e) => setAddressForm({...addressForm, city: e.target.value})}
-                                                        placeholder="City"
-                                                        required
-                                                        className={inputClass}
-                                                    />
+                                                    <label htmlFor="addr-city" className={labelClass}>City</label>
+                                                    <input id="addr-city" type="text" autoComplete="address-level2" value={addressForm.city} onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} placeholder="City" required className={inputClass} />
                                                 </div>
                                                 <div>
-                                                    <label className={labelClass}>State</label>
-                                                    <input 
-                                                        type="text" 
-                                                        value={addressForm.state} 
-                                                        onChange={(e) => setAddressForm({...addressForm, state: e.target.value})}
-                                                        placeholder="State"
-                                                        required
-                                                        className={inputClass}
-                                                    />
+                                                    <label htmlFor="addr-state" className={labelClass}>State</label>
+                                                    <input id="addr-state" type="text" autoComplete="address-level1" value={addressForm.state} onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })} placeholder="State" required className={inputClass} />
                                                 </div>
                                                 <div>
-                                                    <label className={labelClass}>Pincode</label>
-                                                    <input 
-                                                        type="text" 
-                                                        value={addressForm.pincode} 
-                                                        onChange={(e) => setAddressForm({...addressForm, pincode: e.target.value})}
-                                                        placeholder="Pincode"
-                                                        required
-                                                        className={inputClass}
-                                                    />
-                                                    <p className="text-[11px] text-slate-400 mt-1">6 digits numeric.</p>
+                                                    <label htmlFor="addr-pin" className={labelClass}>Pin code</label>
+                                                    <input id="addr-pin" type="text" autoComplete="postal-code" inputMode="numeric" value={addressForm.pincode} onChange={(e) => setAddressForm({ ...addressForm, pincode: e.target.value })} placeholder="6 digits" required className={inputClass} />
                                                 </div>
                                                 <div>
-                                                    <label className={labelClass}>Country</label>
-                                                    <input 
-                                                        type="text" 
-                                                        value={addressForm.country} 
-                                                        onChange={(e) => setAddressForm({...addressForm, country: e.target.value})}
-                                                        placeholder="Country"
-                                                        required
-                                                        className={inputClass}
-                                                    />
+                                                    <label htmlFor="addr-country" className={labelClass}>Country</label>
+                                                    <input id="addr-country" type="text" autoComplete="country-name" value={addressForm.country} onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })} placeholder="Country" required className={inputClass} />
                                                 </div>
                                             </div>
-
                                             <div className="flex justify-end gap-3 pt-2">
                                                 {addresses.length > 0 && (
-                                                    <button 
-                                                        type="button" 
+                                                    <button
+                                                        type="button"
                                                         onClick={() => { setShowForm(false); setEditAddressIdx(null); setAddressForm({ name: "", phone: "", street: "", city: "", state: "", pincode: "", country: "India" }); }}
-                                                        className="px-5 py-2 rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 cursor-pointer"
+                                                        className="min-h-[44px] px-5 text-[14px] font-extrabold border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-ink dark:hover:border-sign"
                                                     >
                                                         Cancel
                                                     </button>
                                                 )}
-                                                <button 
-                                                    type="submit" 
-                                                    disabled={savingAddress}
-                                                    className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
-                                                >
-                                                    {savingAddress ? "Saving..." : "Save Delivery Info"}
+                                                <button type="submit" disabled={savingAddress} className="btn-primary text-[14px]">
+                                                    {savingAddress ? "Saving..." : "Save address"}
                                                 </button>
                                             </div>
                                         </motion.form>
                                     ) : (
-                                        <div className="space-y-4">
-                                            {addresses.map((addr, idx) => (
-                                                <div 
-                                                    key={idx} 
-                                                    onClick={() => setSelectedIdx(idx)}
-                                                    className={`p-5 rounded-xl border transition-all cursor-pointer text-left relative break-words ${
-                                                        selectedIdx === idx 
-                                                            ? "border-primary dark:border-gold bg-primary/5 dark:bg-gold/5" 
-                                                            : "border-slate-200/60 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-900/50"
-                                                    }`}
-                                                >
-                                                    <div className="absolute top-3 right-3 flex items-center gap-0.5">
-                                                        <button 
-                                                            type="button"
-                                                            onClick={(e) => handleEditAddressClick(e, idx)}
-                                                            className="p-2 text-slate-400 hover:text-primary dark:hover:text-gold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                                                            title="Edit Address"
-                                                            aria-label="Edit address"
-                                                        >
-                                                            <HiOutlinePencil className="w-4 h-4" />
-                                                        </button>
-                                                        <button 
-                                                            type="button"
-                                                            onClick={(e) => handleDeleteAddress(e, idx)}
-                                                            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
-                                                            title="Delete Address"
-                                                            aria-label="Delete address"
-                                                        >
-                                                            <HiOutlineTrash className="w-4 h-4" />
-                                                        </button>
-                                                        {selectedIdx === idx && (
-                                                            <span className="bg-primary dark:bg-gold text-white dark:text-slate-900 rounded-full p-0.5 flex items-center justify-center">
-                                                                <HiOutlineCheck className="w-3.5 h-3.5" />
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 flex-wrap pr-24">
-                                                            <span className="font-bold text-slate-800 dark:text-white text-[15px] break-words min-w-0">{addr.name}</span>
-                                                            {addr.isDefault && (
-                                                                <span className="bg-primary/10 dark:bg-gold/10 text-primary dark:text-gold text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/10 dark:border-gold/10">
-                                                                    Default
+                                        <fieldset className="space-y-3">
+                                            <legend className="sr-only">Choose a delivery address</legend>
+                                            {addresses.map((addr, idx) => {
+                                                const picked = selectedIdx === idx;
+                                                return (
+                                                    <div key={idx} className={`relative border-2 transition-colors ${picked ? "border-ink dark:border-sign bg-sign/25 dark:bg-sign/10 shadow-[4px_4px_0_var(--hard-shadow)]" : "border-slate-300 dark:border-slate-600 hover:border-ink dark:hover:border-slate-400"}`}>
+                                                        <label className="flex gap-4 p-4 sm:p-5 pr-28 cursor-pointer break-words">
+                                                            <input type="radio" name="delivery-address" checked={picked} onChange={() => setSelectedIdx(idx)} className="mt-1 w-5 h-5 shrink-0 accent-primary dark:accent-[#fff200]" />
+                                                            <span className="space-y-1 min-w-0">
+                                                                <span className="flex items-center gap-2 flex-wrap">
+                                                                    <span className="font-black text-slate-900 dark:text-white text-[16px] break-words min-w-0">{addr.name}</span>
+                                                                    {addr.isDefault && <span className="text-[11px] font-black uppercase px-1.5 py-0.5 bg-ink text-sign">Default</span>}
                                                                 </span>
-                                                            )}
-                                                        </div>
-                                                        <p className="text-slate-500 dark:text-slate-400 text-[14px] leading-relaxed">
-                                                            {addr.street}<br />
-                                                            {addr.city}, {addr.state} - {addr.pincode}<br />
-                                                            {addr.country}
-                                                        </p>
-                                                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[13px] pt-1.5">
-                                                            <HiOutlinePhone className="w-4 h-4" />
-                                                            <span>{addr.phone}</span>
+                                                                <span className="block text-slate-700 dark:text-slate-300 text-[14px] leading-relaxed">
+                                                                    {addr.street}<br />{addr.city}, {addr.state} {addr.pincode}<br />{addr.country}
+                                                                </span>
+                                                                <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 text-[13px] pt-1">
+                                                                    <HiOutlinePhone className="w-4 h-4" aria-hidden="true" />{addr.phone}
+                                                                </span>
+                                                            </span>
+                                                        </label>
+                                                        <div className="absolute top-2 right-2 flex items-center">
+                                                            <button type="button" onClick={(e) => handleEditAddressClick(e, idx)} className="w-11 h-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-ink hover:bg-sign" aria-label={`Edit address for ${addr.name}`}>
+                                                                <HiOutlinePencil className="w-4 h-4" aria-hidden="true" />
+                                                            </button>
+                                                            <button type="button" onClick={(e) => handleDeleteAddress(e, idx)} className="w-11 h-11 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-white hover:bg-hot" aria-label={`Delete address for ${addr.name}`}>
+                                                                <HiOutlineTrash className="w-4 h-4" aria-hidden="true" />
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
+                                                );
+                                            })}
+                                        </fieldset>
                                     )}
                                 </AnimatePresence>
-                            </div>
+                            </section>
                         ) : (
-                            <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 text-center">
-                                <HiOutlineUser className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-                                <h3 className="text-[18px] font-bold text-slate-900 dark:text-white mb-2">Checkout Delivery Information</h3>
-                                <p className="text-[14px] text-slate-500 dark:text-slate-400 mb-5 max-w-sm mx-auto">
-                                    Please sign in to provide a delivery address and complete your purchase securely.
-                                </p>
-                                <Link to="/login?redirect=cart" className="btn-primary inline-flex">
-                                    Sign In to Continue
-                                </Link>
-                            </div>
+                            <section className="board border-2 border-ink p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                                <div className="flex items-start gap-4">
+                                    <HiOutlineUser className="w-10 h-10 text-sign shrink-0" aria-hidden="true" />
+                                    <div>
+                                        <h2 className="text-[20px] font-black">Sign in to check out</h2>
+                                        <p className="mt-1 text-[15px] text-white/90 max-w-sm">We need an account to save your delivery address and send your bill.</p>
+                                    </div>
+                                </div>
+                                <Link to="/login?redirect=cart" className="btn-buy shrink-0">Sign in to continue</Link>
+                            </section>
                         )}
                     </div>
 
-                    {/* Order summary */}
-                    <div className="lg:w-[400px] shrink-0">
-                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 sticky top-[100px]" style={{ padding: "32px" }}>
-                            <h3 className="text-[22px] font-extrabold text-slate-900 dark:text-white" style={{ marginBottom: "28px" }}>Order Summary</h3>
+                    {/* The bill */}
+                    <aside aria-labelledby="bill-heading" className="lg:w-[400px] shrink-0">
+                        <div className="lg:sticky lg:top-32">
+                            <Receipt>
+                                <ReceiptHead />
+                                <h2 id="bill-heading" className="mt-3 text-center text-[13px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-300">Your bill</h2>
+                                <ReceiptRule />
+                                <dl className="flex flex-col gap-2.5">
+                                    <ReceiptLine label={`${totalItems} piece${totalItems !== 1 ? "s" : ""}`} value={inr(subtotal)} />
+                                    {appliedCoupon && <ReceiptLine label={`Coupon ${appliedCoupon.code}`} value={`- ${inr(actualDiscount)}`} tone="text-emerald" />}
+                                    <ReceiptLine label="Delivery" value={shipping === 0 ? "Free" : inr(shipping)} tone={shipping === 0 ? "text-emerald" : ""} />
+                                </dl>
 
-                            <div className="space-y-4 mb-6">
-                                <div className="flex justify-between text-[16px]">
-                                    <span className="text-slate-500 dark:text-slate-400">Subtotal ({totalItems} items)</span>
-                                    <span className="font-semibold text-slate-900 dark:text-white">₹{subtotal.toLocaleString("en-IN")}</span>
-                                </div>
-                                {appliedCoupon && (
-                                    <div className="flex justify-between text-[16px] text-emerald">
-                                        <span className="font-semibold text-emerald text-[14px]">Discount ({appliedCoupon.code})</span>
-                                        <span className="font-bold">-₹{actualDiscount.toLocaleString("en-IN")}</span>
+                                <ReceiptRule />
+                                <div>
+                                    <label htmlFor="coupon-code" className="block text-[13px] font-extrabold text-slate-700 dark:text-slate-300 mb-1.5">Coupon code</label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            id="coupon-code"
+                                            type="text"
+                                            placeholder="e.g. FESTIVE10"
+                                            value={couponInput}
+                                            onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                                            onKeyDown={(e) => { if (e.key === "Enter" && !appliedCoupon) { e.preventDefault(); handleApplyCoupon(); } }}
+                                            disabled={appliedCoupon || applyingCoupon}
+                                            className={`${inputClass} flex-1 min-w-0 uppercase tracking-[0.06em] font-bold disabled:opacity-60`}
+                                        />
+                                        {appliedCoupon ? (
+                                            <button type="button" onClick={handleRemoveCoupon} className="min-h-[44px] px-4 font-extrabold border-2 border-hot text-hot dark:text-rose-400 dark:border-rose-400 hover:bg-hot hover:text-white">Remove</button>
+                                        ) : (
+                                            <button type="button" onClick={() => handleApplyCoupon()} disabled={applyingCoupon || !couponInput.trim()} className="btn-primary px-5">
+                                                {applyingCoupon ? "..." : "Apply"}
+                                            </button>
+                                        )}
                                     </div>
-                                )}
-                                <div className="flex justify-between text-[16px]">
-                                    <span className="text-slate-500 dark:text-slate-400">Shipping</span>
-                                    <span className={`font-semibold ${shipping === 0 ? "text-emerald" : "text-slate-900 dark:text-white"}`}>
-                                        {shipping === 0 ? "FREE" : `₹${shipping.toLocaleString("en-IN")}`}
-                                    </span>
-                                </div>
-                            </div>
+                                    {couponError && <p role="alert" className="text-hot dark:text-rose-400 text-[13px] font-bold mt-2">{couponError}</p>}
+                                    {couponSuccess && <p role="status" className="text-emerald text-[13px] font-bold mt-2">{couponSuccess}</p>}
 
-                            <div className="mb-6 border-b border-slate-200 dark:border-slate-700 pb-6">
-                                <div className="flex gap-2">
-                                    <input 
-                                        type="text" 
-                                        placeholder="Coupon code" 
-                                        value={couponInput}
-                                        onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                                        disabled={appliedCoupon || applyingCoupon}
-                                        className="flex-1 min-w-0 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-[14px] rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                    />
-                                    {appliedCoupon ? (
-                                        <button onClick={handleRemoveCoupon} className="px-4 font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all cursor-pointer">Remove</button>
-                                    ) : (
-                                        <button onClick={handleApplyCoupon} disabled={applyingCoupon || !couponInput.trim()} className="btn-primary px-5 rounded-xl disabled:opacity-50 cursor-pointer">
-                                            {applyingCoupon ? "..." : "Apply"}
-                                        </button>
+                                    {availableCoupons.length > 0 && (
+                                        <div className="mt-3">
+                                            <button type="button" onClick={() => setShowCoupons(!showCoupons)} aria-expanded={showCoupons} className="min-h-[44px] text-[14px] font-extrabold text-primary dark:text-sign underline underline-offset-4 hover:no-underline">
+                                                {showCoupons ? "Hide coupons" : `See ${availableCoupons.length} coupon${availableCoupons.length !== 1 ? "s" : ""} for you`}
+                                            </button>
+                                            <AnimatePresence>
+                                                {showCoupons && (
+                                                    <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mt-2 space-y-2">
+                                                        {availableCoupons.map((c) => {
+                                                            const isMinMet = subtotal >= c.minOrderValue;
+                                                            return (
+                                                                <li key={c._id} className={`p-3 border-2 border-dashed text-[13px] flex items-center justify-between gap-3 ${isMinMet ? "border-ink dark:border-slate-400" : "border-slate-300 dark:border-slate-600 opacity-70"}`}>
+                                                                    <div className="min-w-0">
+                                                                        <p className="flex items-center gap-2 flex-wrap">
+                                                                            <span className="font-black text-[12px] bg-sign text-ink px-1.5 py-0.5 border-2 border-ink tracking-[0.06em]">{c.code}</span>
+                                                                            <span className="font-extrabold text-slate-900 dark:text-white">{c.discountType === "percentage" ? `${c.discountValue}% off` : `${inr(c.discountValue)} off`}</span>
+                                                                        </p>
+                                                                        <p className="text-[12px] text-slate-600 dark:text-slate-400 mt-1">On bills over {inr(c.minOrderValue)}{!isMinMet ? `: add ${inr(c.minOrderValue - subtotal)} more` : ""}</p>
+                                                                    </div>
+                                                                    {isMinMet && !appliedCoupon && (
+                                                                        <button type="button" onClick={() => handleApplyCoupon(c.code)} className="min-h-[44px] px-3 font-extrabold text-primary dark:text-sign underline underline-offset-4 hover:no-underline shrink-0">Apply</button>
+                                                                    )}
+                                                                </li>
+                                                            );
+                                                        })}
+                                                    </motion.ul>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
                                     )}
                                 </div>
-                                {couponError && <p className="text-rose-500 text-[13px] font-bold mt-2">{couponError}</p>}
-                                {couponSuccess && <p className="text-emerald text-[13px] font-bold mt-2">{couponSuccess}</p>}
 
-                                {availableCoupons.length > 0 && (
-                                    <div className="mt-3.5">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowCoupons(!showCoupons)}
-                                            className="text-[13px] font-bold text-primary dark:text-sign hover:underline flex items-center gap-1 cursor-pointer"
-                                        >
-                                            {showCoupons ? "Hide Available Coupons" : "View Available Coupons"}
-                                        </button>
-                                        
-                                        <AnimatePresence>
-                                            {showCoupons && (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: "auto", opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    className="overflow-hidden mt-2.5 space-y-2"
-                                                >
-                                                    {availableCoupons.map((c) => {
-                                                        const isMinMet = subtotal >= c.minOrderValue;
-                                                        return (
-                                                            <div 
-                                                                key={c._id}
-                                                                className={`p-3 rounded-xl border text-[13px] transition-all flex items-center justify-between gap-3 ${
-                                                                    isMinMet 
-                                                                        ? "bg-slate-50 dark:bg-slate-900 border-slate-200/80 dark:border-slate-800"
-                                                                        : "bg-slate-50/40 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800/40 opacity-60"
-                                                                }`}
-                                                            >
-                                                                <div className="flex-1 min-w-0 text-left">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="font-extrabold text-[12px] bg-primary/10 dark:bg-gold/10 text-primary dark:text-gold px-2 py-0.5 rounded border border-primary/20 dark:border-gold/25 uppercase font-mono">
-                                                                            {c.code}
-                                                                        </span>
-                                                                        <span className="font-bold text-slate-800 dark:text-slate-200">
-                                                                            {c.discountType === "percentage" ? `${c.discountValue}% OFF` : `₹${c.discountValue} OFF`}
-                                                                        </span>
-                                                                    </div>
-                                                                    <p className="text-[11px] text-slate-500 mt-1">
-                                                                        Min order: ₹{c.minOrderValue.toLocaleString("en-IN")}
-                                                                    </p>
-                                                                </div>
-                                                                {isMinMet && !appliedCoupon && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleApplyCoupon(c.code)}
-                                                                        className="text-primary dark:text-gold font-bold hover:underline shrink-0 cursor-pointer"
-                                                                    >
-                                                                        Apply
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
+                                <ReceiptRule />
+                                <dl><ReceiptLine label="To pay" value={inr(total)} strong /></dl>
+                                {actualDiscount > 0 && <p className="mt-1 text-right text-[13px] font-extrabold text-emerald">You save {inr(actualDiscount)} with the coupon</p>}
+
+                                <button
+                                    type="button"
+                                    onClick={handleCheckout}
+                                    disabled={hasStockIssues || placingOrder}
+                                    className="btn-buy w-full mt-6 text-[17px] py-4"
+                                >
+                                    {hasStockIssues ? "Fix the bag to pay" : placingOrder ? "Opening payment..." : `Pay ${inr(total)}`}
+                                </button>
+                                {checkoutError && <p role="alert" className="text-hot dark:text-rose-400 text-[13px] font-bold mt-3 text-center">{checkoutError}</p>}
+                                {hasStockIssues && (
+                                    <p className="mt-3 text-[13px] font-bold text-hot dark:text-rose-400 text-center">Some pieces are sold out or over the stock left. Remove or adjust them above.</p>
                                 )}
-                            </div>
-
-                            <div className="border-t border-slate-200 dark:border-slate-700 pt-5 mb-8">
-                                <div className="flex justify-between">
-                                    <span className="text-[18px] font-extrabold text-slate-900 dark:text-white">Total</span>
-                                    <span className="text-[26px] font-extrabold text-slate-900 dark:text-white">₹{(subtotal - actualDiscount + shipping).toLocaleString("en-IN")}</span>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={handleCheckout}
-                                disabled={hasStockIssues || placingOrder}
-                                className={`w-full py-[18px] text-[16px] mb-5 cursor-pointer rounded-xl font-bold transition-all ${hasStockIssues ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed' : 'btn-primary'}`}
-                            >
-                                {hasStockIssues ? 'Update Cart to Proceed' : placingOrder ? 'Processing…' : 'Proceed to Pay'}
-                            </button>
-                            {checkoutError && (
-                                <p role="alert" className="text-rose-500 text-[13px] font-bold -mt-3 mb-4 text-center">{checkoutError}</p>
-                            )}
-
-                            {hasStockIssues && (
-                                <p className="text-[13px] text-rose-500 font-semibold text-center mb-4 bg-rose-50 dark:bg-rose-500/10 rounded-lg px-4 py-2.5">
-                                    Some items are out of stock or exceed available quantity. Please remove or adjust them.
+                                <p className="mt-4 flex items-center justify-center gap-2 text-[13px] font-semibold text-slate-600 dark:text-slate-400">
+                                    <HiOutlineShieldCheck className="w-4 h-4" aria-hidden="true" />
+                                    Paid through Razorpay: UPI, cards, wallets
                                 </p>
-                            )}
-
-                            <div className="flex items-center justify-center gap-2 text-[14px] text-slate-400">
-                                <HiOutlineShieldCheck className="w-4 h-4" />
-                                <span>Secure checkout powered by Razorpay</span>
-                            </div>
+                            </Receipt>
                         </div>
-                    </div>
+                    </aside>
                 </div>
             </motion.div>
         </main>

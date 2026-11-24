@@ -3,7 +3,7 @@ import { removeFromWishlist, clearWishlist } from "../redux/wishlistSlice";
 import { addToCart } from "../redux/cartSlice";
 import { showAlert } from "../redux/alertSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { HiOutlineHeart, HiOutlineTrash, HiOutlineShoppingCart, HiStar, HiOutlineArrowLeft } from "react-icons/hi";
+import { HiOutlineHeart, HiOutlineTrash, HiOutlineShoppingCart, HiOutlineArrowLeft } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
@@ -67,16 +67,17 @@ export default function Wishlist() {
         return (
             <main id="main-content" className="page-wrap py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-8 lg:gap-10">
-                    <div className="w-28 h-28 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                        <HiOutlineHeart className="w-12 h-12 text-slate-400" />
-                    </div>
-                    <h2 className="text-[30px] font-extrabold text-slate-900 dark:text-white">Your wishlist is empty</h2>
-                    <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-md text-center leading-[1.7]">
-                        Save the items you love by tapping the heart icon. They'll appear here so you can easily find them later.
+                    <span className="w-24 h-24 flex items-center justify-center bg-hot text-white border-2 border-ink shadow-[5px_5px_0_var(--hard-shadow)] -rotate-3" aria-hidden="true">
+                        <HiOutlineHeart className="w-12 h-12" />
+                    </span>
+                    <h1 className="display text-[40px] sm:text-[56px] text-slate-900 dark:text-white">Nothing saved yet</h1>
+                    <p className="text-[16px] text-slate-600 dark:text-slate-400 max-w-md text-center leading-[1.7]">
+                        Tap the heart on any piece to keep it here for later.
                     </p>
-                    <Link to="/shirts" className="btn-primary">
-                        Explore Collection
-                    </Link>
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <Link to="/shirts" className="btn-buy">Shop shirts</Link>
+                        <Link to="/trousers" className="btn-primary">Shop trousers</Link>
+                    </div>
                 </motion.div>
             </main>
         );
@@ -98,26 +99,23 @@ export default function Wishlist() {
                     </ol>
                 </nav>
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", marginBottom: "40px" }}>
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-10">
                     <div>
-                        <h1 className="display text-[40px] sm:text-[60px] text-slate-900 dark:text-white" style={{ marginBottom: "8px" }}>My Wishlist</h1>
-                        <p className="text-[16px] text-slate-500 dark:text-slate-400">{items.length} item{items.length !== 1 ? "s" : ""} saved</p>
+                        <h1 className="display text-[44px] sm:text-[64px] text-slate-900 dark:text-white">Saved for later</h1>
+                        <p className="mt-2 text-[16px] text-slate-600 dark:text-slate-400">{items.length} piece{items.length !== 1 ? "s" : ""} on your hold rail</p>
                     </div>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={handleMoveAllToCart}
-                            className="flex items-center gap-2 text-[14px] font-bold px-5 py-3 rounded-xl transition-all duration-300 text-white hover:opacity-90"
-                            style={{ background: "var(--blue)" }}
-                        >
-                            <HiOutlineShoppingCart className="w-4 h-4" />
-                            Move All to Cart
+                    <div className="flex flex-wrap gap-3">
+                        <button type="button" onClick={handleMoveAllToCart} className="btn-buy text-[14px]">
+                            <HiOutlineShoppingCart className="w-4 h-4" aria-hidden="true" />
+                            Move all to bag
                         </button>
                         <button
+                            type="button"
                             onClick={() => dispatch(clearWishlist())}
-                            className="flex items-center gap-2 text-[14px] font-bold px-5 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-rose-400 hover:text-rose-500 transition-colors"
+                            className="flex items-center gap-2 min-h-[44px] px-4 border-2 border-hot dark:border-rose-400 text-[14px] font-extrabold text-hot dark:text-rose-400 hover:bg-hot hover:text-white active:translate-y-px transition-colors"
                         >
-                            <HiOutlineTrash className="w-4 h-4" />
-                            Clear All
+                            <HiOutlineTrash className="w-4 h-4" aria-hidden="true" />
+                            Clear all
                         </button>
                     </div>
                 </div>
@@ -137,107 +135,62 @@ export default function Wishlist() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
                                     transition={{ duration: 0.3 }}
-                                    className="group relative bg-white dark:bg-slate-800/60 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700"
+                                    className="group relative flex flex-col bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 card-hover"
                                 >
-                                    <Link to={`/product/${item._id}`} className="block">
-                                        {/* Image */}
-                                        <div className="relative overflow-hidden bg-slate-100 dark:bg-slate-800" style={{ aspectRatio: "3/4" }}>
+                                    <Link to={`/product/${item._id}`} className="flex flex-col flex-1" aria-label={`${item.name}, ₹${Number(item.price || 0).toLocaleString("en-IN")}`}>
+                                        <div className="relative overflow-hidden bg-slate-100 dark:bg-slate-800 border-b-2 border-ink dark:border-slate-600" style={{ aspectRatio: "3/4" }}>
                                             <img
                                                 src={item.images && item.images.length > 0 ? item.images[0] : item.imageUrl}
-                                                alt={item.name}
+                                                alt=""
+                                                width="600"
+                                                height="800"
                                                 loading="lazy"
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                                className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
                                             />
-                                            
-
-                                            {/* Badges */}
-                                            <div className="absolute top-3.5 left-3.5 flex flex-col gap-2 z-10">
-                                                {item.fabric && (
-                                                    <span className="text-[11px] font-bold text-white px-3 py-1.5 rounded-lg"
-                                                        style={{ background: "rgba(26,39,68,0.8)" }}>
-                                                        {item.fabric}
-                                                    </span>
-                                                )}
-                                            </div>
-
                                             {discount > 0 && (
-                                                <div className="absolute top-3.5 right-3.5 z-10">
-                                                    <span className="stamp text-[12px]">
-                                                        {discount}% off
-                                                    </span>
-                                                </div>
+                                                <span className="stamp absolute top-3 left-3 text-[12px]">{discount}% off</span>
                                             )}
                                         </div>
 
-                                        {/* Body */}
-                                        <div className="p-5 sm:p-6">
-                                            <p className="text-[11px] font-bold uppercase mb-2 text-slate-500 dark:text-slate-400">
-                                                {item.category === "shirt" ? "Shirt" : "Trouser"}
+                                        <div className="p-3 sm:p-4 flex-1 flex flex-col">
+                                            <p className="text-[11px] sm:text-[12px] font-bold uppercase mb-1 text-slate-600 dark:text-slate-400">
+                                                {item.category === "shirt" ? "Shirt" : "Trouser"}{item.fabric ? ` · ${item.fabric}` : ""}
                                             </p>
-                                            <h3 className="text-[15px] sm:text-[16px] font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-3">
+                                            <h3 className="text-[14px] sm:text-[16px] font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-2" style={{ fontStretch: "100%", letterSpacing: 0 }}>
                                                 {item.name}
                                             </h3>
-
-                                            {/* Rating */}
-                                            <div className="flex items-center gap-2 mb-4">
-                                                <div className="flex items-center gap-0.5">
-                                                    {[...Array(5)].map((_, i) => {
-                                                        const ratingVal = item.ratings || 0;
-                                                        return (
-                                                            <HiStar 
-                                                                key={i} 
-                                                                className={`w-3.5 h-3.5 ${i < Math.floor(ratingVal) ? "" : "text-slate-200 dark:text-slate-600"}`}
-                                                                style={i < Math.floor(ratingVal) ? { color: "var(--gold)" } : {}} 
-                                                            />
-                                                        );
-                                                    })}
-                                                </div>
-                                                <span className="text-[12px] font-semibold text-slate-400">({item.ratings ? item.ratings.toFixed(1) : "0.0"})</span>
-                                            </div>
-
-                                            {/* Price */}
-                                            <div className="flex items-baseline gap-2.5">
-                                                <span className="text-[20px] sm:text-[22px] font-extrabold text-slate-900 dark:text-white">
-                                                    ₹{Number(item.price || 0).toLocaleString("en-IN")}
-                                                </span>
-                                                {originalPrice > 0 && (
-                                                    <span className="text-[13px] text-slate-400 line-through">
-                                                        ₹{originalPrice.toLocaleString("en-IN")}
-                                                    </span>
+                                            <div className="mt-auto flex flex-wrap items-end gap-x-2 gap-y-1">
+                                                <span className="price-tag text-[16px] sm:text-[19px]">₹{Number(item.price || 0).toLocaleString("en-IN")}</span>
+                                                {originalPrice > item.price && (
+                                                    <span className="text-[12px] sm:text-[13px] text-slate-600 dark:text-slate-400 line-through">₹{originalPrice.toLocaleString("en-IN")}</span>
                                                 )}
                                             </div>
                                         </div>
                                     </Link>
 
-                                    {/* Actions */}
-                                    <div className="px-5 sm:px-6 pb-5 sm:pb-6 flex gap-3">
+                                    <div className="px-3 pb-3 sm:px-4 sm:pb-4 flex gap-2">
                                         <button
+                                            type="button"
                                             onClick={() => handleAddToCart(item)}
-                                            className={`flex-1 flex items-center justify-center gap-2 text-[14px] font-bold py-3.5 rounded-xl transition-all duration-300 ${isAdded
-                                                ? "text-white"
-                                                : "text-white hover:opacity-90 active:scale-[0.98]"
-                                                }`}
-                                            style={{
-                                                background: isAdded
-                                                    ? "#10b981"
-                                                    : "var(--blue)"
-                                            }}
+                                            className={`flex-1 flex items-center justify-center gap-2 min-h-[44px] text-[13px] sm:text-[14px] font-extrabold border-2 border-ink dark:border-black transition-colors ${isAdded
+                                                ? "bg-emerald text-white dark:text-ink"
+                                                : "bg-primary text-white hover:bg-primary-dark dark:bg-sign dark:text-ink active:translate-y-px"}`}
+                                            style={{ fontStretch: "110%" }}
                                         >
-                                            {isAdded ? (
-                                                <>Added</>
-                                            ) : (
+                                            {isAdded ? "Added to bag" : (
                                                 <>
-                                                    <HiOutlineShoppingCart className="w-4 h-4" />
-                                                    Buy Now
+                                                    <HiOutlineShoppingCart className="w-4 h-4" aria-hidden="true" />
+                                                    To bag
                                                 </>
                                             )}
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={() => dispatch(removeFromWishlist(item._id))}
-                                            className="w-12 h-12 flex items-center justify-center rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-400 hover:text-rose-500 hover:border-rose-400 transition-colors shrink-0"
-                                            aria-label={`Remove ${item.name} from wishlist`}
+                                            className="w-11 h-11 flex items-center justify-center border-2 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:text-white hover:bg-hot hover:border-hot transition-colors shrink-0"
+                                            aria-label={`Remove ${item.name} from saved`}
                                         >
-                                            <HiOutlineTrash className="w-4.5 h-4.5" />
+                                            <HiOutlineTrash className="w-4 h-4" aria-hidden="true" />
                                         </button>
                                     </div>
                                 </motion.article>

@@ -2,21 +2,23 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import { HiOutlineClipboardList, HiOutlineDownload, HiOutlineRefresh, HiOutlineReply, HiOutlineX, HiOutlineShoppingCart, HiOutlineArrowLeft } from "react-icons/hi";
+import { HiOutlineDownload, HiOutlineRefresh, HiOutlineReply, HiOutlineX, HiOutlineShoppingCart, HiOutlineArrowLeft } from "react-icons/hi";
 import API, { apiErrorMessage } from "../services/api";
 import { stockForSize } from "../utils/stock";
 import { generateInvoicePDF } from "../utils/invoiceGenerator";
 import { usePrompt } from "../context/ConfirmContext";
+import Receipt, { ReceiptHead, ReceiptRule } from "../components/brand/Receipt";
 
+// Status stamps in the shop's own palette: white = paid, yellow = moving, blue = done, red = cancelled
 const STATUS_STYLES = {
-    paid: { bg: "bg-emerald-50 dark:bg-emerald-900/30", text: "text-emerald-700 dark:text-emerald-400", label: "Paid" },
-    shipped: { bg: "bg-blue-50 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-400", label: "Shipped" },
-    delivered: { bg: "bg-indigo-50 dark:bg-indigo-900/30", text: "text-indigo-700 dark:text-indigo-400", label: "Delivered" },
-    "return-requested": { bg: "bg-amber-50 dark:bg-amber-900/30", text: "text-amber-700 dark:text-amber-400", label: "Return Requested" },
-    "exchange-requested": { bg: "bg-orange-50 dark:bg-orange-900/30", text: "text-orange-700 dark:text-orange-400", label: "Exchange Requested" },
-    returned: { bg: "bg-slate-100 dark:bg-slate-700/40", text: "text-slate-600 dark:text-slate-400", label: "Returned" },
-    exchanged: { bg: "bg-slate-100 dark:bg-slate-700/40", text: "text-slate-600 dark:text-slate-400", label: "Exchanged" },
-    cancelled: { bg: "bg-rose-50 dark:bg-rose-900/30", text: "text-rose-700 dark:text-rose-400", label: "Cancelled" },
+    paid: { bg: "bg-white", text: "text-ink", label: "Paid" },
+    shipped: { bg: "bg-sign", text: "text-ink", label: "Shipped" },
+    delivered: { bg: "bg-primary", text: "text-white", label: "Delivered" },
+    "return-requested": { bg: "bg-sign", text: "text-ink", label: "Return requested" },
+    "exchange-requested": { bg: "bg-sign", text: "text-ink", label: "Exchange requested" },
+    returned: { bg: "bg-slate-200", text: "text-ink", label: "Returned" },
+    exchanged: { bg: "bg-slate-200", text: "text-ink", label: "Exchanged" },
+    cancelled: { bg: "bg-hot", text: "text-white", label: "Cancelled" },
 };
 
 export default function Orders() {
@@ -162,14 +164,24 @@ export default function Orders() {
         return (
             <main id="main-content" className="page-wrap py-32 text-center min-h-[70vh] flex flex-col items-center justify-center">
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-8">
-                    <div className="w-28 h-28 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                        <HiOutlineClipboardList className="w-12 h-12 text-slate-400" />
+                    <div className="w-full max-w-sm" aria-hidden="true">
+                        <Receipt>
+                            <ReceiptHead sub="No bills yet" />
+                            <ReceiptRule />
+                            <div className="space-y-2">
+                                <div className="h-3 bg-slate-200 dark:bg-slate-700 w-4/5" />
+                                <div className="h-3 bg-slate-200 dark:bg-slate-700 w-3/5" />
+                            </div>
+                        </Receipt>
                     </div>
-                    <h2 className="text-[30px] font-extrabold text-slate-900 dark:text-white">No orders yet</h2>
-                    <p className="text-[16px] text-slate-500 dark:text-slate-400 max-w-md text-center leading-[1.7]">
-                        Start shopping and your orders will appear here with invoices and tracking.
+                    <h1 className="display text-[40px] sm:text-[56px] text-slate-900 dark:text-white">No orders yet</h1>
+                    <p className="text-[16px] text-slate-600 dark:text-slate-400 max-w-md text-center leading-[1.7]">
+                        When you buy something, its bill, delivery stamps and tracking number land here.
                     </p>
-                    <Link to="/shirts" className="btn-primary">Start Shopping</Link>
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <Link to="/shirts" className="btn-buy">Shop shirts</Link>
+                        <Link to="/trousers" className="btn-primary">Shop trousers</Link>
+                    </div>
                 </motion.div>
             </main>
         );
@@ -207,10 +219,10 @@ export default function Orders() {
                                 key={order._id}
                                 initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+                                className="bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 shadow-[5px_5px_0_var(--hard-shadow)]"
                             >
-                                {/* Order header */}
-                                <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-700">
+                                {/* Order header: the top of the bill */}
+                                <div className="flex flex-wrap items-center justify-between gap-3 px-5 sm:px-6 py-4 bg-slate-50 dark:bg-[#111238] border-b-2 border-dashed border-slate-300 dark:border-slate-600">
                                     <div className="flex flex-wrap items-center gap-4">
                                         <div>
                                             <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider">Invoice</p>
@@ -238,7 +250,7 @@ export default function Orders() {
                                             </>
                                         )}
                                     </div>
-                                    <span className={`px-3 py-1.5 rounded-lg text-[12px] font-bold uppercase tracking-wide ${status.bg} ${status.text}`}>
+                                    <span className={`px-3 py-1 border-2 border-ink text-[13px] font-black uppercase -rotate-2 shadow-[2px_2px_0_#12123a] ${status.bg} ${status.text}`} style={{ fontStretch: "112%" }}>
                                         {status.label}
                                     </span>
                                 </div>
@@ -264,20 +276,19 @@ export default function Orders() {
                                                 { label: "Delivered", key: "delivered", active: order.status === "delivered" },
                                             ].map((step, idx) => (
                                                 <div key={idx} className="flex flex-col items-center gap-1.5 px-2 relative z-10">
-                                                    <div 
-                                                        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                                                            step.active 
-                                                                ? "border-primary dark:border-gold bg-primary dark:bg-gold text-white dark:text-slate-900" 
-                                                                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+                                                    <div
+                                                        className={`w-7 h-7 flex items-center justify-center border-2 transition-all duration-300 ${
+                                                            step.active
+                                                                ? "border-ink bg-sign text-ink rotate-[-4deg]"
+                                                                : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                                                         }`}
+                                                        aria-hidden="true"
                                                     >
-                                                        {step.active ? (
-                                                            <span className="w-1.5 h-1.5 bg-white dark:bg-slate-900 rounded-full" />
-                                                        ) : (
-                                                            <span className="w-1.5 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
-                                                        )}
+                                                        {step.active && <span className="w-2 h-2 bg-ink" />}
                                                     </div>
-                                                    <span className={step.active ? "text-primary dark:text-gold" : ""}>{step.label}</span>
+                                                    <span className={step.active ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}>
+                                                        {step.label}<span className="sr-only">{step.active ? ": done" : ": not yet"}</span>
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
@@ -309,26 +320,27 @@ export default function Orders() {
                                 </div>
 
                                 {/* Order actions */}
-                                <div className="flex flex-wrap items-center gap-3 px-6 py-4 bg-slate-50/50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700">
+                                <div className="flex flex-wrap items-center gap-3 px-5 sm:px-6 py-4 border-t-2 border-dashed border-slate-300 dark:border-slate-600">
                                     <button
                                         onClick={() => handleDownload(order)}
-                                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[13px] font-bold hover:opacity-90 transition-opacity"
+                                        type="button"
+                                        className="btn-primary text-[14px] px-4 py-2"
                                     >
-                                        <HiOutlineDownload className="w-4 h-4" />
-                                        Download Invoice
+                                        <HiOutlineDownload className="w-4 h-4" aria-hidden="true" />
+                                        Download invoice
                                     </button>
                                     {canAct && (
                                         <>
                                             {!order.returnRejected && <button
                                                 onClick={() => openModal("return", order)}
-                                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-[13px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                                className="inline-flex items-center gap-2 min-h-[44px] px-4 border-2 border-ink dark:border-slate-500 text-[14px] font-extrabold text-slate-900 dark:text-white hover:bg-sign hover:text-ink active:translate-y-px transition-colors"
                                             >
                                                 <HiOutlineReply className="w-4 h-4" />
                                                 Request Return
                                             </button>}
                                             {!order.exchangeRejected && <button
                                                 onClick={() => openModal("exchange", order)}
-                                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-[13px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                                className="inline-flex items-center gap-2 min-h-[44px] px-4 border-2 border-ink dark:border-slate-500 text-[14px] font-extrabold text-slate-900 dark:text-white hover:bg-sign hover:text-ink active:translate-y-px transition-colors"
                                             >
                                                 <HiOutlineRefresh className="w-4 h-4" />
                                                 Request Exchange
@@ -338,7 +350,7 @@ export default function Orders() {
                                     {canCancel(order) && (
                                         <button
                                             onClick={() => handleCancelOrder(order._id)}
-                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 text-[13px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
+                                            className="inline-flex items-center gap-2 min-h-[44px] px-4 border-2 border-hot dark:border-rose-400 text-[14px] font-extrabold text-hot dark:text-rose-400 hover:bg-hot hover:text-white active:translate-y-px transition-colors"
                                         >
                                             <HiOutlineX className="w-4 h-4" />
                                             Cancel Order

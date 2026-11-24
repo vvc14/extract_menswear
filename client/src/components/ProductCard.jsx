@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toggleWishlist } from "../redux/wishlistSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { HiStar, HiOutlineHeart, HiHeart } from "react-icons/hi";
+import { HiOutlineHeart, HiHeart } from "react-icons/hi";
 import { useState } from "react";
 
 export default function ProductCard({ product, compact = false, eager = false }) {
@@ -17,8 +17,6 @@ export default function ProductCard({ product, compact = false, eager = false })
     const outOfStock = product.stock <= 0;
     const discount = product.discount || 0;
     const originalPrice = product.originalPrice || 0;
-    const rating = product.ratings || 0;
-    const reviewCount = product.numOfReviews || 0;
     const image = product.images && product.images.length > 0 ? product.images[0] : product.imageUrl;
 
     const handleAddClick = (e) => {
@@ -98,12 +96,8 @@ export default function ProductCard({ product, compact = false, eager = false })
                                 ₹{originalPrice.toLocaleString("en-IN")}
                             </span>
                         )}
-                        {!compact && reviewCount > 0 && (
-                            <span className="ml-auto flex items-center gap-0.5 text-[12px] font-bold text-slate-700 dark:text-slate-300" aria-label={`Rated ${rating} out of 5 from ${reviewCount} reviews`}>
-                                <HiStar className="w-3.5 h-3.5 text-primary dark:text-sign" aria-hidden="true" />
-                                {rating} <span className="font-medium text-slate-500 dark:text-slate-400">({reviewCount})</span>
-                            </span>
-                        )}
+                        {/* No star rating here: the list API has no review data to back a count, and the
+                            imported numOfReviews disagreed with the product page. Ratings live on the product page. */}
                     </div>
                 </div>
             </Link>

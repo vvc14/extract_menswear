@@ -7,6 +7,7 @@ import { showAlert } from "../redux/alertSlice";
 import API, { apiErrorMessage } from "../services/api";
 import { stockForSize } from "../utils/stock";
 import { motion } from "framer-motion";
+import HangTag from "../components/brand/HangTag";
 import { HiOutlineShoppingCart, HiStar, HiOutlineStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart, HiOutlineArrowLeft, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExclamation, HiOutlineChatAlt2, HiOutlinePhotograph, HiOutlineX, HiOutlineTrash } from "react-icons/hi";
 import ProductCard from "../components/ProductCard";
 
@@ -235,6 +236,9 @@ export default function ProductDetail() {
 
     const originalPrice = product.originalPrice || 0;
     const discount = product.discount || 0;
+    // Ratings shown on this page come only from reviews left on this site
+    const reviewCount = product.reviews?.length || 0;
+    const reviewAvg = reviewCount ? product.reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / reviewCount : null;
     const isSized = product.sizes?.length > 0;
     const selectedStock = isSized ? (selectedSize ? stockForSize(product, selectedSize) : null) : stockForSize(product, "");
     const maxQty = Math.max(1, addableFor(isSized ? selectedSize : ""));
@@ -277,9 +281,13 @@ export default function ProductDetail() {
 
                             return (
                                 <>
-                                    <div 
-                                        className="aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 relative flex items-center justify-center bg-black cursor-pointer"
+                                    <div
+                                        className="aspect-[4/5] sm:aspect-square overflow-hidden bg-white border-[3px] border-ink dark:border-black shadow-[8px_8px_0_var(--hard-shadow)] relative flex items-center justify-center cursor-zoom-in"
                                         onClick={() => !isCurrentVideo && setLightboxImg(currentMedia)}
+                                        role={isCurrentVideo ? undefined : "button"}
+                                        tabIndex={isCurrentVideo ? undefined : 0}
+                                        aria-label={isCurrentVideo ? undefined : "Open the full-size photo"}
+                                        onKeyDown={(e) => { if (!isCurrentVideo && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); setLightboxImg(currentMedia); } }}
                                     >
                                         {isCurrentVideo ? (
                                             product.videoUrl.includes("youtube.com") || product.videoUrl.includes("youtu.be") ? (
@@ -317,31 +325,31 @@ export default function ProductDetail() {
                                                         e.stopPropagation();
                                                         setActiveImg((prev) => (prev - 1 + allMedia.length) % allMedia.length);
                                                     }} 
-                                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
-                                                    aria-label="Previous item"
+                                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white text-ink border-2 border-ink flex items-center justify-center hover:bg-sign active:translate-y-[calc(-50%+1px)] transition-colors z-10 cursor-pointer"
+                                                    aria-label="Previous photo"
                                                 >
-                                                    <HiOutlineChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                                                    <HiOutlineChevronLeft className="w-5 h-5" aria-hidden="true" />
                                                 </button>
                                                 <button 
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         setActiveImg((prev) => (prev + 1) % allMedia.length);
                                                     }} 
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 dark:bg-slate-800/80 rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors z-10 cursor-pointer" 
-                                                    aria-label="Next item"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white text-ink border-2 border-ink flex items-center justify-center hover:bg-sign active:translate-y-[calc(-50%+1px)] transition-colors z-10 cursor-pointer"
+                                                    aria-label="Next photo"
                                                 >
-                                                    <HiOutlineChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+                                                    <HiOutlineChevronRight className="w-5 h-5" aria-hidden="true" />
                                                 </button>
                                             </>
                                         )}
                                     </div>
                                     {allMedia.length > 1 && (
-                                        <div className="flex gap-3 mt-4 overflow-x-auto pb-1 scrollbar-hide">
+                                        <div className="flex gap-3 mt-6 overflow-x-auto pt-1 pl-1 pb-2 scrollbar-hide">
                                             {allMedia.map((media, idx) => {
                                                 const isVideoThumb = product.videoUrl && media === product.videoUrl;
                                                 return (
-                                                    <button key={idx} onClick={() => setActiveImg(idx)} className={`relative shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${activeImg === idx ? "border-primary shadow-md" : "border-slate-200 dark:border-slate-700 hover:border-slate-400"}`}>
-                                                        <img src={isVideoThumb ? allImages[0] : media} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                                                    <button key={idx} type="button" onClick={() => setActiveImg(idx)} aria-pressed={activeImg === idx} aria-label={isVideoThumb ? "Show the video" : `Show photo ${idx + 1}`} className={`relative shrink-0 w-20 h-20 overflow-hidden border-2 transition-all ${activeImg === idx ? "border-ink dark:border-sign shadow-[3px_3px_0_#fff200] -translate-y-0.5" : "border-slate-300 dark:border-slate-600 hover:border-ink dark:hover:border-sign"}`}>
+                                                        <img src={isVideoThumb ? allImages[0] : media} alt="" className="w-full h-full object-cover" />
                                                         {isVideoThumb && (
                                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                                                 <svg className="w-8 h-8 text-white drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
@@ -362,8 +370,7 @@ export default function ProductDetail() {
                                 <span className="stamp text-[14px]">{discount}% off</span>
                             )}
                             {product.stock <= 5 && product.stock > 0 && (
-                                <span className="text-[12px] font-bold text-white bg-rose px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                <span className="self-start bg-white text-hot border-2 border-hot text-[12px] font-extrabold uppercase px-2 py-1">
                                     Only {product.stock} left
                                 </span>
                             )}
@@ -375,12 +382,12 @@ export default function ProductDetail() {
                         {/* Badges */}
                         <div className="flex flex-wrap items-center gap-2.5 mb-3">
                             {product.fabric && (
-                                <span className="text-[13px] font-bold text-primary dark:text-blue-300 bg-primary-light dark:bg-blue-900/30 px-3.5 py-2 rounded-xl">{product.fabric}</span>
+                                <span className="text-[13px] font-extrabold uppercase text-ink bg-sign border-2 border-ink px-2.5 py-1">{product.fabric}</span>
                             )}
                             {product.style && (
-                                <span className="text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 rounded-xl">{product.style}</span>
+                                <span className="text-[13px] font-extrabold uppercase text-slate-700 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 px-2.5 py-1">{product.style}</span>
                             )}
-                            <span className="text-[13px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 rounded-xl capitalize">{product.category}</span>
+                            <span className="text-[13px] font-extrabold uppercase text-slate-700 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 px-2.5 py-1">{product.category}</span>
                         </div>
 
                         {/* Name */}
@@ -388,40 +395,35 @@ export default function ProductDetail() {
                             {product.name}
                         </h1>
 
-                        {/* Ratings */}
-                        <div className="flex items-center gap-3 mb-4">
-                            <button 
-                                onClick={() => {
-                                    const element = document.getElementById("reviews-section");
-                                    if (element) element.scrollIntoView({ behavior: "smooth" });
-                                }}
-                                className="flex items-center gap-1 bg-primary text-white dark:bg-sign dark:text-ink border-2 border-ink text-[15px] font-black px-3 min-h-[40px] cursor-pointer"
-                            >
-                                {product.ratings ? product.ratings.toFixed(1) : "0.0"} <HiStar className="w-3.5 h-3.5" />
-                            </button>
+                        {/* Ratings: only shown when there are reviews on this site to back them up */}
+                        {reviewAvg !== null ? (
                             <button
-                                onClick={() => {
-                                    const element = document.getElementById("reviews-section");
-                                    if (element) element.scrollIntoView({ behavior: "smooth" });
-                                }}
-                                className="flex items-center gap-1 hover:underline cursor-pointer"
+                                type="button"
+                                onClick={() => document.getElementById("reviews-section")?.scrollIntoView({ behavior: "smooth" })}
+                                className="flex items-center gap-3 mb-4 min-h-[44px] group"
+                                aria-label={`Rated ${reviewAvg.toFixed(1)} out of 5 from ${reviewCount} reviews. Go to reviews`}
                             >
-                                <div className="flex gap-0.5">
-                                    {[...Array(5)].map((_, i) => {
-                                        const ratingVal = product.ratings || 0;
-                                        return (
-                                            <HiStar
-                                                key={i}
-                                                className={`w-4 h-4 ${i < Math.round(ratingVal) ? "text-primary dark:text-sign" : "text-slate-200 dark:text-slate-700"}`}
-                                            />
-                                        );
-                                    })}
-                                </div>
-                                <span className="text-[15px] font-semibold text-slate-500 dark:text-slate-400 ml-1">
-                                    ({product.reviews?.length || 0} customer review{(product.reviews?.length || 0) !== 1 ? "s" : ""})
+                                <span className="flex items-center gap-1 bg-primary text-white dark:bg-sign dark:text-ink border-2 border-ink text-[15px] font-black px-3 min-h-[36px]">
+                                    {reviewAvg.toFixed(1)} <HiStar className="w-3.5 h-3.5" aria-hidden="true" />
+                                </span>
+                                <span className="flex gap-0.5" aria-hidden="true">
+                                    {[...Array(5)].map((_, i) => (
+                                        <HiStar key={i} className={`w-4 h-4 ${i < Math.round(reviewAvg) ? "text-primary dark:text-sign" : "text-slate-300 dark:text-slate-600"}`} />
+                                    ))}
+                                </span>
+                                <span className="text-[15px] font-semibold text-slate-600 dark:text-slate-400 group-hover:underline underline-offset-4">
+                                    {reviewCount} review{reviewCount !== 1 ? "s" : ""}
                                 </span>
                             </button>
-                        </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById("reviews-section")?.scrollIntoView({ behavior: "smooth" })}
+                                className="mb-4 min-h-[44px] text-[15px] font-semibold text-slate-600 dark:text-slate-400 underline underline-offset-4 hover:text-primary dark:hover:text-sign"
+                            >
+                                No reviews yet. Bought it? Be the first.
+                            </button>
+                        )}
 
                         {/* Price */}
                         <div className="mb-5">
@@ -434,7 +436,12 @@ export default function ProductDetail() {
                                     <span className="stamp text-[15px]">{discount}% off</span>
                                 )}
                             </div>
-                            <p className="text-[15px] text-slate-500 dark:text-slate-400">Inclusive of all taxes</p>
+                            <p className="text-[15px] text-slate-600 dark:text-slate-400">
+                                Inclusive of all taxes
+                                {originalPrice > product.price && (
+                                    <> · <strong className="font-extrabold text-emerald">You save ₹{(originalPrice - product.price).toLocaleString("en-IN")}</strong></>
+                                )}
+                            </p>
                         </div>
 
                         {/* Stock */}
@@ -545,24 +552,26 @@ export default function ProductDetail() {
                             </button>
                         </div>
 
-                        {/* Trust features */}
-                        <div className="border-2 border-ink dark:border-slate-700 divide-y-2 divide-slate-200 dark:divide-slate-700">
-                            {[
-                                { icon: HiOutlineTruck, text: "Standard & Express Delivery", sub: "Shipping dynamically calculated at checkout" },
-                                { icon: HiOutlineRefresh, text: "7-day easy return & exchange", sub: "No questions asked" },
-                                { icon: HiOutlineShieldCheck, text: "100% genuine product guarantee", sub: "Quality checked by our experts" },
-                            ].map((item) => (
-                                <div key={item.text} className="flex items-start gap-5 px-6 py-5">
-                                    <div className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 mt-0.5">
-                                        <item.icon className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                        {/* The shop tag tied to every piece: this piece's real delivery charge and the store's policies */}
+                        <HangTag tone="white" className="max-w-[440px] mt-2 rotate-[-1deg]" tagClassName="pt-12">
+                            <p className="text-[12px] font-black uppercase tracking-[0.1em] text-[#42436f]" style={{ fontStretch: "115%" }}>Shop tag</p>
+                            <dl className="mt-2 divide-y-2 divide-dashed divide-slate-300">
+                                {[
+                                    { icon: HiOutlineTruck, label: "Delivery", value: Number(product.shippingCost) > 0 ? `₹${Number(product.shippingCost).toLocaleString("en-IN")} per piece` : "Free on this piece", to: "/shipping" },
+                                    { icon: HiOutlineRefresh, label: "Returns", value: "7 days from delivery, return or swap the size", to: "/returns" },
+                                    { icon: HiOutlineShieldCheck, label: "Sold by", value: "Extract Menswear, NTR Road, Hyderabad", to: "/about" },
+                                ].map((row) => (
+                                    <div key={row.label} className="flex items-start gap-3 py-3">
+                                        <dt className="flex items-center gap-2 w-[92px] shrink-0 text-[14px] font-black text-ink">
+                                            <row.icon className="w-5 h-5 text-primary" aria-hidden="true" />{row.label}
+                                        </dt>
+                                        <dd className="text-[15px] font-semibold text-ink">
+                                            <Link to={row.to} className="hover:underline underline-offset-4">{row.value}</Link>
+                                        </dd>
                                     </div>
-                                    <div>
-                                        <p className="text-[15px] font-bold text-slate-900 dark:text-white leading-[1.5]">{item.text}</p>
-                                        <p className="text-[14px] text-slate-400 mt-1">{item.sub}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </dl>
+                        </HangTag>
                     </div>
                 </motion.div>
 
@@ -595,24 +604,23 @@ export default function ProductDetail() {
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                             {/* Overall Stats */}
-                            <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 h-fit">
-                                <div className="text-center pb-6 border-b border-slate-200 dark:border-slate-700">
-                                    <p className="text-[48px] font-extrabold text-slate-900 dark:text-white leading-none mb-2">
-                                        {product.ratings ? product.ratings.toFixed(1) : "4.0"}
-                                    </p>
-                                    <div className="flex justify-center gap-1 mb-2">
-                                        {[...Array(5)].map((_, i) => {
-                                            const ratingVal = product.ratings || 4.0;
-                                            return (
-                                                <HiStar
-                                                    key={i}
-                                                    className={`w-5 h-5 ${i < Math.floor(ratingVal) ? "text-[var(--accent)]" : "text-slate-200 dark:text-slate-700"}`}
-                                                />
-                                            );
-                                        })}
-                                    </div>
-                                    <p className="text-[14px] text-slate-500 dark:text-slate-400 font-semibold">
-                                        Based on {product.reviews?.length || 0} reviews
+                            <div className="bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 shadow-[5px_5px_0_var(--hard-shadow)] p-6 h-fit">
+                                <div className="text-center pb-6 border-b-2 border-dashed border-slate-300 dark:border-slate-600">
+                                    {/* Average of the reviews on this site only; nothing shown until someone rates it */}
+                                    {reviewAvg !== null ? (
+                                        <p className="display text-[56px] text-slate-900 dark:text-white leading-none mb-2">{reviewAvg.toFixed(1)}</p>
+                                    ) : (
+                                        <p className="text-[20px] font-black text-slate-900 dark:text-white mb-1">Not rated yet</p>
+                                    )}
+                                    {reviewAvg !== null && (
+                                        <div className="flex justify-center gap-1 mb-2" aria-hidden="true">
+                                            {[...Array(5)].map((_, i) => (
+                                                <HiStar key={i} className={`w-5 h-5 ${i < Math.round(reviewAvg) ? "text-[var(--accent)]" : "text-slate-300 dark:text-slate-600"}`} />
+                                            ))}
+                                        </div>
+                                    )}
+                                    <p className="text-[14px] text-slate-600 dark:text-slate-400 font-semibold">
+                                        {reviewCount ? `From ${reviewCount} review${reviewCount !== 1 ? "s" : ""}` : "No ratings on this piece yet"}
                                     </p>
                                 </div>
 

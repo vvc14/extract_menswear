@@ -191,8 +191,8 @@ export default function Profile() {
         }
     };
 
-    const inputClass = "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-[15px] rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-primary/20 dark:focus:ring-gold/20 focus:border-primary dark:focus:border-gold transition-all relative focus:z-10";
-    const labelClass = "block text-[13px] font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider";
+    const inputClass = "w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-[15px] px-4 py-3 pl-11 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#30318d] dark:focus:shadow-[3px_3px_0_#fff200] transition-shadow relative focus:z-10";
+    const labelClass = "block text-[13px] font-extrabold text-slate-700 dark:text-slate-300 mb-2";
 
     if (loading) {
         return (
@@ -232,7 +232,7 @@ export default function Profile() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Left Column: Personal Info Card */}
                     <div className="md:col-span-1">
-                        <div className="bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-900 rounded-2xl p-6 shadow-sm">
+                        <div className="bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 shadow-[5px_5px_0_var(--hard-shadow)] p-6">
                             <form onSubmit={handleProfileSubmit}>
                                 <div className="flex flex-col items-center text-center mb-6">
                                     <div className="w-20 h-20 rounded-full flex items-center justify-center text-[28px] font-extrabold text-white mb-4"
@@ -324,7 +324,7 @@ export default function Profile() {
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
-                                    className="bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-900 rounded-2xl p-6 shadow-sm overflow-hidden"
+                                    className="bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 shadow-[5px_5px_0_var(--hard-shadow)] p-6 overflow-hidden"
                                 >
                                     <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2.5">
                                         <HiOutlineHome className="w-5 h-5 text-primary dark:text-gold" /> 
