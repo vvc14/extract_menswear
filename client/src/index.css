@@ -826,6 +826,31 @@ a.hang-tag-wrap:active {
   animation: hang-settle 1.1s cubic-bezier(0.3, 0.7, 0.4, 1) both;
 }
 
+/* page-top buffer bar: a yellow strip with an ink edge, sliding while the shop waits on the server */
+.loading-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  height: 4px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--yellow) 30%, transparent);
+  pointer-events: none;
+}
+
+.loading-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: var(--yellow);
+  box-shadow: 0 1px 0 var(--ink);
+  animation: loading-slide 1.1s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+}
+
+@keyframes loading-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
 }
 
 /* ─── Interaction affordances (R-39) ─── */
@@ -862,6 +887,12 @@ select:disabled {
   }
 
   .marquee-track {
+    animation: none !important;
+  }
+
+  /* no sliding: a steady full-width strip still says "loading" */
+  .loading-bar > span {
+    width: 100%;
     animation: none !important;
   }
 }

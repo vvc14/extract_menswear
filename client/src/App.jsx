@@ -1,6 +1,7 @@
 import { useEffect, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
+import LoadingBar from "./components/LoadingBar";
 import { Provider, useSelector } from "react-redux";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import store from "./redux/store";
@@ -64,8 +65,10 @@ function AppRoutes() {
   return (
     <>
     <ScrollToTop />
+    <LoadingBar />
     <Suspense fallback={
       <div className="flex flex-col items-center justify-center gap-3 min-h-[60vh] bg-transparent" role="status">
+        <LoadingBar force />
         <div className="w-8 h-8 border-4 border-slate-200 border-t-primary dark:border-t-sign rounded-full animate-spin" aria-hidden="true" />
         <p className="text-[14px] font-bold text-slate-500 dark:text-slate-400">Loading page...</p>
       </div>

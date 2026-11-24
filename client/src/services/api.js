@@ -16,7 +16,15 @@ const API = axios.create({
 let onUnauthorized = null;
 export const setUnauthorizedHandler = (fn) => { onUnauthorized = fn; };
 
+// Requests in flight, for the page-top loading bar (components/LoadingBar.jsx)
+let inFlight = 0;
+const listeners = new Set();
+const setInFlight = (n) => { inFlight = Math.max(0, n); listeners.forEach((l) => l()); };
+export const subscribeInFlight = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+export const getInFlight = () => inFlight;
+
 API.interceptors.request.use((config) => {
+    if (!config._counted) { config._counted = true; setInFlight(inFlight + 1); }
     try {
         // Check admin session first (sessionStorage), then user session (localStorage)
         const adminAuth = JSON.parse(sessionStorage.getItem("extractAdminAuth"));
@@ -33,8 +41,12 @@ API.interceptors.request.use((config) => {
 
 const SAFE_METHODS = ["get", "head", "options"];
 
+const done = (config) => {
+    if (config?._counted) { config._counted = false; setInFlight(inFlight - 1); }
+};
+
 API.interceptors.response.use(
-    (response) => response,
+    (response) => { done(response.config); return response; },
     async (error) => {
         const config = error.config || {};
 
@@ -47,8 +59,9 @@ API.interceptors.response.use(
         if (transient && config._retries < 3 && SAFE_METHODS.includes((config.method || "get").toLowerCase())) {
             config._retries += 1;
             await new Promise((r) => setTimeout(r, 1000 * config._retries));
-            return API(config);
+            return API(config); // still counted: the bar stays up through retries
         }
+        done(config);
 
         // Session no longer valid: sign out locally so the UI doesn't keep failing.
         // Login endpoints return 401 for wrong credentials, which says nothing about the current session.
