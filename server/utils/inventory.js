@@ -124,7 +124,7 @@ export const normalizeSizeStock = (rawSizeStock, sizes) => {
 
     const bySize = new Map();
     for (const entry of parsed) {
-        const size = typeof entry?.size === "string" ? entry.size.trim() : "";
+        const size = typeof entry?.size === "string" ? entry.size.trim().toUpperCase() : "";
         const stock = Number(entry?.stock);
         if (!size) throw new Error("Each size stock entry needs a size");
         if (!Number.isInteger(stock) || stock < 0) throw new Error(`Stock for size ${size} must be a whole number ≥ 0`);

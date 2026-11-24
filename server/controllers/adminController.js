@@ -40,11 +40,14 @@ const parseJsonArray = (value, label) => {
     }
 };
 
+// "s" and "S" must be one size in the shop filter
+const sizeName = (s) => s.trim().toUpperCase();
+
 const parseSizes = (raw) => {
     const sizes = parseJsonArray(raw, "sizes");
     if (!sizes || sizes.length === 0) throw httpError(400, "Sizes must be a non-empty array");
     if (sizes.some((s) => typeof s !== "string" || !s.trim())) throw httpError(400, "Each size must be a non-empty string");
-    const trimmed = sizes.map((s) => s.trim());
+    const trimmed = sizes.map(sizeName);
     if (new Set(trimmed).size !== trimmed.length) throw httpError(400, "Duplicate sizes are not allowed");
     return trimmed;
 };
@@ -79,11 +82,11 @@ const parseNumbers = (body) => {
 };
 
 const text = (value, max = 120) => (typeof value === "string" ? value.trim().slice(0, max) : undefined);
+// "navy blue" and "Navy Blue" must land in the same color filter
+const colorName = (value) => text(value, 40)?.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
 export const addProduct = async (req, res) => {
     try {
-// "navy blue" and "Navy Blue" must land in the same color filter
-const colorName = (value) => text(value, 40)?.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
         const name = text(req.body.name, 200);
         const { category } = req.body;
         let imageUrl = cleanUnsplashUrl(req.imageUrl || req.body.imageUrl);
@@ -114,10 +117,10 @@ const colorName = (value) => text(value, 40)?.toLowerCase().replace(/\b\w/g, (c)
             category,
             fabric: text(req.body.fabric),
             style: text(req.body.style),
+            color: colorName(req.body.color),
             price: numbers.price,
             originalPrice: numbers.originalPrice || 0,
             discount: numbers.discount || 0,
-            color: colorName(req.body.color),
             shippingCost: numbers.shippingCost || 0,
             imageUrl,
             images,
@@ -150,10 +153,10 @@ export const updateProduct = async (req, res) => {
         }
         if (req.body.fabric !== undefined) updates.fabric = text(req.body.fabric);
         if (req.body.style !== undefined) updates.style = text(req.body.style);
+        if (req.body.color !== undefined) updates.color = colorName(req.body.color);
 
         const numbers = parseNumbers({
             price: req.body.price ?? current.price,
-        if (req.body.color !== undefined) updates.color = colorName(req.body.color);
             originalPrice: req.body.originalPrice ?? current.originalPrice ?? 0,
             shippingCost: req.body.shippingCost,
             stock: req.body.stock,
@@ -333,7 +336,7 @@ export const getCategoryOptions = async (req, res) => {
             result[o.category] = {
                 fabrics: o.fabrics,
                 styles: o.styles,
-                sizes: o.sizes || [],
+                sizes: [...new Set((o.sizes || []).map(sizeName))],
                 maxPrice: priceMap[o.category] || 1000,
             };
         });
@@ -356,7 +359,7 @@ export const updateCategoryOptions = async (req, res) => {
         const update = {};
         if (fabrics !== undefined) update.fabrics = clean(fabrics, "Fabrics");
         if (styles !== undefined) update.styles = clean(styles, "Styles");
-        if (sizes !== undefined) update.sizes = clean(sizes, "Sizes");
+        if (sizes !== undefined) update.sizes = [...new Set(clean(sizes, "Sizes").map(sizeName))];
 
         const option = await CategoryOption.findOneAndUpdate({ category }, { $set: update }, { new: true, upsert: true });
         res.json(option);

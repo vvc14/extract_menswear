@@ -621,6 +621,12 @@ await test("admin product stock edit is rejected if orders changed stock meanwhi
         .send({ sizes: JSON.stringify(["S", "M"]), sizeStock: JSON.stringify({ S: 10, M: 4 }), expectedStock: 7 });
     assert.equal(ok.status, 200, JSON.stringify(ok.body));
     assert.equal(ok.body.stock, 14);
+    // lower-case sizes are stored as the same size the shop already has
+    const lower = await request(app).put(`/api/admin/products/${p._id}`).set(adminAuth)
+        .send({ sizes: JSON.stringify(["s", "m"]), sizeStock: JSON.stringify({ s: 3, m: 4 }), expectedStock: 14 });
+    assert.equal(lower.status, 200, JSON.stringify(lower.body));
+    assert.deepEqual(lower.body.sizes, ["S", "M"]);
+    assert.deepEqual(lower.body.sizeStock.map((e) => [e.size, e.stock]), [["S", 3], ["M", 4]]);
     const bad = await request(app).put(`/api/admin/products/${p._id}`).set(adminAuth).send({ category: "hat" });
     assert.equal(bad.status, 400);
 });
