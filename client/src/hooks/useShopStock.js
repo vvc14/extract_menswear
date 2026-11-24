@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import API from "../services/api";
 
-// One request for the whole catalogue (it is small: a single shop's racks), shared by every
+// The whole catalogue (it is small: a single shop's racks), loaded once and shared by every
 // component that needs to talk about real stock: price bands, biggest markdowns, the delivery line.
 // Cached for the session so the ticker, home page and shipping page do not each refetch.
 let cache = null; // { at, products }
@@ -11,9 +11,13 @@ const TTL = 5 * 60 * 1000;
 function load(force = false) {
     if (!force && cache && Date.now() - cache.at < TTL) return Promise.resolve(cache.products);
     if (!force && inflight) return inflight;
-    inflight = API.get("/products?limit=100&sort=newest")
-        .then(({ data }) => {
-            const products = Array.isArray(data) ? data : [];
+    // Every page, not just the first 100: the delivery line promises something about *all* stock.
+    // shortcut: whole catalogue in memory, fine to ~2,000 products; past that move these numbers to /products/facets
+    const page = (n) => API.get(`/products?limit=100&sort=newest&page=${n}`).then(({ data }) => data);
+    inflight = page(1)
+        .then(async (first) => {
+            const rest = await Promise.all(Array.from({ length: Math.max(0, (first.pages || 1) - 1) }, (_, i) => page(i + 2)));
+            const products = [first, ...rest].flatMap((d) => d.products || []);
             cache = { at: Date.now(), products };
             return products;
         })

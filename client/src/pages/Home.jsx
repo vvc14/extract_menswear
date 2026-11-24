@@ -150,30 +150,20 @@ export default function Home() {
 
     // Fabrics in stock, and which racks carry each one
     const [fabrics, setFabrics] = useState(null); // null = loading, [] = none / failed
-    // category-options is the admin's list of allowed fabrics, not what is stocked, so each one is
-    // checked for at least one product before it is shown. No stocked fabric = the section stays hidden.
+    // Fabrics on real products (the same counts the rack filter uses). None stocked = section hidden.
     useEffect(() => {
         let cancelled = false;
         (async () => {
             try {
-                const { data } = await API.get("/products/category-options");
-                const checks = [];
-                for (const [cat, rack] of [["shirt", "shirts"], ["trouser", "trousers"]]) {
-                    for (const f of data?.[cat]?.fabrics || []) {
-                        checks.push(
-                            API.get(`/products?category=${cat}&fabric=${encodeURIComponent(f)}&page=1&limit=1`)
-                                .then(({ data: r }) => ({ f, rack, total: r?.total || 0 }))
-                                .catch(() => ({ f, rack, total: 0 }))
-                        );
-                    }
-                }
+                const racks = [["shirt", "shirts"], ["trouser", "trousers"]];
+                const facets = await Promise.all(racks.map(([cat]) => API.get(`/products/facets?category=${cat}`).then(({ data }) => data)));
                 const map = new Map();
-                for (const { f, rack, total } of await Promise.all(checks)) {
-                    if (!total) continue;
-                    const key = f.toLowerCase();
-                    if (!map.has(key)) map.set(key, { name: f, racks: [] });
-                    map.get(key).racks.push(rack);
-                }
+                racks.forEach(([, rack], i) => {
+                    for (const { value } of facets[i].fabric || []) {
+                        if (!map.has(value)) map.set(value, { name: value, racks: [] });
+                        map.get(value).racks.push(rack);
+                    }
+                });
                 if (!cancelled) setFabrics([...map.values()]);
             } catch {
                 if (!cancelled) setFabrics([]);
