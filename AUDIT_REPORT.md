@@ -228,6 +228,36 @@ The last function-by-function review across client and server, then a full re-ru
 - Each page makes its API requests once.
 - Fabric fallback, scroll-to-top, menu, sign-in redirect, cancel dialog and redirect-mode payment callback all verified.
 
+## 3E. Pre-Production Pass (2026-11-24)
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | **High:** new advisories in `body-parser`, `compression`, `follow-redirects`, `dompurify`, `vite`, `source-map-js` (denial of service, credential leak on redirect). | `npm audit fix` on server and client. Both now report 0 production vulnerabilities. |
+| 2 | **Bug:** rack filters were built from admin settings, not from stock. Shirt sizes were stored as `xs, s, M` while every shirt is `S/M/L/XL`, and styles "Plain/Checks/Formal" matched no product, so those filters always showed an empty rack. | New `GET /api/products/facets` counts options from live stock. Each group is counted with the other filters applied, and options with 0 products are disabled. |
+| 3 | **Bug:** the size filter matched sizes that were sold out. | Size now means "in stock in that size" (per-size stock aware). |
+| 4 | **Bug:** `?sort=constructor` reached Mongo as a function (500). | Only known sort names are accepted. |
+| 5 | **Hardening:** array or object query values (`?size[$gt]=a`) reached the filter code. | Rejected with 400. |
+| 6 | **Bug:** "TROUSERS" headline clipped at 360 to 390px. | Headline scales with the screen width. |
+
+Added: product colour (admin field, filter with swatches, shown on the product page), On sale and In stock toggles, Biggest discount sort, rack search, and filters that live in the URL (shareable, back button undoes). A loading bar shows while any request or page is loading.
+
+Tests: `npm test` 45 passed (new: catalogue filters). Browser: 38 click-through checks, 17 filter checks, and the edge scan at 360/390px all pass.
+
+## 3F. Follow-up Audit (2026-11-24, all fixed)
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | **High:** parallel guesses skipped the 5-attempt limit on one-time codes (18 of 20 parallel guesses were checked). A guessed reset code means account takeover. | `utils/otpStore.js` claims an attempt and reads the code in one atomic update. Test: exactly 5 of 20 parallel guesses are checked. |
+| 2 | Filter clicks scrolled the rack back to the top. | Rack navigations carry `state.keepScroll`; `ScrollToTop` skips them. |
+| 3 | Pausing after a space in rack search deleted the space. | The URL value is copied back only when it really differs. |
+| 4 | `seedAdminProducts.js` deleted every product in whatever database `MONGO_URI` named. | Removed with the other unused one-off scripts and data files (`seedProducts.js`, `create_test_product.js`, `list_products.js`, `products_data.json`, `dataset/`, `test_cases_report.md`). |
+| 5 | The home fabric board used the admin list (one request per fabric) and hid stocked fabrics missing from it. | It now reads `/products/facets`: 2 requests, real stock. |
+| 6 | Home counts and the "Free delivery on everything" line looked at the first 100 products only. | `useShopStock` loads every page. |
+| 7 | "s" and "S" were stored as different sizes. | Sizes are upper-cased on save and when the admin list is read. Tested. |
+| 8 | Facets sent every price on the rack. | Price bands are counted on the server (`?bands=0,500,1000`, `$bucket`). |
+
+`npm test`: 46 passed. Browser: 38 click-through checks, 17 filter checks and the phone edge scan all pass.
+
 ## 4. Remaining Findings (open)
 
 These need a business decision, an external setup step, or a larger design change. None of them is a known way to lose money or stock.
@@ -246,7 +276,6 @@ These need a business decision, an external setup step, or a larger design chang
 | Two admin identity stores | Low | `server/middleware/auth.js:23` | Admins can be `Admin` documents or `User.role="admin"`. | Consolidate into one. |
 | No self-service account deletion | Low (privacy) | Nothing found | India's DPDP Act gives users erasure rights. | Add "delete my account", keeping order records anonymised. |
 | Admin lists capped, not paginated | Low | `server/controllers/adminController.js:252`, `orderController.js` (`getAllOrders`, 2000 cap) | Fine for current volume. | Paginate in the admin UI when volume grows (the API already supports `?page=`). |
-| `test_cases_report.md` outdated | Info | repo root | Its claims predate these fixes and aren't backed by tests. | Replace with `npm test` output, or delete. |
 
 ---
 
