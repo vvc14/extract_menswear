@@ -31,19 +31,22 @@ export async function saveOtp(email, otp, purpose) {
 
 export async function verifyOtp(email, otp, purpose) {
     const key = keyFor(email, purpose);
-    const entry = await Otp.findOne({ key });
+    // Claim an attempt and read the code in one step, so parallel guesses can't all see "0 used"
+    const entry = await Otp.findOneAndUpdate(
+        { key, attempts: { $lt: MAX_ATTEMPTS }, expiresAt: { $gt: new Date() } },
+        { $inc: { attempts: 1 } },
+        { new: true }
+    );
 
-    if (!entry || entry.expiresAt <= new Date()) {
+    if (!entry) {
+        const stale = await Otp.findOne({ key }).lean();
+        if (stale && stale.expiresAt > new Date()) {
+            await Otp.deleteOne({ _id: stale._id });
+            return { valid: false, message: "Too many attempts. Please request a new code." };
+        }
         return { valid: false, message: "Verification code expired. Please request a new one." };
     }
-    if (entry.attempts >= MAX_ATTEMPTS) {
-        await Otp.deleteOne({ _id: entry._id });
-        return { valid: false, message: "Too many attempts. Please request a new code." };
-    }
-
-    // Count the attempt atomically before comparing
-    await Otp.updateOne({ _id: entry._id }, { $inc: { attempts: 1 } });
-    const attemptsUsed = entry.attempts + 1;
+    const attemptsUsed = entry.attempts;
 
     const expected = Buffer.from(entry.otpHash, "hex");
     const given = Buffer.from(hashOtp(String(otp ?? "").trim()), "hex");

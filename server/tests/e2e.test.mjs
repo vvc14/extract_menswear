@@ -641,6 +641,17 @@ await test("pre-existing paid order without flags restores stock exactly once", 
     assert.equal(await stockOf(p._id), 7);
 });
 
+console.log("\nOne-time codes");
+await test("parallel wrong guesses can't exceed the attempt limit", async () => {
+    const { saveOtp, verifyOtp } = await imp("utils/otpStore.js");
+    await saveOtp("race@example.com", "123456", "reset");
+    const guesses = await Promise.all([...Array(20)].map((_, i) => verifyOtp("race@example.com", String(200000 + i), "reset")));
+    assert.ok(guesses.every((g) => !g.valid));
+    const checked = guesses.filter((g) => g.message.startsWith("Invalid code")).length;
+    assert.equal(checked, 5, `${checked} guesses were compared against the code`);
+    assert.equal((await verifyOtp("race@example.com", "123456", "reset")).valid, false); // locked after 5
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed`);
 if (failures.length) console.log("Failed:\n - " + failures.join("\n - "));
 await mongoose.disconnect();
