@@ -246,7 +246,7 @@ export default function Home() {
 
                     <div className="lg:col-span-7 lg:pl-6">
                         {stock.status === "error" || (stock.status === "ready" && heroPicks.length < 3) ? (
-                            <div className="relative mx-2 sm:mx-10 lg:mx-0 rotate-2 border-[3px] border-ink bg-white p-2 sm:p-3 shadow-[10px_10px_0_#fff200]">
+                            <div className="relative mx-2 sm:mx-10 lg:mx-0 rotate-2 border-[3px] border-ink bg-white p-2 sm:p-3 shadow-[10px_10px_0_#f2cf3e]">
                                 <img src="/images/site/home-hero.jpg" alt="Folded shirts and trousers laid out with a tie" width="1920" height="1280" fetchPriority="high" className="w-full aspect-[4/3] object-cover" />
                             </div>
                         ) : (

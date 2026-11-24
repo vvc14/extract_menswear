@@ -8,12 +8,14 @@ Dial: ENERGY 3 / RHYTHM 3 / MOTION 2 (loud sign colours, sections that vary, mot
 
 | Token | Value | Use it for |
 |---|---|---|
-| `primary` / `--blue` | `#30318D` | The board: hero, navbar, footer, default buttons |
-| `sign` / `--yellow` | `#FFF200` | Buying: price stickers, Buy / Pay buttons, the cart. Always with `ink` text |
-| `hot` / `--red` | `#C9241C` | Discounts and destructive actions only |
-| `--red-edge` | `#A8301A` | The offset edge on sign lettering (`.sign-type`, `.logo-word`) |
+| `primary` / `--blue` | `#33357f` | The board: hero, navbar, footer, default buttons |
+| `sign` / `--yellow` | `#f2cf3e` | Buying: price stickers, Buy / Pay buttons, the cart. Always with `ink` text |
+| `hot` / `--red` | `#b3362c` | Discounts and destructive actions only |
+| `--red-edge` | `#8f3226` | The offset edge on sign lettering (`.sign-type`, `.logo-word`) |
 | `ink` | `#12123A` | Text, borders, hard shadows |
 | `emerald` | per theme | Savings and success text |
+
+These are the banner's colours (`#30318D`, `#FFF200`, `#C9241C`) softened for screens. The neon printed yellow and fire-engine red glare on a backlit display, which tires some shoppers' eyes, so the site uses a warm sunflower and a brick red that still read as the same sign. Don't bring back the raw banner values. In dark mode the accent drops one more step to `#E8C547`.
 
 `slate-*` and `rose-*` are remapped to blue-tinted values in `src/index.css`, so existing utilities stay on palette. `gold-*` is a legacy alias for the theme accent (blue in light, yellow in dark). Don't reach for Tailwind's stock `blue/amber/indigo/orange`. They are off palette.
 

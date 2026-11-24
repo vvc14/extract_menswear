@@ -9,7 +9,9 @@
   red edge, white eagle. Dials: ENERGY 3 / RHYTHM 3 / MOTION 2.
 
   Why each choice:
-  - Blue #30318D, yellow #FFF200, red edge: sampled from the banner, so the site and the shopfront match.
+  - Blue #33357f, yellow #f2cf3e, red #b3362c: the banner's colours (#30318D / #FFF200 / #C9241C)
+    toned down. The printed neon yellow is glaring on a backlit screen, so the site uses a warm
+    sunflower and a brick red that still read as the same sign. Don't bring the raw banner values back.
   - Yellow is the "buy" colour: it only fills price stickers and purchase buttons, always with ink text.
   - Red is reserved for discounts and the offset edge on display type (the banner's red outline).
   - Archivo with its width axis: wide and heavy for headlines like the sign lettering, normal width for body.
@@ -17,12 +19,12 @@
 */
 
 :root {
-  --blue: #30318d;
-  --blue-deep: #222370;
-  --yellow: #fff200;
-  --yellow-press: #ebdf00;
-  --red: #c9241c;
-  --red-edge: #a8301a;
+  --blue: #33357f;
+  --blue-deep: #26286a;
+  --yellow: #f2cf3e;
+  --yellow-press: #e0bc2c;
+  --red: #b3362c;
+  --red-edge: #8f3226;
   --ink: #12123a;
 
   --page: #ffffff;
@@ -31,12 +33,12 @@
   --line: #12123a;
 
   /* accent = the colour that marks the key moment in each theme */
-  --accent: #30318d;
-  --accent-strong: #222370;
+  --accent: #33357f;
+  --accent-strong: #26286a;
   --accent-soft: #e8e8f6;
   --on-accent: #ffffff;
   --hard-shadow: #12123a;
-  --focus: #30318d;
+  --focus: #33357f;
 }
 
 .dark {
@@ -45,12 +47,13 @@
   --surface: #17184a;
   --line: #3a3b7d;
 
-  --accent: #fff200;
-  --accent-strong: #ebdf00;
-  --accent-soft: rgba(255, 242, 0, 0.12);
+  /* a step dimmer than --yellow: bright yellow on near-black glares */
+  --accent: #e8c547;
+  --accent-strong: #d9b636;
+  --accent-soft: rgba(232, 197, 71, 0.12);
   --on-accent: #12123a;
   --hard-shadow: #000000;
-  --focus: #fff200;
+  --focus: #e8c547;
 }
 
 @theme {
@@ -58,11 +61,11 @@
   --font-serif: "Archivo Variable", system-ui, sans-serif;
 
   /* brand */
-  --color-primary: #30318d;
-  --color-primary-dark: #222370;
+  --color-primary: #33357f;
+  --color-primary-dark: #26286a;
   --color-primary-light: #e8e8f6;
-  --color-sign: #fff200;
-  --color-hot: #c9241c;
+  --color-sign: #f2cf3e;
+  --color-hot: #b3362c;
   --color-ink: #12123a;
   --color-night: #0c0d2c;
 
@@ -89,8 +92,8 @@
   --color-rose-50: #fdeceb;
   --color-rose-100: #fad6d4;
   --color-rose-400: #ef5d55;
-  --color-rose-500: #c9241c;
-  --color-rose-600: #a81d16;
+  --color-rose-500: #b3362c;
+  --color-rose-600: #962d24;
 
   --color-emerald: #0b7a53;
 

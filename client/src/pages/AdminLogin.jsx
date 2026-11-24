@@ -54,7 +54,7 @@ export default function AdminLogin() {
                 </div>
 
                 {/* Card */}
-                <div className="border-2 border-black bg-ink p-7 sm:p-9 shadow-[8px_8px_0_#fff200]">
+                <div className="border-2 border-black bg-ink p-7 sm:p-9 shadow-[8px_8px_0_#f2cf3e]">
                     <div className="flex flex-col gap-6">
                         <div className="text-center">
                             <h1 className="text-[28px] sm:text-[32px] font-extrabold text-white tracking-tight mb-2">Admin Panel</h1>

@@ -8,7 +8,7 @@ const PHONES = ["8184836764", "7337526629"];
 const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Extract Men's Wear, NTR Road, Suraram Colony, Hyderabad")}`;
 
 const inputCls =
-    "w-full px-4 py-3.5 border-2 border-slate-300 dark:border-slate-600 text-[16px] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 bg-white dark:bg-slate-900 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#30318d] dark:focus:shadow-[3px_3px_0_#fff200] transition-shadow";
+    "w-full px-4 py-3.5 border-2 border-slate-300 dark:border-slate-600 text-[16px] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 bg-white dark:bg-slate-900 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#33357f] dark:focus:shadow-[3px_3px_0_#f2cf3e] transition-shadow";
 
 export default function Contact() {
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -66,7 +66,7 @@ export default function Contact() {
                     {/* The shop's visiting card: everything needed to reach the counter */}
                     <div className="lg:col-span-5">
                         <h2 className="sr-only">Shop details</h2>
-                        <div className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#fff200] dark:shadow-[10px_10px_0_#000] lg:-rotate-2 px-5 pt-9 pb-6 sm:px-8">
+                        <div className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#f2cf3e] dark:shadow-[10px_10px_0_#000] lg:-rotate-2 px-5 pt-9 pb-6 sm:px-8">
                             <div className="flex items-center gap-3 pb-5 border-b-2 border-white/25">
                                 <Eagle className="w-14 h-auto text-white shrink-0" />
                                 <div className="leading-none">

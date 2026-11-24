@@ -312,7 +312,7 @@ export default function Login() {
                 </div>
 
                 {/* Card */}
-                <div className="border-2 border-black bg-ink p-7 sm:p-9 shadow-[8px_8px_0_#fff200]">
+                <div className="border-2 border-black bg-ink p-7 sm:p-9 shadow-[8px_8px_0_#f2cf3e]">
                     <AnimatePresence mode="wait">
                         {/* ──────── STEP 1: EMAIL ──────── */}
                         {step === STEP_EMAIL && (

@@ -380,7 +380,7 @@ export default function Cart() {
         }
     };
 
-    const inputClass = "w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-[15px] px-4 py-2.5 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#30318d] dark:focus:shadow-[3px_3px_0_#fff200] transition-shadow";
+    const inputClass = "w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-[15px] px-4 py-2.5 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#33357f] dark:focus:shadow-[3px_3px_0_#f2cf3e] transition-shadow";
     const labelClass = "block text-[13px] font-extrabold text-slate-700 dark:text-slate-300 mb-1.5";
     const hintClass = "text-[12px] text-slate-600 dark:text-slate-400 mt-1";
     const inr = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
@@ -630,7 +630,7 @@ export default function Cart() {
                                                 return (
                                                     <div key={idx} className={`relative border-2 transition-colors ${picked ? "border-ink dark:border-sign bg-sign/25 dark:bg-sign/10 shadow-[4px_4px_0_var(--hard-shadow)]" : "border-slate-300 dark:border-slate-600 hover:border-ink dark:hover:border-slate-400"}`}>
                                                         <label className="flex gap-4 p-4 sm:p-5 pr-28 cursor-pointer break-words">
-                                                            <input type="radio" name="delivery-address" checked={picked} onChange={() => setSelectedIdx(idx)} className="mt-1 w-5 h-5 shrink-0 accent-primary dark:accent-[#fff200]" />
+                                                            <input type="radio" name="delivery-address" checked={picked} onChange={() => setSelectedIdx(idx)} className="mt-1 w-5 h-5 shrink-0 accent-primary dark:accent-[#f2cf3e]" />
                                                             <span className="space-y-1 min-w-0">
                                                                 <span className="flex items-center gap-2 flex-wrap">
                                                                     <span className="font-black text-slate-900 dark:text-white text-[16px] break-words min-w-0">{addr.name}</span>

@@ -348,7 +348,7 @@ export default function ProductDetail() {
                                             {allMedia.map((media, idx) => {
                                                 const isVideoThumb = product.videoUrl && media === product.videoUrl;
                                                 return (
-                                                    <button key={idx} type="button" onClick={() => setActiveImg(idx)} aria-pressed={activeImg === idx} aria-label={isVideoThumb ? "Show the video" : `Show photo ${idx + 1}`} className={`relative shrink-0 w-20 h-20 overflow-hidden border-2 transition-all ${activeImg === idx ? "border-ink dark:border-sign shadow-[3px_3px_0_#fff200] -translate-y-0.5" : "border-slate-300 dark:border-slate-600 hover:border-ink dark:hover:border-sign"}`}>
+                                                    <button key={idx} type="button" onClick={() => setActiveImg(idx)} aria-pressed={activeImg === idx} aria-label={isVideoThumb ? "Show the video" : `Show photo ${idx + 1}`} className={`relative shrink-0 w-20 h-20 overflow-hidden border-2 transition-all ${activeImg === idx ? "border-ink dark:border-sign shadow-[3px_3px_0_#f2cf3e] -translate-y-0.5" : "border-slate-300 dark:border-slate-600 hover:border-ink dark:hover:border-sign"}`}>
                                                         <img src={isVideoThumb ? allImages[0] : media} alt="" className="w-full h-full object-cover" />
                                                         {isVideoThumb && (
                                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
