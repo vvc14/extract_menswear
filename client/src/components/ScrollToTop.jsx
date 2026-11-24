@@ -4,9 +4,12 @@ import { useLocation } from "react-router-dom";
 // Scroll to the top on every navigation — including tapping a link to the page you're
 // already on (e.g. "Shirts" in the footer while on /shirts), which changes only location.key.
 export default function ScrollToTop() {
-  const { pathname, hash, key } = useLocation();
+  const { pathname, hash, key, state } = useLocation();
+  // Rack filters change the URL but the shopper stays where they are
+  const keepScroll = state?.keepScroll === true;
 
   useEffect(() => {
+    if (keepScroll) return;
     if (hash) {
       const el = document.querySelector(hash);
       if (el) {
@@ -17,7 +20,7 @@ export default function ScrollToTop() {
     // Jump instantly: the page-wide smooth scrolling would animate from the footer and can be
     // interrupted on iOS while the new page renders.
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [pathname, hash, key]);
+  }, [pathname, hash, key, keepScroll]);
 
   return null;
 }

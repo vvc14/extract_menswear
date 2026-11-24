@@ -82,6 +82,8 @@ const text = (value, max = 120) => (typeof value === "string" ? value.trim().sli
 
 export const addProduct = async (req, res) => {
     try {
+// "navy blue" and "Navy Blue" must land in the same color filter
+const colorName = (value) => text(value, 40)?.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
         const name = text(req.body.name, 200);
         const { category } = req.body;
         let imageUrl = cleanUnsplashUrl(req.imageUrl || req.body.imageUrl);
@@ -115,6 +117,7 @@ export const addProduct = async (req, res) => {
             price: numbers.price,
             originalPrice: numbers.originalPrice || 0,
             discount: numbers.discount || 0,
+            color: colorName(req.body.color),
             shippingCost: numbers.shippingCost || 0,
             imageUrl,
             images,
@@ -150,6 +153,7 @@ export const updateProduct = async (req, res) => {
 
         const numbers = parseNumbers({
             price: req.body.price ?? current.price,
+        if (req.body.color !== undefined) updates.color = colorName(req.body.color);
             originalPrice: req.body.originalPrice ?? current.originalPrice ?? 0,
             shippingCost: req.body.shippingCost,
             stock: req.body.stock,

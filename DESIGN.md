@@ -55,7 +55,9 @@ These rules exist because the old site showed claims the code did not back up.
 
 - **Delivery:** each product has its own `shippingCost`. Never hard-code "free above X". Use `deliveryLine()` from `hooks/useShopStock.js`, which words the message from live stock.
 - **Ratings:** shown only from reviews left on this site (`product.reviews`). The imported `ratings` / `numOfReviews` fields are not displayed.
-- **Price bands:** `utils/priceBands.js` defines "Under ₹500", "₹500 to ₹999" and "₹1,000 and up" once. The home tags, the rack header and the filter panel all read it. Rack URLs take `?price=<band id>&fabric=A,B`.
+- **Price bands:** `utils/priceBands.js` defines "Under ₹500", "₹500 to ₹999" and "₹1,000 and up" once. The home tags, the rack header and the filter panel all read it.
+- **Filters:** options and counts come from `GET /products/facets` (live stock), never from a hand-kept list. Rack URLs carry every filter: `?size=M,L&color=Navy&fabric=Cotton&style=Casual&price=under-500&sale=1&stock=1&sort=discount&q=linen`. Colour swatches come from `utils/colors.js`; an unknown colour name still filters, with a plain swatch.
+- **Loading:** `components/LoadingBar.jsx` shows a top bar whenever an API request or a page takes longer than 150 ms. Don't add page-level spinners for the same wait.
 - **Counts and discounts** on the home page are computed from the catalogue (`useShopStock`), never typed in.
 - **Order totals:** `order.totalAmount` excludes shipping, so add `order.shipping` to get what the customer paid.
 

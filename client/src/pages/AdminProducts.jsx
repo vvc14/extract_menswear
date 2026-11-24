@@ -7,7 +7,7 @@ import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineX, HiOutlineSe
 import { useConfirm } from "../context/ConfirmContext";
 
 // sizeStock: { [size]: "12" } — per-size stock inputs. legacyStock: shared stock of an older product (null when per-size).
-const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", price: "", originalPrice: "", discount: "", shippingCost: "", sizeStock: {}, legacyStock: null, originalStock: 0, images: [], imageUrl: "", videoFile: null, videoUrl: "", selectedSizes: [], existingImages: [] };
+const EMPTY_FORM = { name: "", category: "shirt", fabric: "", style: "", color: "", price: "", originalPrice: "", discount: "", shippingCost: "", sizeStock: {}, legacyStock: null, originalStock: 0, images: [], imageUrl: "", videoFile: null, videoUrl: "", selectedSizes: [], existingImages: [] };
 
 export default function AdminProducts() {
     const dispatch = useDispatch();
@@ -69,6 +69,7 @@ export default function AdminProducts() {
         const matchSearch =
             p.name.toLowerCase().includes(query) ||
             (p.fabric || "").toLowerCase().includes(query) ||
+            (p.color || "").toLowerCase().includes(query) ||
             (p.style || "").toLowerCase().includes(query) ||
             p.category.toLowerCase().includes(query);
         const matchCat = filterCat === "all" || p.category === filterCat;
@@ -85,7 +86,7 @@ export default function AdminProducts() {
         setEditing(p._id);
         const perSize = Array.isArray(p.sizeStock) && p.sizeStock.length > 0;
         setForm({
-            name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", price: p.price,
+            name: p.name, category: p.category, fabric: p.fabric || "", style: p.style || "", color: p.color || "", price: p.price,
             originalPrice: p.originalPrice || "", discount: p.discount || "", shippingCost: p.shippingCost || "",
             sizeStock: perSize ? Object.fromEntries(p.sizeStock.map((e) => [e.size, String(e.stock)])) : {},
             legacyStock: perSize ? null : (p.stock || 0),
@@ -163,6 +164,7 @@ export default function AdminProducts() {
         formData.append("category", form.category);
         formData.append("fabric", form.fabric);
         formData.append("style", form.style);
+        formData.append("color", form.color);
         formData.append("price", form.price);
         formData.append("originalPrice", form.originalPrice || 0);
         formData.append("discount", form.discount || 0);
@@ -342,6 +344,14 @@ export default function AdminProducts() {
                                             ))}
                                         </select>
                                     </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="product-color" className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Colour</label>
+                                    <input id="product-color" list="product-colors" maxLength={40} value={form.color} onChange={(e) => handleFormChange("color", e.target.value)} placeholder="Navy, White, Olive..." className={inputClass} />
+                                    <datalist id="product-colors">
+                                        {[...new Set(products.map((p) => p.color).filter(Boolean))].sort().map((c) => <option key={c} value={c} />)}
+                                    </datalist>
+                                    <p className="mt-1 text-[12px] text-slate-500">Shoppers filter by this. Use the same name for the same shade.</p>
                                 </div>
                                 <div>
                                     <label className="block text-[13px] font-bold text-slate-400 uppercase tracking-wider mb-2">Price (₹)</label>

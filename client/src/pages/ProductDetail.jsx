@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import HangTag from "../components/brand/HangTag";
 import { HiOutlineShoppingCart, HiStar, HiOutlineStar, HiOutlineTruck, HiOutlineRefresh, HiOutlineShieldCheck, HiOutlineHeart, HiHeart, HiOutlineArrowLeft, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExclamation, HiOutlineChatAlt2, HiOutlinePhotograph, HiOutlineX, HiOutlineTrash } from "react-icons/hi";
 import ProductCard from "../components/ProductCard";
+import { swatchFor } from "../utils/colors";
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -386,6 +387,12 @@ export default function ProductDetail() {
                             )}
                             {product.style && (
                                 <span className="text-[13px] font-extrabold uppercase text-slate-700 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 px-2.5 py-1">{product.style}</span>
+                            )}
+                            {product.color && (
+                                <span className="inline-flex items-center gap-2 text-[13px] font-extrabold uppercase text-slate-700 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 px-2.5 py-1">
+                                    {swatchFor(product.color) && <span className="w-3.5 h-3.5 border border-ink" style={{ background: swatchFor(product.color) }} aria-hidden="true" />}
+                                    {product.color}
+                                </span>
                             )}
                             <span className="text-[13px] font-extrabold uppercase text-slate-700 dark:text-slate-200 border-2 border-slate-300 dark:border-slate-600 px-2.5 py-1">{product.category}</span>
                         </div>

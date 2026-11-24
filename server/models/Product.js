@@ -23,6 +23,7 @@ const productSchema = new mongoose.Schema({
     category: { type: String, required: true, enum: ["shirt", "trouser"] },
     fabric: { type: String, trim: true },
     style: { type: String, trim: true },
+    color: { type: String, trim: true },
     price: { type: Number, required: true, min: 0 },
     originalPrice: { type: Number, default: 0, min: 0 },
     discount: { type: Number, default: 0, min: 0, max: 100 },
@@ -42,6 +43,7 @@ const productSchema = new mongoose.Schema({
 productSchema.index({ category: 1 });
 productSchema.index({ fabric: 1 });
 productSchema.index({ style: 1 });
+productSchema.index({ color: 1 });
 productSchema.index({ sizes: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });

@@ -652,6 +652,30 @@ await test("parallel wrong guesses can't exceed the attempt limit", async () => 
     assert.equal((await verifyOtp("race@example.com", "123456", "reset")).valid, false); // locked after 5
 });
 
+console.log("\nCatalogue filters");
+await test("size filter means in stock in that size; facets leave their own filter out", async () => {
+    await Product.deleteMany({});
+    await makeProduct({ name: "Navy M gone", color: "Navy", sizeStock: [{ size: "S", stock: 2 }, { size: "M", stock: 0 }], stock: 2 });
+    await makeProduct({ name: "Navy on sale", color: "Navy", price: 400, originalPrice: 800 });
+    await makeProduct({ name: "White", color: "White", category: "trouser", sizes: ["32"], sizeStock: [], stock: 3 });
+    const list = async (q) => (await request(app).get("/api/products").query({ ...q, page: 1 })).body;
+
+    assert.deepEqual((await list({ size: "M" })).products.map((p) => p.name), ["Navy on sale"]);
+    assert.equal((await list({ size: "32" })).total, 1); // legacy shared stock
+    assert.equal((await list({ color: "Navy", onSale: "true" })).total, 1);
+    assert.equal((await list({ maxPrice: "500" })).total, 1);
+
+    const f = (await request(app).get("/api/products/facets").query({ category: "shirt", color: "White" })).body;
+    assert.equal(f.total, 0);
+    assert.deepEqual(f.color, [{ value: "Navy", count: 2 }]); // color counts ignore the color filter itself
+    assert.deepEqual(f.size, []);
+    const b = (await request(app).get("/api/products/facets").query({ bands: "0,500,1000" })).body.bands;
+    assert.deepEqual(b, { 0: 1, 1000: 2 }); // 400 under 500, two at 1000
+    assert.equal((await request(app).get("/api/products/facets").query({ bands: "500,0" })).status, 400);
+    assert.equal((await request(app).get("/api/products?sort=constructor")).status, 200);
+    assert.equal((await request(app).get("/api/products").query("size[$gt]=a")).status, 400);
+});
+
 console.log(`\n${passed} passed, ${failures.length} failed`);
 if (failures.length) console.log("Failed:\n - " + failures.join("\n - "));
 await mongoose.disconnect();
