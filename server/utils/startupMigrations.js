@@ -1,4 +1,5 @@
 import Order from "../models/Order.js";
+import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 import Otp from "../models/Otp.js";
 import Counter from "../models/Counter.js";
@@ -41,6 +42,20 @@ export const runStartupMigrations = async () => {
         const paidCount = await Order.countDocuments({ invoiceNumber: { $exists: true } });
         await Counter.updateOne({ _id: "invoice" }, { $setOnInsert: { seq: paidCount } }, { upsert: true });
     }
+
+    // 7. Sizes are saved in capitals; an older "s" would miss "S" when stock is reserved or returned
+    const up = (v) => ({ $toUpper: { $ifNull: [v, ""] } });
+    const upLines = (field, keys) => ({
+        $map: { input: { $ifNull: [`$${field}`, []] }, in: { $mergeObjects: ["$$this", Object.fromEntries(keys.map((k) => [k, up(`$$this.${k}`)]))] } },
+    });
+    const lower = /[a-z]/;
+    await Product.updateMany({ $or: [{ sizes: lower }, { "sizeStock.size": lower }] }, [
+        { $set: { sizes: { $map: { input: { $ifNull: ["$sizes", []] }, in: up("$$this") } }, sizeStock: upLines("sizeStock", ["size"]) } },
+    ]);
+    await Cart.updateMany({ "items.size": lower }, [{ $set: { items: upLines("items", ["size"]) } }]);
+    await Order.updateMany({ $or: [{ "items.size": lower }, { "exchangeItems.fromSize": lower }, { "exchangeItems.toSize": lower }] }, [
+        { $set: { items: upLines("items", ["size"]), exchangeItems: upLines("exchangeItems", ["fromSize", "toSize"]) } },
+    ]);
 
     try {
         await Promise.all([Order.syncIndexes(), Otp.syncIndexes(), WebhookEvent.syncIndexes(), Product.createIndexes()]);

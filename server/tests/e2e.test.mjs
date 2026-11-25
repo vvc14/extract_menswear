@@ -677,6 +677,24 @@ await test("admin uploads go through temp files that are removed afterwards", as
     assert.deepEqual([...tmpFiles()].filter((n) => !before.has(n)), []);
 });
 
+console.log("\nSize case migration");
+await test("lowercase sizes saved earlier are upper-cased everywhere", async () => {
+    const { default: Cart } = await imp("models/Cart.js");
+    const u = await makeUser();
+    const p = await Product.collection.insertOne({ name: "Old", category: "shirt", price: 500, imageUrl: "https://x/y.jpg", sizes: ["s", "M"], sizeStock: [{ size: "s", stock: 2 }, { size: "M", stock: 1 }], stock: 3 });
+    await Cart.collection.insertOne({ userId: u.user._id, items: [{ productId: p.insertedId, size: "s", quantity: 1 }] });
+    const o = await Order.collection.insertOne({ userId: u.user._id, razorpayOrderId: "order_CASE1", items: [{ productId: p.insertedId, name: "Old", price: 500, quantity: 1, size: "s" }], totalAmount: 500, status: "paid", stockReserved: true, createdAt: new Date() });
+    await runStartupMigrations();
+    const prod = await Product.findById(p.insertedId).lean();
+    assert.deepEqual(prod.sizes, ["S", "M"]);
+    assert.deepEqual(prod.sizeStock.map((e) => e.size), ["S", "M"]);
+    assert.equal((await Cart.findOne({ userId: u.user._id }).lean()).items[0].size, "S");
+    assert.equal((await Order.findById(o.insertedId).lean()).items[0].size, "S");
+    // a cancel now restocks the real size
+    assert.equal((await request(app).post(`/api/orders/${o.insertedId}/cancel`).set(u.auth).send({})).status, 200);
+    assert.equal((await Product.findById(p.insertedId).lean()).sizeStock.find((e) => e.size === "S").stock, 3);
+});
+
 console.log("\nCatalogue filters");
 await test("size filter means in stock in that size; facets leave their own filter out", async () => {
     await Product.deleteMany({});
