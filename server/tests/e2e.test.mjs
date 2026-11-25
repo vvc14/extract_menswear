@@ -658,6 +658,12 @@ await test("parallel wrong guesses can't exceed the attempt limit", async () => 
     assert.equal((await verifyOtp("race@example.com", "123456", "reset")).valid, false); // locked after 5
 });
 
+await test("two code requests at the same moment send only one code", async () => {
+    const { saveOtp } = await imp("utils/otpStore.js");
+    const results = await Promise.all([1, 2, 3].map(() => saveOtp("twice@example.com", "111111", "signup")));
+    assert.equal(results.filter((r) => r.success).length, 1);
+});
+
 console.log("\nCatalogue filters");
 await test("size filter means in stock in that size; facets leave their own filter out", async () => {
     await Product.deleteMany({});

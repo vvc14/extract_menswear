@@ -17,15 +17,19 @@ export function generateOtp() {
 
 export async function saveOtp(email, otp, purpose) {
     const key = keyFor(email, purpose);
-    const existing = await Otp.findOne({ key }).lean();
-    if (existing && existing.expiresAt > new Date() && Date.now() - new Date(existing.createdAt).getTime() < COOLDOWN_MS) {
-        return { error: "Please wait before requesting another code" };
+    const now = Date.now();
+    // Replace only an expired or cooled-down code. A live one makes the upsert hit the unique key,
+    // so two requests at the same moment can't both send a code.
+    try {
+        await Otp.updateOne(
+            { key, $or: [{ expiresAt: { $lte: new Date(now) } }, { createdAt: { $lte: new Date(now - COOLDOWN_MS) } }] },
+            { $set: { otpHash: hashOtp(otp), attempts: 0, createdAt: new Date(now), expiresAt: new Date(now + OTP_EXPIRY_MS) } },
+            { upsert: true }
+        );
+    } catch (err) {
+        if (err?.code === 11000) return { error: "Please wait before requesting another code" };
+        throw err;
     }
-    await Otp.findOneAndUpdate(
-        { key },
-        { key, otpHash: hashOtp(otp), attempts: 0, createdAt: new Date(), expiresAt: new Date(Date.now() + OTP_EXPIRY_MS) },
-        { upsert: true }
-    );
     return { success: true };
 }
 
