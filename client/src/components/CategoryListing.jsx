@@ -200,13 +200,13 @@ export default function CategoryListing({ config }) {
             <section className="board relative overflow-hidden border-b-2 border-ink">
                 <img src={heroImage} alt="" width="1920" height="2880" fetchPriority="high" className="hidden md:block absolute right-0 top-0 h-full w-[38%] object-cover border-l-2 border-ink" />
                 <Eagle className="pointer-events-none absolute left-[45%] -bottom-20 h-[320px] w-auto text-white opacity-[0.06]" />
-                <div className="page-wrap relative pt-12 pb-10 sm:pt-16 sm:pb-12 md:pr-[42%]">
+                <div className="page-wrap relative pt-12 pb-10 sm:pt-16 sm:pb-12 md:pr-[42%] @container">
                     <nav aria-label="Breadcrumb" className="mb-6 text-[14px] font-semibold text-white/80">
                         <Link to="/" className="hover:text-sign underline-offset-4 hover:underline">Home</Link>
                         <span className="mx-2" aria-hidden="true">/</span>
                         <span aria-current="page" className="text-white">{title}</span>
                     </nav>
-                    <h1 className="display sign-type text-[clamp(36px,12vw,56px)] sm:text-[88px] lg:text-[110px]">{title}</h1>
+                    <h1 className="display sign-type text-[min(110px,13cqi)]">{title}</h1>
                     <p className="mt-5 max-w-md text-[16px] sm:text-[18px] leading-relaxed text-white/90">{blurb}</p>
 
                     <div className="mt-8">

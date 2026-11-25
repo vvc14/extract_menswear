@@ -84,9 +84,9 @@ export default function ShippingInfo() {
                         <ol className="-mt-[7px] flex gap-5 overflow-x-auto snap-x snap-mandatory pb-6 pl-2 pr-6 md:grid md:grid-cols-3 md:gap-x-6 md:overflow-visible md:px-8">
                             {JOURNEY.map((s, i) => (
                                 <li key={s.stamp} className={`hang-settle w-[min(300px,80vw)] shrink-0 snap-start md:w-full md:max-w-[400px] md:mx-auto ${i === 1 ? "md:[--drop:84px]" : ""}`} style={{ animationDelay: `${i * 0.12}s` }}>
-                                    <HangTag tone={["white", "yellow", "blue"][i]} className="swing" style={{ "--string": "var(--drop, 40px)" }}>
+                                    <HangTag tone={["white", "yellow", "blue"][i]} className="swing" tagClassName="@container" style={{ "--string": "var(--drop, 40px)" }}>
                                         <p className={`text-[13px] font-black tabular-nums ${i === 2 ? "text-white/85" : "text-ink/75"}`}>Stage {i + 1}</p>
-                                        <h3 className="display text-[34px] mt-1">{s.stamp}</h3>
+                                        <h3 className="display text-[min(34px,13cqi)] mt-1">{s.stamp}</h3>
                                         <p className={`mt-3 text-[15px] leading-relaxed ${i === 2 ? "text-white/90" : "text-ink/85"}`}>{s.what}</p>
                                     </HangTag>
                                 </li>

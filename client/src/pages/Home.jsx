@@ -200,7 +200,7 @@ export default function Home() {
                 <Eagle className="pointer-events-none absolute -left-24 -bottom-24 h-[420px] w-auto text-white opacity-[0.06] lg:left-auto lg:right-[52%] lg:-bottom-32 lg:h-[560px]" />
 
                 <div className="page-wrap relative grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center pt-10 pb-16 sm:pt-14 sm:pb-20 lg:py-20">
-                    <div className="lg:col-span-5">
+                    <div className="lg:col-span-5 @container">
                         <motion.p
                             initial="hidden" animate="visible" variants={rise} custom={0}
                             className="text-[13px] sm:text-[14px] font-extrabold uppercase tracking-[0.08em] text-white/85 mb-5"
@@ -209,7 +209,7 @@ export default function Home() {
                             Extract Men's Wear · NTR Road, Suraram Colony
                         </motion.p>
 
-                        <h1 className="display text-[42px] min-[400px]:text-[50px] sm:text-[78px] lg:text-[54px] xl:text-[68px] 2xl:text-[84px]">
+                        <h1 className="display text-[min(42px,12cqi)] min-[400px]:text-[min(50px,12cqi)] sm:text-[min(78px,12cqi)] lg:text-[min(54px,12cqi)] xl:text-[min(68px,12cqi)] 2xl:text-[min(84px,12cqi)]">
                             <motion.span initial="hidden" animate="visible" variants={rise} custom={1} className="block text-white">Sharp shirts.</motion.span>
                             <motion.span initial="hidden" animate="visible" variants={rise} custom={2} className="block sign-type mt-1">Solid trousers.</motion.span>
                         </h1>
@@ -255,9 +255,9 @@ export default function Home() {
             {bands.length > 0 && (
                 <section aria-labelledby="budget-heading" className="relative bg-slate-50 dark:bg-[#111238] border-b-2 border-ink dark:border-slate-800 overflow-hidden">
                     <div className="page-wrap py-16 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
-                        <div className="lg:col-span-4 lg:pt-10">
+                        <div className="lg:col-span-4 lg:pt-10 @container">
                             <p className="section-label">Shop by price</p>
-                            <h2 id="budget-heading" className="display text-[44px] sm:text-[60px] text-slate-900 dark:text-white">What's the budget?</h2>
+                            <h2 id="budget-heading" className="display text-[min(44px,14cqi)] sm:text-[min(60px,14cqi)] text-slate-900 dark:text-white">What's the budget?</h2>
                             <p className="mt-5 max-w-sm text-[16px] leading-relaxed text-slate-600 dark:text-slate-400">
                                 Pick a tag. The count is what is on the rack right now.
                             </p>
@@ -272,11 +272,11 @@ export default function Home() {
                                     const onBlue = tone === "blue";
                                     return (
                                         <li key={band.id} className={`hang-settle w-[min(240px,72vw)] shrink-0 snap-start min-[560px]:w-auto ${i === 1 ? "min-[560px]:[--drop:80px]" : i === 2 ? "min-[560px]:[--drop:56px]" : ""}`} style={{ animationDelay: `${i * 0.12}s` }}>
-                                            <HangTag tone={tone} className="swing" style={{ "--string": "var(--drop, 40px)" }}>
+                                            <HangTag tone={tone} className="swing" tagClassName="@container" style={{ "--string": "var(--drop, 40px)" }}>
                                                 <p className="text-[12px] font-black uppercase tracking-[0.06em] opacity-80" style={{ fontStretch: "115%" }}>
                                                     {band.count} {band.count === 1 ? "piece" : "pieces"}
                                                 </p>
-                                                <h3 className="display text-[34px] sm:text-[38px] leading-[0.95] mt-1">{band.label}</h3>
+                                                <h3 className="display text-[min(34px,19cqi)] sm:text-[min(38px,19cqi)] leading-[0.95] mt-1">{band.label}</h3>
                                                 <p className={`mt-2 text-[14px] font-semibold ${onBlue ? "text-white/90" : "text-ink/80"}`}>From {inr(band.from)}</p>
                                                 <div className="mt-5 flex flex-col gap-2">
                                                     {band.racks.map(({ rack, count }) => (
@@ -342,8 +342,8 @@ export default function Home() {
                                 <div className="relative overflow-hidden border-b-2 sm:border-b-0 sm:border-r-2 border-ink bg-slate-100">
                                     <img src={imageOf(lead)} alt="" width="600" height="800" loading="lazy" className="w-full h-full aspect-[3/4] sm:aspect-auto object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
                                 </div>
-                                <div className="p-6 sm:p-8 flex flex-col">
-                                    <p className="display text-[72px] sm:text-[96px] text-hot leading-[0.85]">{lead.discount}%</p>
+                                <div className="p-6 sm:p-8 flex flex-col @container">
+                                    <p className="display text-[min(72px,33cqi)] sm:text-[min(96px,33cqi)] text-hot leading-[0.85]">{lead.discount}%</p>
                                     <p className="display text-[28px] text-hot">off</p>
                                     <h3 className="mt-6 text-[18px] sm:text-[20px] font-bold leading-snug" style={{ fontStretch: "100%", letterSpacing: 0 }}>{lead.name}</h3>
                                     <div className="mt-auto pt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">

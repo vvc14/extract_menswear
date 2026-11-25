@@ -16,8 +16,8 @@ function ShopSign() {
         <figure aria-label="The Extract shop sign" className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#12123a] dark:shadow-[10px_10px_0_#000] overflow-hidden">
             <div className="grid grid-cols-[auto_1fr] items-center gap-4 sm:gap-8 px-5 pt-9 pb-6 sm:px-10 sm:pt-12 sm:pb-8">
                 <Eagle className="w-[72px] sm:w-[150px] lg:w-[190px] h-auto text-white" />
-                <div className="min-w-0">
-                    <p className="logo-word text-[44px] min-[400px]:text-[54px] sm:text-[96px] lg:text-[128px] leading-[0.9]">EXTRACT</p>
+                <div className="min-w-0 @container">
+                    <p className="logo-word text-[min(44px,14.5cqi)] min-[400px]:text-[min(54px,14.5cqi)] sm:text-[min(96px,14.5cqi)] lg:text-[min(128px,14.5cqi)] leading-[0.9]">EXTRACT</p>
                     <p className="mt-2 sm:mt-3 text-[12px] sm:text-[20px] lg:text-[24px] font-black uppercase tracking-[0.14em] text-white" style={{ fontStretch: "125%" }}>
                         Menswear
                     </p>
@@ -79,9 +79,9 @@ export default function About() {
                             <Link to="/trousers" className="btn-outline">Shop trousers</Link>
                         </div>
                     </div>
-                    <div className="px-4 sm:px-8 lg:px-12 xl:px-16 py-14 sm:py-20 bg-sign text-ink">
+                    <div className="px-4 sm:px-8 lg:px-12 xl:px-16 py-14 sm:py-20 bg-sign text-ink @container">
                         <p className="inline-block text-[13px] font-extrabold uppercase bg-ink text-sign px-2 py-0.5 mb-4 -rotate-1">By the bundle</p>
-                        <h3 className="display text-[40px] sm:text-[56px]">Wholesale</h3>
+                        <h3 className="display text-[min(40px,11cqi)] sm:text-[min(56px,11cqi)]">Wholesale</h3>
                         <p className="mt-5 max-w-md text-[16px] leading-relaxed font-medium">
                             Running a store, dressing a wedding party or ordering for a team? We sell in bulk. Rates depend on quantity and fabric, so call and tell us what you need.
                         </p>

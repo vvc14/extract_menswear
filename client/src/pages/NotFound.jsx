@@ -39,10 +39,10 @@ export default function NotFound() {
                             transition={{ delay: 0.7, duration: 0.5 }}
                             className="w-full max-w-[520px]"
                         >
-                            <HangTag tone="white" hole="var(--shutter-slat)" className="hang-settle" tagClassName="px-6 sm:px-10 pb-8 text-center" style={{ animationDelay: "0.8s" }}>
+                            <HangTag tone="white" hole="var(--shutter-slat)" className="hang-settle" tagClassName="px-6 sm:px-10 pb-8 text-center @container" style={{ animationDelay: "0.8s" }}>
                                 <p className="display text-[84px] sm:text-[120px] text-hot leading-none">404</p>
-                                <h1 className="display text-[30px] sm:text-[42px] text-ink mt-2">Shutter's down on this page</h1>
-                                <p className="mt-4 text-[16px] sm:text-[17px] text-[#42436f]">
+                                <h1 className="display text-[min(30px,12.5cqi)] sm:text-[min(42px,12.5cqi)] text-ink mt-2">Shutter's down on this page</h1>
+                                <p className="mt-4 text-[16px] sm:text-[17px] text-[#474747]">
                                     It does not exist or it has moved. The link may be old, or the piece sold out and came off the rack.
                                 </p>
                                 <div className="mt-7 flex flex-wrap justify-center gap-3">
