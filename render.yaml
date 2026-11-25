@@ -5,7 +5,7 @@ services:
     name: extract-menswear-api
     runtime: node
     rootDir: server
-    plan: free
+    plan: starter # free sleeps after 15 idle minutes: the first shopper waits ~1 min and sees errors
     region: singapore
     buildCommand: npm ci --omit=dev
     startCommand: npm start
@@ -16,6 +16,9 @@ services:
         value: production
       - key: NODE_VERSION
         value: "22"
+      # Invoice dates and numbers come from the server clock: keep it on India time
+      - key: TZ
+        value: Asia/Kolkata
       - key: TRUST_PROXY_HOPS
         value: "1"
       - key: JWT_SECRET

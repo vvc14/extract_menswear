@@ -40,12 +40,11 @@ How to put Extract Menswear online for free, and move to AWS later. Setup:
 2. Fill in the variables marked `sync: false` (see the table in step 7).
 3. After the first deploy, open `https://<service>.onrender.com/api/health`. It should return `{"status":"ok","db":"connected"}`.
 
-Render free-tier facts ([docs](https://render.com/docs/free)):
-- **The service spins down after 15 minutes without traffic.** The next request waits about a minute.
-  - Razorpay webhooks get delivered once it's awake.
-  - Stock held by abandoned checkouts is released by the expiry job when it wakes.
-- **Outbound SMTP ports 25, 465 and 587 are blocked.** Gmail/SMTP email won't work there, so use `BREVO_API_KEY`.
-- **750 free instance hours a month, one instance, no persistent disk.** The API keeps nothing on disk: uploads go to Cloudinary, data to Atlas.
+The blueprint uses the paid **Starter** plan (512 MB). Don't switch it to free for the live shop ([docs](https://render.com/docs/free)):
+- **Free services spin down after 15 minutes without traffic.** The next request waits about a minute, and the storefront gives up after about 6 seconds, so that shopper sees "Rack did not load". Webhooks and the job that frees abandoned-checkout stock also wait until it wakes.
+- **Free services block outbound SMTP ports 25, 465 and 587.** Gmail/SMTP email won't work there, so use `BREVO_API_KEY`.
+- **No persistent disk.** The API keeps nothing on disk: admin uploads pass through a temp file to Cloudinary, data goes to Atlas.
+- **`TZ=Asia/Kolkata`** is set in the blueprint so invoice dates and numbers follow India time.
 - **On every deploy or restart Render sends SIGTERM and force-kills about 30 seconds later** ([docs](https://render.com/docs/deploys)). The server shuts down gracefully: it finishes in-flight requests and closes the DB.
 
 ## 3. Storefront on Vercel
