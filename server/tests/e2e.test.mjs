@@ -664,6 +664,19 @@ await test("two code requests at the same moment send only one code", async () =
     assert.equal(results.filter((r) => r.success).length, 1);
 });
 
+await test("admin uploads go through temp files that are removed afterwards", async () => {
+    const fs = await import("node:fs");
+    const os = await import("node:os");
+    const tmpFiles = () => new Set(fs.readdirSync(os.tmpdir()).filter((n) => /^[0-9a-f]{32}$/.test(n)));
+    const before = tmpFiles();
+    const r = await request(app).post("/api/admin/products").set(adminAuth)
+        .field("name", "Upload").field("category", "shirt").field("price", "100").field("sizes", JSON.stringify(["M"]))
+        .attach("images", Buffer.from("fake-png"), { filename: "a.png", contentType: "image/png" });
+    assert.equal(r.status, 400); // Cloudinary is not configured in tests
+    await new Promise((res) => setTimeout(res, 100));
+    assert.deepEqual([...tmpFiles()].filter((n) => !before.has(n)), []);
+});
+
 console.log("\nCatalogue filters");
 await test("size filter means in stock in that size; facets leave their own filter out", async () => {
     await Product.deleteMany({});

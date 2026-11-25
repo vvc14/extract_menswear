@@ -1,7 +1,12 @@
+import fs from "fs";
 import multer from "multer";
 import streamifier from "streamifier";
 
 const storage = multer.memoryStorage();
+// Admin media can be ~200 MB per request: write it to temp files instead of holding it in RAM
+const diskStorage = multer.diskStorage({});
+const removeTemp = (files) => files.forEach((f) => f.path && fs.unlink(f.path, () => {}));
+const filesOf = (req) => (req.files ? (Array.isArray(req.files) ? req.files : Object.values(req.files).flat()) : req.file ? [req.file] : []);
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
@@ -18,7 +23,7 @@ const reviewUpload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024, file
 
 // Admin product media: up to 10 images (10 MB each) and one video (100 MB)
 const adminUpload = multer({
-    storage,
+    storage: diskStorage,
     limits: { fileSize: 100 * 1024 * 1024, files: 11 },
     fileFilter: (req, file, cb) => {
         if (file.fieldname === "video") return fileFilter(VIDEO_TYPES)(req, file, cb);
@@ -32,6 +37,7 @@ const withUploadErrors = (middleware) => (req, res, next) => {
         if (!err) {
             const images = Object.values(req.files || {}).flat().filter((f) => f.fieldname === "images");
             if (images.some((f) => f.size > 10 * 1024 * 1024)) {
+                removeTemp(filesOf(req));
                 return res.status(400).json({ message: "Each image must be 10 MB or smaller" });
             }
             return next();
@@ -66,14 +72,13 @@ const uploadOne = (file) =>
             { folder: "extract-menswear", resource_type: file.fieldname === "video" ? "video" : "image" },
             (error, result) => (error ? reject(error) : resolve(result.secure_url))
         );
-        streamifier.createReadStream(file.buffer).pipe(stream);
+        const source = file.path ? fs.createReadStream(file.path) : streamifier.createReadStream(file.buffer);
+        source.on("error", reject).pipe(stream);
     });
 
 export const uploadToCloudinary = async (req, res, next) => {
+    const files = filesOf(req);
     try {
-        let files = [];
-        if (req.files) files = Array.isArray(req.files) ? req.files : Object.values(req.files).flat();
-        else if (req.file) files = [req.file];
         if (files.length === 0) return next();
 
         await cloudinaryReady;
@@ -95,5 +100,7 @@ export const uploadToCloudinary = async (req, res, next) => {
     } catch (err) {
         console.error("Cloudinary upload error:", err.message);
         res.status(502).json({ message: "File upload failed. Please try again." });
+    } finally {
+        removeTemp(files);
     }
 };
