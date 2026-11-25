@@ -391,13 +391,11 @@ export default function Cart() {
             <main id="main-content" className="bg-slate-50 dark:bg-[#111238] min-h-[70vh]">
                 <div className="page-wrap py-20 sm:py-28 flex flex-col items-center text-center">
                     {/* an empty rail: the bag is the customer's own rack */}
-                    <div className="w-full max-w-md" aria-hidden="true">
+                    <div className="hang-rail w-full max-w-md text-slate-400 dark:text-slate-500" aria-hidden="true">
                         <div className="rail-rod" />
-                        <div className="-mt-[22px] flex justify-around text-slate-400 dark:text-slate-500">
-                            <Hanger className="w-24 hang-settle" />
-                            <Hanger className="w-24 hang-settle [animation-delay:0.15s]" />
-                            <Hanger className="w-24 hang-settle [animation-delay:0.3s]" />
-                        </div>
+                        <Hanger className="hanger hang-settle" />
+                        <Hanger className="hanger hang-settle [animation-delay:0.15s]" />
+                        <Hanger className="hanger hang-settle [animation-delay:0.3s]" />
                     </div>
                     <h1 className="mt-10 display text-[40px] sm:text-[60px] text-slate-900 dark:text-white">Your bag is empty</h1>
                     <p className="mt-4 text-[17px] text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">

@@ -42,19 +42,19 @@ function HeroRail({ status, picks }) {
     const slots = status === "ready" ? picks : [null, null, null];
     return (
         <div className="relative pt-2">
-            <div className="rail-rod relative z-10 mx-0 sm:mx-2" aria-hidden="true" />
             <ul
-                className="relative -mt-[34px] sm:-mt-[40px] grid grid-cols-3 gap-2 sm:gap-6 px-1 sm:px-6"
+                className="hang-rail"
                 aria-label={status === "ready" ? "Picked from the rack today" : "Loading the rack"}
                 aria-busy={status === "loading"}
             >
+                <li className="rail-rod" aria-hidden="true" />
                 {slots.map((p, i) => (
                     <li key={p?._id || i} className="hang-settle" style={{ animationDelay: `${0.25 + i * 0.12}s` }}>
-                        <Hanger className="block mx-auto w-[64px] sm:w-[104px] h-auto text-white" />
+                        <Hanger className="hanger text-white" />
                         {p ? (
                             <Link
                                 to={`/product/${p._id}`}
-                                className="group block -mt-[3px] relative"
+                                className="group hung block"
                                 aria-label={`${p.name}, ${inr(p.price)}${p.discount ? `, ${p.discount}% off` : ""}`}
                             >
                                 <span className="block border-[3px] border-ink bg-white p-1 sm:p-1.5 shadow-[6px_6px_0_rgba(18,18,58,0.55)] transition-transform duration-300 group-hover:-rotate-2 group-hover:-translate-y-1">
@@ -76,7 +76,7 @@ function HeroRail({ status, picks }) {
                                 )}
                             </Link>
                         ) : (
-                            <span className="block -mt-[3px] border-[3px] border-dashed border-white/40 aspect-[3/4] animate-pulse" />
+                            <span className="hung block border-[3px] border-dashed border-white/40 aspect-[3/4] animate-pulse" />
                         )}
                     </li>
                 ))}
