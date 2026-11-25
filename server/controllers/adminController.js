@@ -327,17 +327,12 @@ export const getCategoryOptions = async (req, res) => {
             options = await CategoryOption.find().lean();
         }
 
-        const maxPrices = await Product.aggregate([{ $group: { _id: "$category", maxPrice: { $max: "$price" } } }]);
-        const priceMap = {};
-        maxPrices.forEach((p) => { priceMap[p._id] = p.maxPrice; });
-
         const result = {};
         options.forEach((o) => {
             result[o.category] = {
                 fabrics: o.fabrics,
                 styles: o.styles,
                 sizes: [...new Set((o.sizes || []).map(sizeName))],
-                maxPrice: priceMap[o.category] || 1000,
             };
         });
         res.json(result);
