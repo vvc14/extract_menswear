@@ -57,7 +57,7 @@ function HeroRail({ status, picks }) {
                                 className="group hung block"
                                 aria-label={`${p.name}, ${inr(p.price)}${p.discount ? `, ${p.discount}% off` : ""}`}
                             >
-                                <span className="block border-[3px] border-ink bg-white p-1 sm:p-1.5 shadow-[6px_6px_0_rgba(18,18,58,0.55)] transition-transform duration-300 group-hover:-rotate-2 group-hover:-translate-y-1">
+                                <span className="block border-[3px] border-ink bg-white p-1 sm:p-1.5 shadow-[6px_6px_0_rgba(17,17,17,0.55)] transition-transform duration-300 group-hover:-rotate-2 group-hover:-translate-y-1">
                                     <img
                                         src={imageOf(p)}
                                         alt=""
@@ -236,7 +236,7 @@ export default function Home() {
 
                     <div className="lg:col-span-7 lg:pl-6">
                         {stock.status === "error" || (stock.status === "ready" && heroPicks.length < 3) ? (
-                            <div className="relative mx-2 sm:mx-10 lg:mx-0 rotate-2 border-[3px] border-ink bg-white p-2 sm:p-3 shadow-[10px_10px_0_#f2cf3e]">
+                            <div className="relative mx-2 sm:mx-10 lg:mx-0 rotate-2 border-[3px] border-ink bg-white p-2 sm:p-3 shadow-[10px_10px_0_#111111] dark:shadow-[10px_10px_0_#000]">
                                 <img src="/images/site/home-hero.jpg" alt="Folded shirts and trousers laid out with a tie" width="1920" height="1280" fetchPriority="high" className="w-full aspect-[4/3] object-cover" />
                             </div>
                         ) : (
@@ -253,7 +253,7 @@ export default function Home() {
 
             {/* ═══════════ PRICE TAGS: shop by what you want to spend (counts are live) ═══════════ */}
             {bands.length > 0 && (
-                <section aria-labelledby="budget-heading" className="relative bg-slate-50 dark:bg-[#111238] border-b-2 border-ink dark:border-slate-800 overflow-hidden">
+                <section aria-labelledby="budget-heading" className="relative bg-slate-50 dark:bg-[#121212] border-b-2 border-ink dark:border-slate-800 overflow-hidden">
                     <div className="page-wrap py-16 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
                         <div className="lg:col-span-4 lg:pt-10 @container">
                             <p className="section-label">Shop by price</p>
@@ -338,7 +338,7 @@ export default function Home() {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                            <Link to={`/product/${lead._id}`} className="group lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 bg-white text-ink border-2 border-ink shadow-[8px_8px_0_#12123a] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_#12123a] transition-all">
+                            <Link to={`/product/${lead._id}`} className="group lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 bg-white text-ink border-2 border-ink shadow-[8px_8px_0_#111111] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_#111111] transition-all">
                                 <div className="relative overflow-hidden border-b-2 sm:border-b-0 sm:border-r-2 border-ink bg-slate-100">
                                     <img src={imageOf(lead)} alt="" width="600" height="800" loading="lazy" className="w-full h-full aspect-[3/4] sm:aspect-auto object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
                                 </div>
@@ -348,9 +348,9 @@ export default function Home() {
                                     <h3 className="mt-6 text-[18px] sm:text-[20px] font-bold leading-snug" style={{ fontStretch: "100%", letterSpacing: 0 }}>{lead.name}</h3>
                                     <div className="mt-auto pt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                                         <span className="price-tag text-[26px]">{inr(lead.price)}</span>
-                                        <span className="text-[15px] text-[#555683] line-through">{inr(lead.originalPrice)}</span>
+                                        <span className="text-[15px] text-[#5c5c5c] line-through">{inr(lead.originalPrice)}</span>
                                     </div>
-                                    <p className="mt-3 text-[15px] font-extrabold text-[#0b7a53]">You save {inr(lead.originalPrice - lead.price)}</p>
+                                    <p className="mt-3 text-[15px] font-extrabold text-hot">You save {inr(lead.originalPrice - lead.price)}</p>
                                 </div>
                             </Link>
 
@@ -358,13 +358,13 @@ export default function Home() {
                                 <ol className="lg:col-span-5 flex flex-col gap-4">
                                     {restCuts.map((p, i) => (
                                         <li key={p._id}>
-                                            <Link to={`/product/${p._id}`} className={`group flex items-center gap-4 bg-white text-ink border-2 border-ink p-3 pr-4 shadow-[5px_5px_0_#12123a] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform ${i === 1 ? "lg:ml-8" : ""}`}>
+                                            <Link to={`/product/${p._id}`} className={`group flex items-center gap-4 bg-white text-ink border-2 border-ink p-3 pr-4 shadow-[5px_5px_0_#111111] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform ${i === 1 ? "lg:ml-8" : ""}`}>
                                                 <img src={imageOf(p)} alt="" width="120" height="160" loading="lazy" className="w-[72px] h-[96px] object-cover object-top border-2 border-ink shrink-0" />
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-[15px] font-bold leading-snug line-clamp-2" style={{ fontStretch: "100%" }}>{p.name}</p>
                                                     <p className="mt-2 flex flex-wrap items-baseline gap-2">
                                                         <span className="price-tag text-[16px]">{inr(p.price)}</span>
-                                                        <span className="text-[13px] text-[#555683] line-through">{inr(p.originalPrice)}</span>
+                                                        <span className="text-[13px] text-[#5c5c5c] line-through">{inr(p.originalPrice)}</span>
                                                     </p>
                                                 </div>
                                                 <span className="stamp text-[14px] shrink-0">{p.discount}% off</span>
@@ -379,7 +379,7 @@ export default function Home() {
             )}
 
             {/* ═══════════ JUST IN ═══════════ */}
-            <section id="new-arrivals" aria-labelledby="arrivals-heading" className="bg-slate-50 dark:bg-[#111238] border-b-2 border-ink dark:border-slate-800">
+            <section id="new-arrivals" aria-labelledby="arrivals-heading" className="bg-slate-50 dark:bg-[#121212] border-b-2 border-ink dark:border-slate-800">
                 <div className="page-wrap py-16 sm:py-20">
                     <div className="flex flex-wrap items-end justify-between gap-4 mb-8 sm:mb-10">
                         <div>
@@ -508,7 +508,7 @@ export default function Home() {
                         </p>
                     </div>
                     <div className="lg:col-span-6 lg:justify-self-end w-full max-w-[520px]">
-                        <div className="bolted board border-2 border-ink shadow-[8px_8px_0_#12123a] -rotate-1 px-6 pt-8 pb-6 sm:px-8">
+                        <div className="bolted board border-2 border-ink shadow-[8px_8px_0_#111111] -rotate-1 px-6 pt-8 pb-6 sm:px-8">
                             <div className="flex items-center gap-3">
                                 <Eagle className="w-12 h-auto text-white shrink-0" />
                                 <div className="leading-none">
@@ -519,7 +519,7 @@ export default function Home() {
                             <ul className="mt-6 grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
                                 {PHONES.map((p) => (
                                     <li key={p}>
-                                        <a href={`tel:+91${p}`} className="flex items-center justify-center gap-2 min-h-[52px] px-4 bg-sign text-ink border-2 border-ink shadow-[3px_3px_0_#12123a] text-[19px] font-black tabular-nums hover:-translate-x-px hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-transform" style={{ fontStretch: "112%" }}>
+                                        <a href={`tel:+91${p}`} className="flex items-center justify-center gap-2 min-h-[52px] px-4 bg-sign text-ink border-2 border-ink shadow-[3px_3px_0_#111111] text-[19px] font-black tabular-nums hover:-translate-x-px hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-transform" style={{ fontStretch: "112%" }}>
                                             <HiOutlinePhone className="w-5 h-5" aria-hidden="true" />
                                             {p.slice(0, 5)} {p.slice(5)}
                                         </a>

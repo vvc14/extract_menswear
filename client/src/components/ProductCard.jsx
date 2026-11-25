@@ -126,7 +126,7 @@ export default function ProductCard({ product, compact = false, eager = false })
                         aria-label={hasSizes ? `Choose a size for ${product.name}` : `Add ${product.name} to bag`}
                         className={`w-full min-h-[44px] text-[13px] sm:text-[14px] font-extrabold border-2 border-ink dark:border-black transition-colors ${added
                             ? "bg-emerald text-white dark:text-ink"
-                            : "bg-primary text-white hover:bg-primary-dark dark:bg-sign dark:text-ink dark:hover:bg-[#e0bc2c]"
+                            : "bg-primary text-white hover:bg-primary-dark dark:bg-sign dark:text-ink dark:hover:bg-[#e6e6e6]"
                             }`}
                         style={{ fontStretch: "110%" }}
                     >

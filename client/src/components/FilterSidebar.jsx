@@ -30,7 +30,7 @@ function FilterSection({ title, count = 0, defaultOpen = false, children }) {
 
 const chip = (active, empty) =>
     `border-2 transition-colors active:translate-y-px disabled:opacity-40 disabled:cursor-not-allowed disabled:active:translate-y-0 ${active
-        ? "bg-primary text-white border-ink dark:bg-sign dark:text-ink dark:border-black shadow-[2px_2px_0_#12123a] dark:shadow-[2px_2px_0_#000]"
+        ? "bg-primary text-white border-ink dark:bg-sign dark:text-ink dark:border-black shadow-[2px_2px_0_#111111] dark:shadow-[2px_2px_0_#000]"
         : `bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-600 ${empty ? "" : "hover:border-ink dark:hover:border-sign"}`}`;
 
 const Count = ({ n }) => <span className="ml-auto pl-2 text-[13px] font-bold tabular-nums opacity-70">{n}</span>;
@@ -81,7 +81,7 @@ export default function FilterSidebar({ category, value = EMPTY_FILTERS, onChang
                             checked={checked}
                             disabled={!checked && count === 0}
                             onChange={() => toggle(key, item)}
-                            className="w-5 h-5 accent-primary dark:accent-[#e8c547] cursor-pointer disabled:cursor-not-allowed"
+                            className="w-5 h-5 accent-primary dark:accent-[#ffffff] cursor-pointer disabled:cursor-not-allowed"
                         />
                         <span className="flex flex-1 text-[15px] text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white font-semibold">
                             {item}<Count n={count} />
@@ -100,7 +100,7 @@ export default function FilterSidebar({ category, value = EMPTY_FILTERS, onChang
                 checked={value[key]}
                 disabled={!value[key] && n === 0}
                 onChange={() => onChange({ ...value, [key]: !value[key] })}
-                className="w-5 h-5 accent-primary dark:accent-[#e8c547] cursor-pointer disabled:cursor-not-allowed"
+                className="w-5 h-5 accent-primary dark:accent-[#ffffff] cursor-pointer disabled:cursor-not-allowed"
             />
             <span className="flex flex-1 text-[15px] font-bold text-slate-800 dark:text-slate-200">{label}<Count n={n} /></span>
         </label>
@@ -197,10 +197,10 @@ export default function FilterSidebar({ category, value = EMPTY_FILTERS, onChang
                                         >
                                             <span
                                                 className="relative shrink-0 w-6 h-6 border-2 border-ink flex items-center justify-center text-[11px] font-black text-ink"
-                                                style={{ background: hex || "repeating-linear-gradient(45deg,#e9e9f4 0 4px,#d9d9ea 4px 8px)" }}
+                                                style={{ background: hex || "repeating-linear-gradient(45deg,#ebebeb 0 4px,#dcdcdc 4px 8px)" }}
                                                 aria-hidden="true"
                                             >
-                                                {active ? <HiCheck className="w-4 h-4" style={{ color: isDarkSwatch(hex) ? "#fff" : "#12123a" }} /> : !hex && name[0]}
+                                                {active ? <HiCheck className="w-4 h-4" style={{ color: isDarkSwatch(hex) ? "#fff" : "#111111" }} /> : !hex && name[0]}
                                             </span>
                                             <span className="truncate">{name}</span>
                                             <span className="ml-auto text-[12px] tabular-nums opacity-70">{count}</span>

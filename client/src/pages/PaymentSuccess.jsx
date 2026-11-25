@@ -125,7 +125,7 @@ export default function PaymentSuccess() {
                                     <ReceiptLine label="Subtotal" value={inr(subtotal)} />
                                     <ReceiptLine label="Delivery" value={order.shipping ? inr(order.shipping) : "Free"} />
                                     {order.discountAmount > 0 && (
-                                        <ReceiptLine label={`Discount${order.couponCode ? ` (${order.couponCode})` : ""}`} value={`- ${inr(order.discountAmount)}`} tone="text-emerald" />
+                                        <ReceiptLine label={`Discount${order.couponCode ? ` (${order.couponCode})` : ""}`} value={`- ${inr(order.discountAmount)}`} tone="text-hot" />
                                     )}
                                 </dl>
                                 <ReceiptRule />

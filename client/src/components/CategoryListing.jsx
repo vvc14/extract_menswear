@@ -221,8 +221,8 @@ export default function CategoryListing({ config }) {
                                             onClick={() => setFilters({ ...filters, price: active ? "" : band.id })}
                                             aria-pressed={active}
                                             className={`relative inline-flex items-center min-h-[44px] pl-6 pr-4 text-[15px] font-black border-2 border-ink transition-transform active:translate-y-px ${active
-                                                ? "bg-white text-primary shadow-[3px_3px_0_#f2cf3e] -rotate-2"
-                                                : "bg-sign text-ink shadow-[3px_3px_0_#12123a] hover:-rotate-2"}`}
+                                                ? "bg-ink text-white !border-white shadow-[3px_3px_0_#ffffff] -rotate-2"
+                                                : "bg-sign text-ink shadow-[3px_3px_0_#111111] hover:-rotate-2"}`}
                                             style={{ fontStretch: "112%", clipPath: "polygon(12px 0, 100% 0, 100% 100%, 12px 100%, 0 50%)" }}
                                         >
                                             <span className="absolute left-[9px] top-1/2 -mt-[3px] w-[6px] h-[6px] rounded-full bg-primary" aria-hidden="true" />
@@ -249,7 +249,7 @@ export default function CategoryListing({ config }) {
                             onChange={(e) => setSearchDraft(e.target.value)}
                             maxLength={100}
                             placeholder={`Search ${plural}: brand, colour, fit`}
-                            className="w-full min-h-[44px] pl-10 pr-3 bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 text-[15px] text-slate-900 dark:text-white placeholder-slate-500 outline-none focus:shadow-[3px_3px_0_#33357f] dark:focus:shadow-[3px_3px_0_#e8c547]"
+                            className="w-full min-h-[44px] pl-10 pr-3 bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 text-[15px] text-slate-900 dark:text-white placeholder-slate-500 outline-none focus:shadow-[3px_3px_0_#111111] dark:focus:shadow-[3px_3px_0_#ffffff]"
                         />
                     </div>
                     <div className="flex flex-wrap items-center gap-2 min-w-0 order-last md:order-none w-full md:w-auto md:flex-1">

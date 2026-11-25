@@ -13,7 +13,7 @@ const fmt = (p) => `${p.slice(0, 5)} ${p.slice(5)}`;
 /** The shopfront sign, rebuilt in HTML from the banner over the counter. */
 function ShopSign() {
     return (
-        <figure aria-label="The Extract shop sign" className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#12123a] dark:shadow-[10px_10px_0_#000] overflow-hidden">
+        <figure aria-label="The Extract shop sign" className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#111111] dark:shadow-[10px_10px_0_#000] overflow-hidden">
             <div className="grid grid-cols-[auto_1fr] items-center gap-4 sm:gap-8 px-5 pt-9 pb-6 sm:px-10 sm:pt-12 sm:pb-8">
                 <Eagle className="w-[72px] sm:w-[150px] lg:w-[190px] h-auto text-white" />
                 <div className="min-w-0 @container">
@@ -42,7 +42,7 @@ export default function About() {
     return (
         <main id="main-content">
             {/* Hero: the sign itself */}
-            <section className="bg-slate-50 dark:bg-[#111238] border-b-2 border-ink dark:border-slate-800">
+            <section className="bg-slate-50 dark:bg-[#121212] border-b-2 border-ink dark:border-slate-800">
                 <div className="page-wrap pt-10 pb-16 sm:pt-14 sm:pb-24">
                     <nav aria-label="Breadcrumb" className="mb-8 text-[14px] font-semibold text-slate-600 dark:text-slate-400">
                         <Link to="/" className="hover:text-primary dark:hover:text-sign underline-offset-4 hover:underline">Home</Link>
@@ -87,7 +87,7 @@ export default function About() {
                         </p>
                         <div className="mt-8 flex flex-wrap gap-3">
                             {PHONES.map((p) => (
-                                <a key={p} href={`tel:+91${p}`} className="inline-flex items-center gap-2 min-h-[48px] px-5 bg-primary text-white border-2 border-ink shadow-[4px_4px_0_#12123a] font-black tabular-nums text-[17px] hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-transform">
+                                <a key={p} href={`tel:+91${p}`} className="inline-flex items-center gap-2 min-h-[48px] px-5 bg-primary text-white border-2 border-ink shadow-[4px_4px_0_#111111] font-black tabular-nums text-[17px] hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-transform">
                                     <HiOutlinePhone className="w-5 h-5 text-sign" aria-hidden="true" />
                                     {fmt(p)}
                                 </a>
@@ -98,7 +98,7 @@ export default function About() {
             </section>
 
             {/* What every online order comes with, printed as a bill */}
-            <section aria-labelledby="promise-heading" className="bg-slate-50 dark:bg-[#111238]">
+            <section aria-labelledby="promise-heading" className="bg-slate-50 dark:bg-[#121212]">
                 <div className="page-wrap py-16 sm:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     <div className="lg:col-span-5">
                         <p className="section-label">Buying online</p>

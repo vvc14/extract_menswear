@@ -253,12 +253,12 @@ export default function ProductDetail() {
                         <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
                             <HiOutlineArrowLeft className="w-4 h-4" /> Back
                         </button>
-                        <span className="text-slate-300 dark:text-slate-600">|</span>
+                        <span className="text-slate-400 dark:text-slate-500">|</span>
                         <ol className="flex items-center gap-2 text-[14px] sm:text-[15px] min-w-0">
                             <li className="hidden sm:block shrink-0"><Link to="/" className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors">Home</Link></li>
-                            <li className="hidden sm:block shrink-0 text-slate-300 dark:text-slate-600">/</li>
+                            <li className="hidden sm:block shrink-0 text-slate-400 dark:text-slate-500">/</li>
                             <li className="shrink-0"><Link to={product.category === "shirt" ? "/shirts" : "/trousers"} className="text-slate-400 hover:text-primary dark:hover:text-gold transition-colors capitalize">{product.category}s</Link></li>
-                            <li className="shrink-0 text-slate-300 dark:text-slate-600">/</li>
+                            <li className="shrink-0 text-slate-400 dark:text-slate-500">/</li>
                             <li className="text-slate-900 dark:text-white font-semibold truncate min-w-0">{product.name}</li>
                         </ol>
                     </nav>
@@ -349,7 +349,7 @@ export default function ProductDetail() {
                                             {allMedia.map((media, idx) => {
                                                 const isVideoThumb = product.videoUrl && media === product.videoUrl;
                                                 return (
-                                                    <button key={idx} type="button" onClick={() => setActiveImg(idx)} aria-pressed={activeImg === idx} aria-label={isVideoThumb ? "Show the video" : `Show photo ${idx + 1}`} className={`relative shrink-0 w-20 h-20 overflow-hidden border-2 transition-all ${activeImg === idx ? "border-ink dark:border-sign shadow-[3px_3px_0_#f2cf3e] -translate-y-0.5" : "border-slate-300 dark:border-slate-600 hover:border-ink dark:hover:border-sign"}`}>
+                                                    <button key={idx} type="button" onClick={() => setActiveImg(idx)} aria-pressed={activeImg === idx} aria-label={isVideoThumb ? "Show the video" : `Show photo ${idx + 1}`} className={`relative shrink-0 w-20 h-20 overflow-hidden border-2 transition-all ${activeImg === idx ? "border-ink dark:border-sign shadow-[3px_3px_0_#111111] dark:shadow-[3px_3px_0_#ffffff] -translate-y-0.5" : "border-slate-300 dark:border-slate-600 hover:border-ink dark:hover:border-sign"}`}>
                                                         <img src={isVideoThumb ? allImages[0] : media} alt="" className="w-full h-full object-cover" />
                                                         {isVideoThumb && (
                                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -446,7 +446,7 @@ export default function ProductDetail() {
                             <p className="text-[15px] text-slate-600 dark:text-slate-400">
                                 Inclusive of all taxes
                                 {originalPrice > product.price && (
-                                    <> · <strong className="font-extrabold text-emerald">You save ₹{(originalPrice - product.price).toLocaleString("en-IN")}</strong></>
+                                    <> · <strong className="font-extrabold text-hot dark:text-rose-400">You save ₹{(originalPrice - product.price).toLocaleString("en-IN")}</strong></>
                                 )}
                             </p>
                         </div>
@@ -485,7 +485,7 @@ export default function ProductDetail() {
                                             aria-pressed={selectedSize === s}
                                             className={`min-w-[52px] h-[48px] px-3 text-[15px] font-black border-2 transition-colors cursor-pointer ${stockForSize(product, s) <= 0 ? "line-through opacity-50 " : ""}${
                                                 selectedSize === s
-                                                    ? "bg-primary border-ink text-white dark:bg-sign dark:border-black dark:text-ink shadow-[3px_3px_0_#12123a] dark:shadow-[3px_3px_0_#000]"
+                                                    ? "bg-primary border-ink text-white dark:bg-sign dark:border-black dark:text-ink shadow-[3px_3px_0_#111111] dark:shadow-[3px_3px_0_#000]"
                                                     : "bg-white border-slate-300 text-slate-900 dark:bg-slate-900 dark:border-slate-600 dark:text-white hover:border-ink dark:hover:border-sign"
                                             }`}
                                         >
@@ -561,7 +561,7 @@ export default function ProductDetail() {
 
                         {/* The shop tag tied to every piece: this piece's real delivery charge and the store's policies */}
                         <HangTag tone="white" className="max-w-[440px] mt-2 rotate-[-1deg]" tagClassName="pt-12">
-                            <p className="text-[12px] font-black uppercase tracking-[0.1em] text-[#42436f]" style={{ fontStretch: "115%" }}>Shop tag</p>
+                            <p className="text-[12px] font-black uppercase tracking-[0.1em] text-[#474747]" style={{ fontStretch: "115%" }}>Shop tag</p>
                             <dl className="mt-2 divide-y-2 divide-dashed divide-slate-300">
                                 {[
                                     { icon: HiOutlineTruck, label: "Delivery", value: Number(product.shippingCost) > 0 ? `₹${Number(product.shippingCost).toLocaleString("en-IN")} per piece` : "Free on this piece", to: "/shipping" },

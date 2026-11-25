@@ -9,13 +9,13 @@ import { generateInvoicePDF } from "../utils/invoiceGenerator";
 import { usePrompt } from "../context/ConfirmContext";
 import Receipt, { ReceiptHead, ReceiptRule } from "../components/brand/Receipt";
 
-// Status stamps in the shop's own palette: white = paid, yellow = moving, blue = done, red = cancelled
+// Status stamps: white = paid, mid grey = moving, black = done, light grey = closed, red = cancelled
 const STATUS_STYLES = {
     paid: { bg: "bg-white", text: "text-ink", label: "Paid" },
-    shipped: { bg: "bg-sign", text: "text-ink", label: "Shipped" },
+    shipped: { bg: "bg-slate-300", text: "text-ink", label: "Shipped" },
     delivered: { bg: "bg-primary", text: "text-white", label: "Delivered" },
-    "return-requested": { bg: "bg-sign", text: "text-ink", label: "Return requested" },
-    "exchange-requested": { bg: "bg-sign", text: "text-ink", label: "Exchange requested" },
+    "return-requested": { bg: "bg-slate-300", text: "text-ink", label: "Return requested" },
+    "exchange-requested": { bg: "bg-slate-300", text: "text-ink", label: "Exchange requested" },
     returned: { bg: "bg-slate-200", text: "text-ink", label: "Returned" },
     exchanged: { bg: "bg-slate-200", text: "text-ink", label: "Exchanged" },
     cancelled: { bg: "bg-hot", text: "text-white", label: "Cancelled" },
@@ -222,7 +222,7 @@ export default function Orders() {
                                 className="bg-white dark:bg-slate-900 border-2 border-ink dark:border-slate-600 shadow-[5px_5px_0_var(--hard-shadow)]"
                             >
                                 {/* Order header: the top of the bill */}
-                                <div className="flex flex-wrap items-center justify-between gap-3 px-5 sm:px-6 py-4 bg-slate-50 dark:bg-[#111238] border-b-2 border-dashed border-slate-300 dark:border-slate-600">
+                                <div className="flex flex-wrap items-center justify-between gap-3 px-5 sm:px-6 py-4 bg-slate-50 dark:bg-[#121212] border-b-2 border-dashed border-slate-300 dark:border-slate-600">
                                     <div className="flex flex-wrap items-center gap-4">
                                         <div>
                                             <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider">Invoice</p>
@@ -250,7 +250,7 @@ export default function Orders() {
                                             </>
                                         )}
                                     </div>
-                                    <span className={`px-3 py-1 border-2 border-ink text-[13px] font-black uppercase -rotate-2 shadow-[2px_2px_0_#12123a] ${status.bg} ${status.text}`} style={{ fontStretch: "112%" }}>
+                                    <span className={`px-3 py-1 border-2 border-ink text-[13px] font-black uppercase -rotate-2 shadow-[2px_2px_0_#111111] ${status.bg} ${status.text}`} style={{ fontStretch: "112%" }}>
                                         {status.label}
                                     </span>
                                 </div>

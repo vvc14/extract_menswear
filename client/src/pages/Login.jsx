@@ -312,7 +312,7 @@ export default function Login() {
                 </div>
 
                 {/* Card */}
-                <div className="border-2 border-black bg-ink p-7 sm:p-9 shadow-[8px_8px_0_#f2cf3e]">
+                <div className="border-2 border-black bg-ink p-7 sm:p-9 shadow-[8px_8px_0_#ffffff]">
                     <AnimatePresence mode="wait">
                         {/* ──────── STEP 1: EMAIL ──────── */}
                         {step === STEP_EMAIL && (
@@ -680,8 +680,6 @@ export default function Login() {
                         )}
                     </AnimatePresence>
                 </div>
-
-                <p className="text-center text-[13px] text-white/20 mt-7">Extract Menswear · Premium Fashion</p>
             </motion.div>
         </main>
     );

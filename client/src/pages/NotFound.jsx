@@ -14,7 +14,7 @@ const LINKS = [
 /** A page that does not exist = a shop with the shutter down. The sign stays lit above it. */
 export default function NotFound() {
     return (
-        <main id="main-content" className="bg-slate-50 dark:bg-[#111238]">
+        <main id="main-content" className="bg-slate-50 dark:bg-[#121212]">
             <div className="page-wrap py-10 sm:py-14">
                 {/* sign above the shutter */}
                 <div className="bolted board border-[3px] border-ink px-5 pt-7 pb-4 sm:px-10 flex items-center justify-center gap-4">

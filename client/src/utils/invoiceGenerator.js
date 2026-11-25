@@ -10,17 +10,8 @@ export const generateInvoicePDF = async (order) => {
     doc.setFillColor(250, 251, 252);
     doc.rect(0, 0, pw, ph, "F");
 
-    // ─── Left gold accent strip ───
-    doc.setFillColor(242, 207, 62);
-    doc.rect(0, 0, 2, ph, "F");
-
-    // ─── Header band ───
-    doc.setFillColor(51, 53, 127);
-    doc.rect(2, 0, pw - 2, 50, "F");
-
-    // ─── Gold underline ───
-    doc.setFillColor(242, 207, 62);
-    doc.rect(2, 50, pw - 2, 1.2, "F");
+    doc.setFillColor(17, 17, 17);
+    doc.rect(0, 0, pw, 50, "F");
 
     // ─── Logo / Brand ───
     try {
@@ -36,7 +27,7 @@ export const generateInvoicePDF = async (order) => {
         doc.addImage(img, "PNG", 12, 8, logoW, logoH);
         doc.setFontSize(7);
         doc.setFont("helvetica", "normal");
-        doc.setTextColor(242, 207, 62);
+        doc.setTextColor(255, 255, 255);
         doc.text("W H O L E S A L E   &   R E T A I L", 12, 34);
     } catch {
         doc.setFont("helvetica", "bold");
@@ -45,7 +36,7 @@ export const generateInvoicePDF = async (order) => {
         doc.text("EXTRACT", 12, 26);
         doc.setFontSize(7);
         doc.setFont("helvetica", "normal");
-        doc.setTextColor(242, 207, 62);
+        doc.setTextColor(255, 255, 255);
         doc.text("W H O L E S A L E   &   R E T A I L", 12, 34);
     }
 
@@ -60,11 +51,11 @@ export const generateInvoicePDF = async (order) => {
     doc.text(`No. ${order.invoiceNumber || "N/A"}`, pw - 12, 32, { align: "right" });
 
     // ─── PAID badge ───
-    doc.setFillColor(16, 185, 129);
+    doc.setFillColor(255, 255, 255);
     doc.roundedRect(pw - 35, 38, 23, 8, 2, 2, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6);
-    doc.setTextColor(255, 255, 255);
+    doc.setTextColor(17, 17, 17);
     doc.text("PAID", pw - 23.5, 43.5, { align: "center" });
 
     // ─── Customer Details Card ───
@@ -80,7 +71,7 @@ export const generateInvoicePDF = async (order) => {
     doc.setTextColor(148, 163, 184);
     doc.text("BILLED TO", 16, y);
     doc.setFontSize(10);
-    doc.setTextColor(51, 53, 127);
+    doc.setTextColor(17, 17, 17);
     doc.text(order.userName || "Customer", 16, y + 6);
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
@@ -97,7 +88,7 @@ export const generateInvoicePDF = async (order) => {
     doc.text("DATE", pw / 2 + 10, y);
     doc.text("PAYMENT ID", pw / 2 + 10, y + 10);
     doc.setFontSize(9);
-    doc.setTextColor(51, 53, 127);
+    doc.setTextColor(17, 17, 17);
     doc.text(orderDate, pw / 2 + 40, y);
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
@@ -160,7 +151,7 @@ export const generateInvoicePDF = async (order) => {
     doc.setTextColor(100, 116, 139);
     doc.text("Subtotal", sumLX, finalY);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(51, 53, 127);
+    doc.setTextColor(17, 17, 17);
     doc.text(`Rs. ${originalSubtotal.toLocaleString("en-IN")}`, sumRX, finalY, { align: "right" });
 
     if (discount > 0) {
@@ -192,11 +183,11 @@ export const generateInvoicePDF = async (order) => {
     // Grand Total Box
     const boxX = sumLX - 5;
     const boxW = sumRX - sumLX + 10;
-    doc.setFillColor(51, 53, 127);
+    doc.setFillColor(17, 17, 17);
     doc.roundedRect(boxX, finalY + 4, boxW, 16, 3, 3, "F");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
-    doc.setTextColor(242, 207, 62);
+    doc.setTextColor(255, 255, 255);
     doc.text("GRAND TOTAL", boxX + 8, finalY + 14);
     doc.setFontSize(13);
     doc.setTextColor(255, 255, 255);
@@ -206,7 +197,7 @@ export const generateInvoicePDF = async (order) => {
     const tyY = finalY + 50;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
-    doc.setTextColor(51, 53, 127);
+    doc.setTextColor(17, 17, 17);
     doc.text("Thank You for Your Business!", pw / 2, tyY, { align: "center" });
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
@@ -216,10 +207,8 @@ export const generateInvoicePDF = async (order) => {
     // ─── Footer band ───
     const footH = 16;
     const footY = ph - footH;
-    doc.setFillColor(51, 53, 127);
-    doc.rect(2, footY, pw - 2, footH, "F");
-    doc.setFillColor(242, 207, 62);
-    doc.rect(2, footY, pw - 2, 0.8, "F");
+    doc.setFillColor(17, 17, 17);
+    doc.rect(0, footY, pw, footH, "F");
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
     doc.setTextColor(148, 163, 184);

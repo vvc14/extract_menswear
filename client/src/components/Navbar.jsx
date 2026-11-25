@@ -268,10 +268,10 @@ export default function Navbar() {
                                     </Link>
                                 )}
 
-                                {/* Cart: the yellow plate, because it is where the money is */}
+                                {/* Cart: the white plate, because it is where the money is */}
                                 <Link
                                     to="/cart"
-                                    className="sm:ml-1 flex items-center gap-1.5 sm:gap-2 h-11 px-2.5 sm:px-3 bg-sign text-ink border-2 border-ink font-black text-[14px] shadow-[3px_3px_0_#12123a] hover:-translate-x-px hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-transform"
+                                    className="sm:ml-1 flex items-center gap-1.5 sm:gap-2 h-11 px-2.5 sm:px-3 bg-sign text-ink border-2 border-ink font-black text-[14px] shadow-[3px_3px_0_#111111] hover:-translate-x-px hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-transform"
                                     aria-label={`Cart, ${cartCount} items`}
                                 >
                                     <HiOutlineShoppingBag className="w-5 h-5" aria-hidden="true" />

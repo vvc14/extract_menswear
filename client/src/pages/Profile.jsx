@@ -191,7 +191,7 @@ export default function Profile() {
         }
     };
 
-    const inputClass = "w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-[15px] px-4 py-3 pl-11 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#33357f] dark:focus:shadow-[3px_3px_0_#f2cf3e] transition-shadow relative focus:z-10";
+    const inputClass = "w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-[15px] px-4 py-3 pl-11 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#111111] dark:focus:shadow-[3px_3px_0_#ffffff] transition-shadow relative focus:z-10";
     const labelClass = "block text-[13px] font-extrabold text-slate-700 dark:text-slate-300 mb-2";
 
     if (loading) {

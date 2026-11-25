@@ -104,7 +104,7 @@ export default function AdminLayout() {
                                                 to={to}
                                                 aria-current={active ? "page" : undefined}
                                                 className={`flex items-center gap-3 min-h-[44px] px-3 text-[15px] font-extrabold border-2 transition-colors ${active
-                                                    ? "bg-sign text-ink border-ink shadow-[3px_3px_0_#12123a]"
+                                                    ? "bg-sign text-ink border-ink shadow-[3px_3px_0_#111111]"
                                                     : "text-white border-transparent hover:bg-white/10"
                                                     }`}
                                             >

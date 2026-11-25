@@ -41,7 +41,7 @@ export default function ShippingInfo() {
                     </div>
 
                     <div className="lg:col-span-6 lg:col-start-7 w-full max-w-[560px] lg:rotate-1">
-                        <div className="bg-white text-ink border-[3px] border-ink shadow-[8px_8px_0_#12123a] dark:shadow-[8px_8px_0_#000]">
+                        <div className="bg-white text-ink border-[3px] border-ink shadow-[8px_8px_0_#111111] dark:shadow-[8px_8px_0_#000]">
                             <div className="flex items-center justify-between gap-3 bg-ink text-white px-5 py-3">
                                 <span className="flex items-center gap-2 text-[15px] font-black uppercase tracking-[0.08em]" style={{ fontStretch: "120%" }}>
                                     <Eagle className="w-7 h-auto text-white" /> Parcel
@@ -50,14 +50,14 @@ export default function ShippingInfo() {
                             </div>
                             <dl className="grid grid-cols-1 sm:grid-cols-2">
                                 <div className="p-5 border-b-2 sm:border-b-0 sm:border-r-2 border-dashed border-ink">
-                                    <dt className="text-[12px] font-black uppercase tracking-[0.1em] text-[#42436f]">From</dt>
+                                    <dt className="text-[12px] font-black uppercase tracking-[0.1em] text-[#474747]">From</dt>
                                     <dd className="mt-1 text-[15px] leading-relaxed font-semibold">
                                         <span className="block font-black text-[17px]">Extract Menswear</span>
                                         H.No. 5-360, NTR Road<br />Suraram Colony, Hyderabad 500055
                                     </dd>
                                 </div>
                                 <div className="p-5">
-                                    <dt className="text-[12px] font-black uppercase tracking-[0.1em] text-[#42436f]">To</dt>
+                                    <dt className="text-[12px] font-black uppercase tracking-[0.1em] text-[#474747]">To</dt>
                                     <dd className="mt-1 text-[15px] leading-relaxed font-semibold">
                                         <span className="block font-black text-[17px]">You</span>
                                         The address you pick in your bag. Any 6-digit Indian pin code.

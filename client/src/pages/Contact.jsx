@@ -8,7 +8,7 @@ const PHONES = ["8184836764", "7337526629"];
 const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Extract Men's Wear, NTR Road, Suraram Colony, Hyderabad")}`;
 
 const inputCls =
-    "w-full px-4 py-3.5 border-2 border-slate-300 dark:border-slate-600 text-[16px] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 bg-white dark:bg-slate-900 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#33357f] dark:focus:shadow-[3px_3px_0_#f2cf3e] transition-shadow";
+    "w-full px-4 py-3.5 border-2 border-slate-300 dark:border-slate-600 text-[16px] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 bg-white dark:bg-slate-900 outline-none focus:border-primary dark:focus:border-sign focus:shadow-[3px_3px_0_#111111] dark:focus:shadow-[3px_3px_0_#ffffff] transition-shadow";
 
 export default function Contact() {
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -60,13 +60,13 @@ export default function Contact() {
                 </div>
             </section>
 
-            <section className="bg-slate-50 dark:bg-[#111238]">
+            <section className="bg-slate-50 dark:bg-[#121212]">
                 <div className="page-wrap py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14">
 
                     {/* The shop's visiting card: everything needed to reach the counter */}
                     <div className="lg:col-span-5">
                         <h2 className="sr-only">Shop details</h2>
-                        <div className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#f2cf3e] dark:shadow-[10px_10px_0_#000] lg:-rotate-2 px-5 pt-9 pb-6 sm:px-8">
+                        <div className="bolted board border-[3px] border-ink shadow-[10px_10px_0_#9e9e9e] dark:shadow-[10px_10px_0_#000] lg:-rotate-2 px-5 pt-9 pb-6 sm:px-8">
                             <div className="flex items-center gap-3 pb-5 border-b-2 border-white/25">
                                 <Eagle className="w-14 h-auto text-white shrink-0" />
                                 <div className="leading-none">
@@ -78,7 +78,7 @@ export default function Contact() {
                             <ul className="mt-5 flex flex-col gap-3">
                                 {PHONES.map((p) => (
                                     <li key={p}>
-                                        <a href={`tel:+91${p}`} className="flex items-center gap-3 min-h-[56px] px-4 bg-sign text-ink border-2 border-ink shadow-[4px_4px_0_#12123a] text-[24px] sm:text-[28px] font-black tabular-nums hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-transform" style={{ fontStretch: "112%" }}>
+                                        <a href={`tel:+91${p}`} className="flex items-center gap-3 min-h-[56px] px-4 bg-sign text-ink border-2 border-ink shadow-[4px_4px_0_#111111] text-[24px] sm:text-[28px] font-black tabular-nums hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-transform" style={{ fontStretch: "112%" }}>
                                             <HiOutlinePhone className="w-6 h-6 shrink-0" aria-hidden="true" />
                                             {p.slice(0, 5)} {p.slice(5)}
                                         </a>
