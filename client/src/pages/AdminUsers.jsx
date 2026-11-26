@@ -121,7 +121,7 @@ export default function AdminUsers() {
                                     <td className="px-4 md:px-6 py-4 max-w-0 w-full sm:max-w-none sm:w-auto">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${u.role === "admin"
-                                                    ? "bg-gradient-to-br from-primary to-blue-600"
+                                                    ? "bg-primary"
                                                     : "bg-gradient-to-br from-slate-200 to-slate-300"
                                                 }`}>
                                                 <span className={`text-[14px] font-extrabold ${u.role === "admin" ? "text-white" : "text-slate-600"}`}>

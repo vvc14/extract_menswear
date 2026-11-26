@@ -276,7 +276,7 @@ export default function AdminProducts() {
                     <h1 className="text-[28px] sm:text-[36px]" style={{ fontWeight: 800, letterSpacing: "-0.025em", color: "#0f172a", marginBottom: "8px" }}>Products</h1>
                     <p style={{ fontSize: "16px", color: "#64748b" }}>{products.length} product{products.length !== 1 ? "s" : ""} in catalog</p>
                 </div>
-                <button onClick={openAdd} className="flex items-center gap-2 bg-gradient-to-r from-primary to-blue-600 text-white text-[15px] font-bold px-5 sm:px-8 py-3 sm:py-4 rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all shrink-0">
+                <button onClick={openAdd} className="flex items-center gap-2 bg-primary text-white text-[15px] font-bold px-5 sm:px-8 py-3 sm:py-4 rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all shrink-0">
                     <HiOutlinePlus className="w-5 h-5" /> Add Product
                 </button>
             </div>
@@ -555,7 +555,7 @@ export default function AdminProducts() {
                                 </div>
                                 <div className="md:col-span-2 flex items-center gap-3 pt-3">
                                     <button type="submit" disabled={submitting}
-                                        className="bg-gradient-to-r from-primary to-blue-600 text-white text-[16px] font-bold px-8 sm:px-12 py-4 rounded-xl whitespace-nowrap hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50">
+                                        className="bg-primary text-white text-[16px] font-bold px-8 sm:px-12 py-4 rounded-xl whitespace-nowrap hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50">
                                         {submitting ? "Saving..." : editing ? "Update Product" : "Add Product"}
                                     </button>
                                     <button type="button" onClick={() => setShowForm(false)} className="text-[16px] font-semibold text-slate-500 px-8 py-4.5 rounded-xl hover:bg-slate-100 transition-colors">
@@ -639,7 +639,7 @@ export default function AdminProducts() {
                                     <input type="checkbox" checked={selectedIds.includes(p._id)} onChange={() => toggleSelect(p._id)}
                                         className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/30 cursor-pointer" />
                                 </td>
-                                <td className="px-3 md:px-6 py-4 max-w-0 md:max-w-none w-full md:w-auto">
+                                <td className="px-3 md:px-6 py-4 max-w-0 w-full">
                                     <div className="flex items-center gap-3 md:gap-4">
                                         <div className="w-11 h-14 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200/50">
                                             <img src={p.images && p.images.length > 0 ? p.images[0] : p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
