@@ -43,7 +43,10 @@ export const runStartupMigrations = async () => {
         await Counter.updateOne({ _id: "invoice" }, { $setOnInsert: { seq: paidCount } }, { upsert: true });
     }
 
-    // 7. Sizes are saved in capitals; an older "s" would miss "S" when stock is reserved or returned
+    // 7. Unpaid orders from before reservation deadlines never expired: give them a past one for the expiry job
+    await Order.updateMany({ status: "created", reservedUntil: null }, { $set: { reservedUntil: new Date(0) } });
+
+    // 8. Sizes are saved in capitals; an older "s" would miss "S" when stock is reserved or returned
     const up = (v) => ({ $toUpper: { $ifNull: [v, ""] } });
     const upLines = (field, keys) => ({
         $map: { input: { $ifNull: [`$${field}`, []] }, in: { $mergeObjects: ["$$this", Object.fromEntries(keys.map((k) => [k, up(`$$this.${k}`)]))] } },

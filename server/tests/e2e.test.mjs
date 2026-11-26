@@ -677,6 +677,14 @@ await test("admin uploads go through temp files that are removed afterwards", as
     assert.deepEqual([...tmpFiles()].filter((n) => !before.has(n)), []);
 });
 
+await test("unpaid orders without a deadline are expired after startup", async () => {
+    const u = await makeUser();
+    const legacy = await Order.collection.insertOne({ userId: u.user._id, razorpayOrderId: "order_NODEADLINE", items: [], totalAmount: 100, status: "created", createdAt: new Date("2026-04-03") });
+    await runStartupMigrations();
+    await expireStaleOrders();
+    assert.equal((await Order.findById(legacy.insertedId)).status, "failed");
+});
+
 console.log("\nSize case migration");
 await test("lowercase sizes saved earlier are upper-cased everywhere", async () => {
     const { default: Cart } = await imp("models/Cart.js");
