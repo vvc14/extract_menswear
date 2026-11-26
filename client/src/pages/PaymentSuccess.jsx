@@ -57,7 +57,7 @@ export default function PaymentSuccess() {
                     </span>
                     <h1 className="display text-[48px] sm:text-[84px]">Paid. Packing it now.</h1>
                     <p className="mt-5 max-w-xl text-[17px] sm:text-[19px] font-medium">
-                        Your order is confirmed. We will email you when it leaves the shop, with the courier and tracking number.
+                        Your order is confirmed. When it leaves the shop, the courier and tracking number appear on your Orders page.
                     </p>
 
                     <div className="mt-9 flex flex-col sm:flex-row gap-4">
@@ -73,10 +73,10 @@ export default function PaymentSuccess() {
                         )}
                     </div>
                     {downloadError && (
-                        <p role="alert" className="mt-4 text-[15px] font-bold text-hot">The invoice could not be generated. It is also attached to your confirmation email.</p>
+                        <p role="alert" className="mt-4 text-[15px] font-bold text-hot">The invoice could not be generated here. Try again, or download it from your Orders page.</p>
                     )}
                     <p className="mt-8 text-[15px] font-medium">
-                        A confirmation email with your invoice is on its way.{" "}
+                        Your invoice is also on your Orders page.{" "}
                         <Link to="/" className="font-extrabold underline underline-offset-4 hover:no-underline">Keep shopping</Link>
                     </p>
                 </div>
@@ -99,11 +99,11 @@ export default function PaymentSuccess() {
                         )}
 
                         {orderStatus === "error" && (
-                            <p className="mt-5 text-[15px] text-slate-600 dark:text-slate-300">The itemised bill could not load here. It is in your Orders page and in the confirmation email.</p>
+                            <p className="mt-5 text-[15px] text-slate-600 dark:text-slate-300">The itemised bill could not load here. It is on your Orders page.</p>
                         )}
 
                         {orderStatus === "none" && !invoice && (
-                            <p className="mt-2 text-[15px] text-slate-600 dark:text-slate-300">Your bill is in your Orders page and in the confirmation email.</p>
+                            <p className="mt-2 text-[15px] text-slate-600 dark:text-slate-300">Your bill is on your Orders page.</p>
                         )}
 
                         {orderStatus === "ready" && (
