@@ -13,7 +13,7 @@ export const signUserToken = (user) =>
     jwt.sign(
         { id: String(user._id), email: user.email, role: user.role, type: "user", tv: user.tokenVersion || 0 },
         process.env.JWT_SECRET,
-        { expiresIn: "7d", audience: AUD.user }
+        { expiresIn: user.role === "admin" ? "12h" : "7d", audience: AUD.user } // admin rights: a short session
     );
 
 // kind: "admin" for the Admin collection, "user" for a User with role "admin"

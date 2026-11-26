@@ -93,6 +93,16 @@ The blueprint uses the paid **Starter** plan (512 MB). Don't switch it to free f
 
 Google Cloud Console → APIs & Services → Credentials → your OAuth client. Add your storefront URL(s) to **Authorized JavaScript origins** (e.g. `https://www.yourstore.com`), and use the same client id for `GOOGLE_CLIENT_ID` (Render) and `VITE_GOOGLE_CLIENT_ID` (Vercel).
 
+### Admins
+
+There is no separate admin login. An admin is a normal customer account with `role: "admin"`:
+
+1. The person signs up on the shop as usual (email or Google).
+2. In Atlas → your database → `users`, find their email and set `role` to `"admin"`. An existing admin can also do this from **Admin dashboard → Users**.
+3. They sign out and back in. **Admin dashboard** now appears in their account menu.
+
+Everyone else gets the ordinary 404 page at the admin URL, so it isn't discoverable. Admin sessions last 12 hours; customer sessions last 7 days. Removing the role takes effect on the admin's next request.
+
 ## 7. API environment variables (Render)
 
 | Variable | Required | Notes |
@@ -122,7 +132,7 @@ Google Cloud Console → APIs & Services → Credentials → your OAuth client. 
   - The order shows under My Orders.
 - [ ] **Close the Razorpay window without paying:** the stock comes back within a few seconds.
 - [ ] **Admin:**
-  1. Log in at `/<VITE_ADMIN_PATH>/login`.
+  1. Sign in on the normal `/login` page with an admin account, then open **Admin dashboard** from the account menu.
   2. Ship → deliver an order. The customer gets both emails.
   3. Cancel another order. The refund shows in the Razorpay Dashboard.
 - [ ] Razorpay Dashboard → Webhooks shows successful (2xx) deliveries.

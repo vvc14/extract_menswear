@@ -95,6 +95,13 @@ try {
     // ── 404 ──
     await p.goto(base + "/no-such-page", { waitUntil: "networkidle0" });
     ok("Unknown URL shows the 404 sign", (await p.$eval("h1", (h) => h.textContent)).includes("Shutter"));
+    // the admin area must look like any missing page to a signed-out visitor
+    const adminPath = process.env.VITE_ADMIN_PATH || "store-mgmt-x9k2";
+    for (const path of ["/admin", `/${adminPath}`, `/${adminPath}/login`]) {
+        await p.goto(base + path, { waitUntil: "networkidle0" });
+        ok(`Signed out, ${path === "/admin" ? path : "the admin path" + path.slice(adminPath.length + 1)} is an ordinary 404`, (await p.$eval("h1", (h) => h.textContent)).includes("Shutter") && p.url() === base + path);
+    }
+    await p.goto(base + "/no-such-page", { waitUntil: "networkidle0" });
     await p.click('main a[href="/"]');
     await wait(800);
     ok("404 'Back to the shop' works", p.url() === base + "/");

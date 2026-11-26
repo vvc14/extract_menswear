@@ -42,9 +42,9 @@ export default function Navbar() {
     const cartCount = useSelector((s) => s.cart.items.reduce((sum, i) => sum + i.quantity, 0));
     const wishlistCount = useSelector((s) => s.wishlist.items.length);
     const user = useSelector((s) => s.auth.user);
-    const admin = useSelector((s) => s.auth.admin);
-    const isLoggedIn = !!(user || admin);
-    const displayName = user?.name || admin?.username || "";
+    const isLoggedIn = !!user;
+    const isAdmin = user?.role === "admin";
+    const displayName = user?.name || "";
     const menuRef = useRef(null);
     const menuButtonRef = useRef(null);
 
@@ -227,10 +227,10 @@ export default function Navbar() {
                                                 >
                                                     <div className="px-4 py-3 border-b-2 border-ink dark:border-black bg-sign text-ink">
                                                         <p className="text-[15px] font-black truncate">{displayName}</p>
-                                                        <p className="text-[13px] font-medium truncate">{user?.email || admin?.username}</p>
+                                                        <p className="text-[13px] font-medium truncate">{user?.email}</p>
                                                     </div>
                                                     <div className="py-1">
-                                                        {(admin || user?.role === "admin") && (
+                                                        {isAdmin && (
                                                             <Link role="menuitem" to={`/${ADMIN_PATH}/dashboard`} className="flex items-center gap-3 px-4 py-3 text-[14px] font-bold text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800">
                                                                 <HiOutlineShieldCheck className="w-4 h-4" aria-hidden="true" /> Admin dashboard
                                                             </Link>
@@ -322,7 +322,7 @@ export default function Navbar() {
                                         {isLoggedIn ? (
                                             <>
                                                 <span className="w-full text-white/70 text-[13px] font-semibold truncate">Signed in as {displayName}</span>
-                                                {(admin || user?.role === "admin") && <Link to={`/${ADMIN_PATH}/dashboard`} className="min-h-[44px] flex items-center text-white hover:text-sign">Admin</Link>}
+                                                {isAdmin && <Link to={`/${ADMIN_PATH}/dashboard`} className="min-h-[44px] flex items-center text-white hover:text-sign">Admin</Link>}
                                                 {user && <Link to="/profile" className="min-h-[44px] flex items-center text-white hover:text-sign">Profile</Link>}
                                                 {user && <Link to="/orders" className="min-h-[44px] flex items-center text-white hover:text-sign">Orders</Link>}
                                                 <button type="button" onClick={handleLogout} className="min-h-[44px] flex items-center text-white hover:text-sign">Sign out</button>

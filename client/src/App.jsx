@@ -37,28 +37,15 @@ const AdminOrders = lazy(() => import("./pages/AdminOrders"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const AdminSettings = lazy(() => import("./pages/AdminSettings"));
 const AdminCoupons = lazy(() => import("./pages/AdminCoupons"));
-const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 import { MotionConfig } from "framer-motion";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ConfirmProvider } from "./context/ConfirmContext";
 import { preloadRazorpay } from "./services/razorpay";
 import ModalAlert from "./components/ModalAlert";
 
-function ProtectedRoute({ children }) {
-  const token = useSelector((s) => s.auth.token);
-  const admin = useSelector((s) => s.auth.admin);
-  const user = useSelector((s) => s.auth.user);
-
-  if (!token) {
-    return <Navigate to={`/${ADMIN_PATH}/login`} replace />;
-  }
-  if (!admin && user?.role !== "admin") {
-    return <Navigate to="/" replace />;
-  }
-  return children;
-}
-
 function AppRoutes() {
+  // Admin pages exist only for a signed-in admin; for anyone else the path is an ordinary 404
+  const isAdmin = useSelector((s) => !!s.auth.token && s.auth.user?.role === "admin");
   useCartSync();
   useWishlistSync();
   useEffect(() => { preloadRazorpay(); }, []);
@@ -95,26 +82,17 @@ function AppRoutes() {
         <Route path="*" element={<NotFound />} />
       </Route>
 
-      {/* Admin login — public, secret path */}
-      <Route path={`${ADMIN_PATH}/login`} element={<AdminLogin />} />
-
-      {/* Admin panel — protected, secret path */}
-      <Route
-        path={ADMIN_PATH}
-        element={
-          <ProtectedRoute>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="products" element={<AdminProducts />} />
-        <Route path="orders" element={<AdminOrders />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="coupons" element={<AdminCoupons />} />
-        <Route path="settings" element={<AdminSettings />} />
-      </Route>
+      {isAdmin && (
+        <Route path={ADMIN_PATH} element={<AdminLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
+      )}
 
       {/* Top-level catch-all for non-Layout routes */}
       <Route path="*" element={<Layout />}>

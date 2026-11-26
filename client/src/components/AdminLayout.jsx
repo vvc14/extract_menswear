@@ -40,10 +40,8 @@ export default function AdminLayout() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const toggleRef = useRef(null);
-    const admin = useSelector((s) => s.auth.admin);
     const user = useSelector((s) => s.auth.user);
-    const authAdmin = admin || (user?.role === "admin" ? user : null);
-    const displayName = authAdmin?.username || authAdmin?.name || "Admin";
+    const displayName = user?.name || "Admin";
 
     const handleLogout = () => { dispatch(logout()); navigate("/login"); };
     const pageTitle = ALL_NAV.find((n) => pathname.startsWith(n.to))?.label || "Admin";
@@ -120,7 +118,7 @@ export default function AdminLayout() {
                 </nav>
 
                 <div className="border-t-2 border-ink px-3 py-4">
-                    {authAdmin && (
+                    {user && (
                         <div className="flex items-center gap-3 px-3 mb-2">
                             <span className="w-9 h-9 flex items-center justify-center bg-white text-primary border-2 border-ink font-black" aria-hidden="true">
                                 {displayName.charAt(0).toUpperCase()}

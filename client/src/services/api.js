@@ -26,10 +26,7 @@ export const getInFlight = () => inFlight;
 API.interceptors.request.use((config) => {
     if (!config._counted) { config._counted = true; setInFlight(inFlight + 1); }
     try {
-        // Check admin session first (sessionStorage), then user session (localStorage)
-        const adminAuth = JSON.parse(sessionStorage.getItem("extractAdminAuth"));
-        const userAuth = JSON.parse(localStorage.getItem("extractAuth"));
-        const token = adminAuth?.token || userAuth?.token;
+        const token = JSON.parse(localStorage.getItem("extractAuth"))?.token;
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

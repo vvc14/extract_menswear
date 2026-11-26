@@ -1,11 +1,10 @@
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
-import Admin from "../models/Admin.js";
 import User from "../models/User.js";
 import { generateOtp, saveOtp, verifyOtp as verifyStoredOtp, clearOtp } from "../utils/otpStore.js";
 import { sendOtpEmail } from "../utils/emailSender.js";
 import { validateEmailDomain } from "../utils/emailValidator.js";
-import { signUserToken, signAdminToken, signOtpToken, verifyOtpToken } from "../utils/tokens.js";
+import { signUserToken, signOtpToken, verifyOtpToken } from "../utils/tokens.js";
 import { handleError, httpError } from "../utils/httpError.js";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -82,23 +81,6 @@ export const googleLogin = async (req, res) => {
     }
 };
 
-// ─── Google Admin Sign-In ───
-export const adminGoogleLogin = async (req, res) => {
-    try {
-        const { email } = await verifyGoogleCredential(req.body.credential);
-        const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user || user.role !== "admin") {
-            return res.status(403).json({ message: "Access denied. Only registered administrators can access the admin panel." });
-        }
-        res.json({
-            token: signAdminToken(user, "user"),
-            admin: { id: user._id, username: user.name || user.email, role: "admin" },
-        });
-    } catch (error) {
-        handleError(res, error, "Admin Google login");
-    }
-};
-
 // ─── Check if email exists (unified sign-in flow) ───
 export const checkEmail = async (req, res) => {
     try {
@@ -161,25 +143,6 @@ export const verifyOtp = async (req, res) => {
         res.json({ verified: true, emailVerificationToken: signOtpToken(email, purpose, tv) });
     } catch (error) {
         handleError(res, error, "Verify OTP");
-    }
-};
-
-// ─── Admin Login (Admin collection) ───
-export const adminLogin = async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        if (typeof username !== "string" || typeof password !== "string" || !username || !password) {
-            return res.status(400).json({ message: "Username and password are required" });
-        }
-
-        const admin = await Admin.findOne({ username: username.trim() });
-        if (!admin || !(await admin.comparePassword(password))) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-
-        res.json({ token: signAdminToken(admin, "admin"), admin: { id: admin._id, username: admin.username, role: admin.role } });
-    } catch (error) {
-        handleError(res, error, "Admin login");
     }
 };
 

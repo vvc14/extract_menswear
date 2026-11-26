@@ -80,4 +80,4 @@ These rules exist because the old site showed claims the code did not back up.
 - Data views have loading, empty and error states.
 - Hanging and rolling motion runs once and stops. `MotionConfig reducedMotion="user"` and the CSS reduced-motion block switch it off.
 - Copy uses no em dashes and makes no claims without a source.
-- With the API and `npm run dev` running, `npm run test:ui` (in `client/`) clicks through the shop and checks filters, text contrast in both themes, text spilling out of its box, and sideways overflow on phones. Set `CHROME_PATH` if Chrome is not in the default Windows location.
+- With the API and `npm run dev` running, `npm run test:ui` (in `client/`) clicks through the shop and checks filters, text contrast in both themes, text spilling out of its box, and sideways overflow on phones. Set `CHROME_PATH` if Chrome is not in the default Windows location, and `VITE_ADMIN_PATH` to check that the admin address stays an ordinary 404.

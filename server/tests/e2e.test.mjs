@@ -677,6 +677,21 @@ await test("admin uploads go through temp files that are removed afterwards", as
     assert.deepEqual([...tmpFiles()].filter((n) => !before.has(n)), []);
 });
 
+await test("admins sign in through the normal login; the separate admin logins are gone", async () => {
+    assert.equal((await request(app).post("/api/auth/admin-login").send({ username: "boss", password: "correct horse battery" })).status, 404);
+    assert.equal((await request(app).post("/api/auth/admin-google").send({ credential: "x" })).status, 404);
+    const boss = await makeUser({ role: "admin" });
+    const login = await request(app).post("/api/auth/login").send({ email: boss.user.email, password: "password123" });
+    assert.equal(login.body.user.role, "admin");
+    const { exp, iat } = JSON.parse(Buffer.from(login.body.token.split(".")[1], "base64url"));
+    assert.equal(exp - iat, 12 * 3600); // admin rights get a 12-hour session
+    assert.equal((await request(app).get("/api/orders/admin").set({ Authorization: `Bearer ${login.body.token}` })).status, 200);
+    const shopper = await makeUser();
+    const plain = await request(app).post("/api/auth/login").send({ email: shopper.user.email, password: "password123" });
+    assert.equal(JSON.parse(Buffer.from(plain.body.token.split(".")[1], "base64url")).exp - JSON.parse(Buffer.from(plain.body.token.split(".")[1], "base64url")).iat, 7 * 24 * 3600);
+    assert.equal((await request(app).get("/api/orders/admin").set({ Authorization: `Bearer ${plain.body.token}` })).status, 403);
+});
+
 await test("unpaid orders without a deadline are expired after startup", async () => {
     const u = await makeUser();
     const legacy = await Order.collection.insertOne({ userId: u.user._id, razorpayOrderId: "order_NODEADLINE", items: [], totalAmount: 100, status: "created", createdAt: new Date("2026-04-03") });

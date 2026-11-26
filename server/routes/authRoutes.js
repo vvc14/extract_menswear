@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { adminLogin, userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp, adminGoogleLogin, sendForgotPasswordOtp, resetPassword } from "../controllers/authController.js";
+import { userRegister, userLogin, getProfile, updateProfile, checkEmail, googleLogin, sendOtp, verifyOtp, sendForgotPasswordOtp, resetPassword } from "../controllers/authController.js";
 import { userAuth } from "../middleware/auth.js";
 
 const router = Router();
@@ -31,8 +31,6 @@ router.post("/verify-otp", authLimiter, verifyOtp);
 router.post("/forgot-password-send-otp", authLimiter, sendForgotPasswordOtp);
 router.post("/forgot-password-reset", authLimiter, resetPassword);
 router.post("/google", authLimiter, googleLogin);
-router.post("/admin-login", authLimiter, accountLoginLimiter, adminLogin);
-router.post("/admin-google", authLimiter, adminGoogleLogin);
 router.post("/register", authLimiter, userRegister);
 router.post("/login", authLimiter, accountLoginLimiter, userLogin);
 
